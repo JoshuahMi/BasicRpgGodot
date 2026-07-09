@@ -21,28 +21,13 @@ var is_sprint_pressed: bool = false
 		
 var is_sprint_just_pressed: bool = false
 
-
-var is_sprint_just_released: bool = false:
-	set(new_value):
-		is_sprint_just_released = new_value
-		
-		
-## needed for the calculation of has_just_moved.
-## NEVER set manually.
-# var has_just_moved_frame_count: int = 0
+var is_sprint_just_released: bool = false
 
 ## if the player just went from staying still to moving, i.e. input from WASD just came from having no input at all
-var has_just_moved: bool = false:
-	set(new_value):
-		has_just_moved = new_value
-		if new_value == true:
-			print("moved!")
-	
-var has_just_stopped: bool = false:
-	set(new_value):
-		has_just_stopped = new_value
-		if new_value == true:
-			print("stopped!")
+var has_just_moved: bool = false
+		
+## If the player just went from moving to stopping, so WASD-input isn't there. This variable is true the first frame where there's no WASD-input only.
+var has_just_stopped: bool = false
 
 var is_test_pressed: bool = false
 var is_test_just_pressed: bool = false
@@ -68,7 +53,7 @@ func _ready() -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	# moving
-	move_direction = Input.get_vector("move_left", "move_right", "move_forward", "move_backwards")
+	move_direction = Input.get_vector("MoveLeft", "MoveRight", "MoveForward", "MoveBackwards")
 	
 	
 	if Input.is_action_just_pressed("Jump"):

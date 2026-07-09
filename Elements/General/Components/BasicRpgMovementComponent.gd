@@ -281,21 +281,21 @@ func move(delta: float) -> void:
 	
 ## knocks the thing in the provided direction. 
 ## currently independent from the state.
-func knockback(direction: Vector3, directional_strength: float, jump_strength: float) -> void:
+func knockback(direction: Vector3, directional_strength: float, in_jump_strength: float) -> void:
 	
 	match current_state:
 		BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_IDLE:
-			perform_knockback(direction, directional_strength, jump_strength)
+			perform_knockback(direction, directional_strength, in_jump_strength)
 		BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_MOVEMENT_NORMAL:
-			perform_knockback(direction, directional_strength, jump_strength)
+			perform_knockback(direction, directional_strength, in_jump_strength)
 		BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_MOVEMENT_SPRINTING:
-			perform_knockback(direction, directional_strength, jump_strength)
+			perform_knockback(direction, directional_strength, in_jump_strength)
 		BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_JUMP:
-			perform_knockback(direction, directional_strength, jump_strength)
+			perform_knockback(direction, directional_strength, in_jump_strength)
 		BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_KNOCKBACK:
-			perform_knockback(direction, directional_strength, jump_strength)
+			perform_knockback(direction, directional_strength, in_jump_strength)
 		BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING:
-			perform_knockback(direction, directional_strength, jump_strength)
+			perform_knockback(direction, directional_strength, in_jump_strength)
 	
 	
 
