@@ -12,48 +12,139 @@ class_name BasicRpgMovementComponent extends Node
 ## The Movement Position. Used to tell if the player is in the air from different causes.
 enum MovementPosition {
 	
-	MP_ON_FLOOR,
+	MP_ON_SURFACE,
 	MP_IN_AIR_FROM_KNOCKBACK,
 	MP_IN_AIR_FROM_JUMP,
 	MP_IN_AIR_FROM_FALLING,
 	
 }
 
-
+#region Signals
 signal state_changed(new_state: BasicRpgGeneral.PlayerMovementStates)
+#endregion Signals
+
+#region Current State
+
+## THE CURRENT STATE
+## used to determine the behaviour of the core functions.
+## Use the setter to implement functionality that is specific to entering a specific state.
+var current_state: BasicRpgGeneral.PlayerMovementStates = BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_IDLE:
+	set(new_value):
+		if new_value != current_state:
+			match new_value:
+				BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_IDLE:
+					pass
+				BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_MOVEMENT_NORMAL:
+					pass
+				BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_MOVEMENT_SPRINTING:
+					pass
+				BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_JUMP:
+					pass
+				BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_KNOCKBACK:
+					pass
+				BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING:
+					pass
+				BasicRpgGeneral.PlayerMovementStates.IN_AIR_WHILE_DASH:
+					pass
+			current_state = new_value
+			state_changed.emit(new_value)
+		else:
+			current_state = new_value
+
+#endregion Current State
 
 
-#region Variables
 
+#region State determining Variables
 
 ## If true, can jump and sprint normally.
 ## meant to be set by the object this component belongs to.
 ## usually this is set to false because the player/NPC ran out of stamina,
 ## and is set to true because they have enough.
+## State determining Variable!
+## This Variable lets the component have two condition: A normal and a reduced one. 
+## This is because in games usually we have a stamina reserve that is used to perform movement,
+## and without enough stamina for example sprinting isn't possible. This is implemented by this 
+## variable, set it to "false" when stamina is depleted.
 var is_normal_movement_possible : bool = true:
 	set(new_value):
 		is_normal_movement_possible = new_value
 		determine_state()
 
-var current_state: BasicRpgGeneral.PlayerMovementStates = BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_IDLE:
+## State determining Variable!
+var movement_position: MovementPosition = MovementPosition.MP_IN_AIR_FROM_FALLING
+
+## State determining Variable!
+## This is set by the object that is using this component. Will tell this component that it wants to sprint by setting it to true.
+## The state won't change to sprinting though if is_normal_movement_possible is false. 
+var is_currently_sprinting: bool = false:
 	set(new_value):
-		current_state = new_value
-		state_changed.emit(new_value)
+		if new_value != is_currently_sprinting:
+			is_currently_sprinting = new_value
+			determine_state()
+			pass
+		else:
+			is_currently_sprinting = new_value
+
+## Will be set by the class using the component. This will determine the direction the component will let the instance move.
+## Used by the move() function.
+## State determining Variable!
+var movement_direction: Vector2 = Vector2.ZERO:
+	set(new_value):
+		if new_value == movement_direction:
+			movement_direction = new_value	
+		else:
+			movement_direction = new_value
+			determine_state()
+
+## State determining Variable!
+var has_just_jumped: bool = false:
+	set(new_value):
+		has_just_jumped = new_value
+		if new_value == true:
+			determine_state()
+			has_just_jumped = false
 
 
 
 
-## needed for the calculation of is_just_landed. is_just_landed is only true on the first frame when body.is_on_floor() returns true.
-var is_on_floor_frame_counter := 0
+
+
+
+
+#endregion State determining Variables
+
+
+
+#region Variables
+
+var is_body_on_floor: bool = false:
+	set(new_value):
+		if new_value != is_body_on_floor:
+			if new_value == true:
+				is_just_landed = true
+			else:
+				has_just_left_ground = true
+			is_body_on_floor = new_value
+		else:
+			is_body_on_floor = new_value
+			is_just_landed = false
+			has_just_left_ground = false
+
 ## is calculated from is_on_floor_frame_counter. This variable is only true on the first frame when body.is_on_floor() returns true.
 ## used to make sure that after jumping the jump charges don't get immediately replenished because the game thinks that the body is still on the floor because of the still low distance to it on the immediate next frame.
-var is_just_landed := false
-
-## Needed for the calculation of has_just_left_ground. has_just_left_ground is only true on the first frame when body.is_on_floor returns false
-var is_not_on_floor_frame_counter := 0
+var is_just_landed := false:
+	set(new_value):
+		is_just_landed = new_value
+		if new_value == true:
+			print("From Movement Component: Is just landed!")
 
 ## Used to determine the is in air state.
-var has_just_left_ground := false
+var has_just_left_ground := false:
+	set(new_value):
+			has_just_left_ground = new_value
+			if new_value == true:
+				print("From Movement Component: Has just left ground!")
 
 
 @export_category("Jump Parameters")
@@ -69,16 +160,6 @@ var jump_charges = 2
 ## which multiplier is applied to the jump strength when a weak jump is performed
 @export var weak_jump_strength_multiplier: float = 0.25
 
-var has_just_jumped: bool = false:
-	set(new_value):
-		has_just_jumped = new_value
-		if new_value == true:
-			determine_state()
-			has_just_jumped = false
-
-
-var movement_position: MovementPosition = MovementPosition.MP_IN_AIR_FROM_FALLING
-
 ## how good can the player navigate while in air
 ## 0.0 = none
 ## 1.0 = like on the ground
@@ -89,35 +170,11 @@ var movement_position: MovementPosition = MovementPosition.MP_IN_AIR_FROM_FALLIN
 @export var mouse_sensitivity := 1.0
 @export var movement_speed := 3.0
 
-
-
 var movement_acceleration := 1000.0
 
 ## The multiplier applied to the regular movement speed when sprinting
 @export var sprint_multiplier: float = 1.75
-var is_currently_sprinting: bool = false:
-	set(new_value):
-		if new_value != is_currently_sprinting:
-			is_currently_sprinting = new_value
-			determine_state()
-			pass
-		else:
-			is_currently_sprinting = new_value
-		
-		
 
-
-## Will be set by the class using the component. This will determine the direction the component will let the instance move.
-## Used by the move() function.
-var movement_direction: Vector2 = Vector2.ZERO:
-	set(new_value):
-		if new_value == movement_direction:
-			movement_direction = new_value	
-		else:
-			movement_direction = new_value
-			determine_state()
-
-# var walk_velocity: Vector3 = Vector3.ZERO
 
 #endregion Variables
 
@@ -130,42 +187,19 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	
+	is_body_on_floor = body.is_on_floor()
+	
 	if is_just_landed:
-		movement_position = MovementPosition.MP_ON_FLOOR
+		movement_position = MovementPosition.MP_ON_SURFACE
 		jump_charges = max_jump_charges
 		determine_state()
 		
 	if has_just_left_ground:
 		
 		# If the movement position wasn't set by jump() or knockback(), obviously you're falling
-		if movement_position == MovementPosition.MP_ON_FLOOR:
+		if movement_position == MovementPosition.MP_ON_SURFACE:
 			movement_position = MovementPosition.MP_IN_AIR_FROM_FALLING
 		determine_state()
-	
-	## important! Will ensure that is_just_landed is true only one time.
-	
-	if body.is_on_floor():
-		is_not_on_floor_frame_counter = 0
-		is_on_floor_frame_counter += 1
-	else:
-		is_not_on_floor_frame_counter += 1
-		is_on_floor_frame_counter = 0
-		
-	if is_on_floor_frame_counter == 1:
-		is_just_landed = true
-	else: 
-		is_just_landed = false
-		
-	if is_not_on_floor_frame_counter == 1:
-		has_just_left_ground = true
-	else:
-		has_just_left_ground = false
-	
-		
-
-	
-	
-	
 	
 	if not body.is_on_floor():
 
@@ -178,15 +212,12 @@ func _physics_process(delta: float) -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	
-	# determine_state()
+	if body.is_on_wall_only():
+		body.get_wall_normal()
+		# print("From Movement Component: Is on Wall only!")
 	
-	move(delta)
-	
-	pass
-	
-	# will be called in the parent
-	# But WHY?
-	# move(Input.get_vector("Left", "Right", "Forward", "Backwards"), delta)
+	move(delta)	
+
 
 	
 #endregion Builtin Functions
@@ -211,7 +242,6 @@ func jump() -> void:
 			pass
 		BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING:
 			perform_jump(jump_strength)
-	
 	
 ## causes the camera to rotate. Will clamp the looking up/down within reasonable values
 func look(look_up: float, look_right: float) -> void:
@@ -308,6 +338,10 @@ func knockback(direction: Vector3, directional_strength: float, in_jump_strength
 func perform_jump(in_jump_strength: float):
 	
 	if jump_charges > 0:
+		
+		# If normal movement is possible (aka the creature component has enough stamina), then perform a full jump.
+		# If it is not, perform a weak jump.
+		
 		if is_normal_movement_possible:
 			# Jump! 
 			body.velocity.y += in_jump_strength 
@@ -345,39 +379,42 @@ func perform_knockback(direction: Vector3, directional_strength: float, jump_str
 
 
 ## determines the current state, depending on the movement position, which is also an enum, and other values.
+## See the region (and comment) "State determining variable"
 func determine_state():
 		
 	match movement_position:
 			
-		MovementPosition.MP_ON_FLOOR:
+		MovementPosition.MP_ON_SURFACE:
 				
 			if is_currently_sprinting and is_normal_movement_possible and movement_direction.length() > 0.01:
 				
 				current_state = BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_MOVEMENT_SPRINTING
 			
 			elif movement_direction.length() > 0.05:
-				#print("From Movement Component: State is ON_FLOOR_MOVEMENT_NORMAL")
+				
 				# if the character is just moving: NORMAL MOVEMENT
 				current_state = BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_MOVEMENT_NORMAL
 				# else: IDLE
 			else:
-				#print("From Movement Component: State is ON_FLOOR_IDLE")
+				
 				current_state = BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_IDLE
 			
 		MovementPosition.MP_IN_AIR_FROM_KNOCKBACK:
+			
 			current_state = BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_KNOCKBACK
-			#print("From Movement Component: State is IN_AIR_FROM_KNOCKBACK")
+		
 			pass
 				
 		MovementPosition.MP_IN_AIR_FROM_JUMP:
 				
 			current_state = BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_JUMP
-			#print("From Movement Component: State is IN_AIR_FROM_JUMP")
+			
 			pass
 				
 		MovementPosition.MP_IN_AIR_FROM_FALLING:
+			
 			current_state = BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING
-			#print("From Movement Component: State is IN_AIR_FROM_FALLING")
+			
 			pass
 		
 		pass
