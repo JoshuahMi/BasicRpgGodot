@@ -18,7 +18,7 @@ signal state_changed(new_state: BasicRpgGeneral.PlayerMovementStates)
 
 ## THE CURRENT STATE
 ## used to determine the behaviour of the core functions.
-## Use the setter to implement functionality that is specific to entering and exiting a specific state.
+## Use the setter to implement functionality that is specific to entering or exiting a specific state.
 var current_state: BasicRpgGeneral.PlayerMovementStates = BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_IDLE:
 	set(new_value):
 		if new_value != current_state:
@@ -52,7 +52,9 @@ var current_state: BasicRpgGeneral.PlayerMovementStates = BasicRpgGeneral.Player
 				BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_KNOCKBACK:
 					pass
 				BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING:
-					pass
+					# When falling, you get subtracted one jump charge, because it is like you were jumping.
+					jump_charges -= 1
+
 				BasicRpgGeneral.PlayerMovementStates.IN_AIR_WHILE_DASH:
 					pass
 				
@@ -130,15 +132,8 @@ var movement_direction: Vector2 = Vector2.ZERO:
 			movement_direction = new_value
 			determine_state()
 
-
-#endregion State determining Variables
-
-
-
-#region Variables
-
-
 ## Is simply mirroring body.is_on_floor(), and is set every frame, but will, in its setter, make sure that is_just_landed and has_just_left_ground are true in their respective situations, and are only true for one single frame.
+## State determining Variable, because is_just_landed and has_just_left_ground depend on this variable, and movement_position depends on them, and the state depends on movement_position, look at determine_state().
 var is_body_on_floor: bool = false:
 	set(new_value):
 		if new_value != is_body_on_floor:
@@ -154,14 +149,33 @@ var is_body_on_floor: bool = false:
 
 ## is calculated from is_on_floor_frame_counter. This variable is only true on the first frame when body.is_on_floor() returns true.
 ## used to make sure that after jumping the jump charges don't get immediately replenished because the game thinks that the body is still on the floor because of the still low distance to it on the immediate next frame.
+## State determining Variable, because movement_position depends on this variable.
 var is_just_landed := false:
 	set(new_value):
+		if new_value == true:
+			#print("From Movement Component: has just landed!")
+			movement_position = BasicRpgGeneral.MovementPosition.MP_ON_SURFACE
+			jump_charges = max_jump_charges
 		is_just_landed = new_value
 		
 ## Used to determine the is in air state.
+## State determining Variable, because movement_position depends on this variable.
 var has_just_left_ground := false:
 	set(new_value):
-			has_just_left_ground = new_value
+		if new_value == true:
+			#print("From Movement Component: Has just left the ground!")
+			# If the movement position wasn't set by jump() or knockback(), obviously you're falling
+			if movement_position == BasicRpgGeneral.MovementPosition.MP_ON_SURFACE:
+				movement_position = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_FALLING
+		has_just_left_ground = new_value
+
+#endregion State determining Variables
+
+
+
+#region Variables
+
+
 
 
 @export_category("Jump Parameters")
@@ -187,7 +201,7 @@ var jump_charges = 2
 @export var mouse_sensitivity := 1.0
 @export var movement_speed := 3.0
 
-var movement_acceleration := 1000.0
+const MOVEMENT_ACCELERATION := 1000.0
 
 ## The multiplier applied to the regular movement speed when sprinting
 @export var sprint_multiplier: float = 1.75
@@ -205,17 +219,6 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	
 	is_body_on_floor = body.is_on_floor()
-	
-	if is_just_landed:
-		movement_position = BasicRpgGeneral.MovementPosition.MP_ON_SURFACE
-		jump_charges = max_jump_charges
-		determine_state()
-		
-	if has_just_left_ground:
-		
-		# If the movement position wasn't set by jump() or knockback(), obviously you're falling
-		if movement_position == BasicRpgGeneral.MovementPosition.MP_ON_SURFACE:
-			movement_position = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_FALLING
 	
 	if not is_body_on_floor:
 
@@ -300,23 +303,23 @@ func move(delta: float) -> void:
 		#movement on the floor:
 		BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_IDLE:
 			# here it can just use "move toward" directily on the velocity
-			body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, movement_acceleration * delta)
-			body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, movement_acceleration * delta)
+			body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, MOVEMENT_ACCELERATION * delta)
+			body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, MOVEMENT_ACCELERATION * delta)
 	
 		BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_MOVEMENT_NORMAL:
 			# here it can just use "move toward" directily on the velocity
-			body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, movement_acceleration * delta)
-			body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, movement_acceleration * delta)
+			body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, MOVEMENT_ACCELERATION * delta)
+			body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, MOVEMENT_ACCELERATION * delta)
 	
 		BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_MOVEMENT_SPRINTING:
 			# here it can just use "move toward" directily on the velocity
-			body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local * sprint_multiplier, movement_acceleration * delta)
-			body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local * sprint_multiplier, movement_acceleration * delta)
+			body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local * sprint_multiplier, MOVEMENT_ACCELERATION * delta)
+			body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local * sprint_multiplier, MOVEMENT_ACCELERATION * delta)
 			
 		BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_JUMP:
 			# then use "move toward" to move the player
-			velocity_local.x = move_toward(body.velocity.x, direction_local.x * movement_strength_while_jumping * movement_speed_local, movement_acceleration * delta)
-			velocity_local.z = move_toward(body.velocity.z, direction_local.z * movement_strength_while_jumping * movement_speed_local, movement_acceleration * delta)
+			velocity_local.x = move_toward(body.velocity.x, direction_local.x * movement_strength_while_jumping * movement_speed_local, MOVEMENT_ACCELERATION * delta)
+			velocity_local.z = move_toward(body.velocity.z, direction_local.z * movement_strength_while_jumping * movement_speed_local, MOVEMENT_ACCELERATION * delta)
 		
 			# here it has to interpolate, because we're in the air
 			body.velocity = lerp(body.velocity, velocity_local, movement_strength_while_jumping)	
@@ -324,8 +327,8 @@ func move(delta: float) -> void:
 			pass
 		BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING:
 			# then use "move toward" to move the player
-			velocity_local.x = move_toward(body.velocity.x, direction_local.x * movement_strength_while_jumping * movement_speed_local, movement_acceleration * delta)
-			velocity_local.z = move_toward(body.velocity.z, direction_local.z * movement_strength_while_jumping * movement_speed_local, movement_acceleration * delta)
+			velocity_local.x = move_toward(body.velocity.x, direction_local.x * movement_strength_while_jumping * movement_speed_local, MOVEMENT_ACCELERATION * delta)
+			velocity_local.z = move_toward(body.velocity.z, direction_local.z * movement_strength_while_jumping * movement_speed_local, MOVEMENT_ACCELERATION * delta)
 		
 			# here it has to interpolate, because we're in the air
 			body.velocity = lerp(body.velocity, velocity_local, movement_strength_while_jumping)	
@@ -395,7 +398,7 @@ func perform_knockback(direction: Vector3, directional_strength: float, jump_str
 	pass
 
 ## determines the current state, depending on the state determining variables (See the region or the comment with that name).
-## See the region (and comment) "State determining variable"
+## See the region (and comment) "State determining Variable"
 func determine_state():
 		
 	match movement_position:
