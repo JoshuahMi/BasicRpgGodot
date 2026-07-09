@@ -27,10 +27,28 @@ signal state_changed(new_state: BasicRpgGeneral.PlayerMovementStates)
 
 ## THE CURRENT STATE
 ## used to determine the behaviour of the core functions.
-## Use the setter to implement functionality that is specific to entering a specific state.
+## Use the setter to implement functionality that is specific to entering and exiting a specific state.
 var current_state: BasicRpgGeneral.PlayerMovementStates = BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_IDLE:
 	set(new_value):
 		if new_value != current_state:
+			## Implement all state specific exiting logic here!
+			match current_state:
+				BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_IDLE:
+					pass
+				BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_MOVEMENT_NORMAL:
+					pass
+				BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_MOVEMENT_SPRINTING:
+					pass
+				BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_JUMP:
+					pass
+				BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_KNOCKBACK:
+					pass
+				BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING:
+					pass
+				BasicRpgGeneral.PlayerMovementStates.IN_AIR_WHILE_DASH:
+					pass
+			
+			## implement all state specific entering logic here!
 			match new_value:
 				BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_IDLE:
 					pass
@@ -46,6 +64,7 @@ var current_state: BasicRpgGeneral.PlayerMovementStates = BasicRpgGeneral.Player
 					pass
 				BasicRpgGeneral.PlayerMovementStates.IN_AIR_WHILE_DASH:
 					pass
+				
 			current_state = new_value
 			state_changed.emit(new_value)
 		else:
@@ -56,6 +75,9 @@ var current_state: BasicRpgGeneral.PlayerMovementStates = BasicRpgGeneral.Player
 
 
 #region State determining Variables
+
+# These Variables determine the state. We distinguish between input from the player or other controller
+# and things that just happen. 
 
 ## If true, can jump and sprint normally.
 ## meant to be set by the object this component belongs to.
@@ -72,19 +94,34 @@ var is_normal_movement_possible : bool = true:
 		determine_state()
 
 ## State determining Variable!
-var movement_position: MovementPosition = MovementPosition.MP_IN_AIR_FROM_FALLING
+## Is set by the jump() and knockback() function, and the _physics_process() function, with their respective situations.
+var movement_position: MovementPosition = MovementPosition.MP_IN_AIR_FROM_FALLING:
+	set(new_value):
+		movement_position = new_value
+		determine_state()
 
 ## State determining Variable!
 ## This is set by the object that is using this component. Will tell this component that it wants to sprint by setting it to true.
 ## The state won't change to sprinting though if is_normal_movement_possible is false. 
-var is_currently_sprinting: bool = false:
+var wants_to_sprint: bool = false:
 	set(new_value):
-		if new_value != is_currently_sprinting:
-			is_currently_sprinting = new_value
+		if new_value != wants_to_sprint:
+			wants_to_sprint = new_value
 			determine_state()
 			pass
 		else:
-			is_currently_sprinting = new_value
+			wants_to_sprint = new_value
+			
+## State determining Variable!
+## This is set by the object that is using this component. Will tell this component that it wants to jump by setting this variable to true.
+## Will only be performed as a normal jump then if is_normal_movement_possible is true
+var wants_to_jump: bool = false:
+	set(new_value):
+		if new_value != wants_to_jump:
+			wants_to_jump = new_value
+			determine_state()
+		else:
+			wants_to_jump = new_value
 
 ## Will be set by the class using the component. This will determine the direction the component will let the instance move.
 ## Used by the move() function.
@@ -97,20 +134,6 @@ var movement_direction: Vector2 = Vector2.ZERO:
 			movement_direction = new_value
 			determine_state()
 
-## State determining Variable!
-var has_just_jumped: bool = false:
-	set(new_value):
-		has_just_jumped = new_value
-		if new_value == true:
-			determine_state()
-			has_just_jumped = false
-
-
-
-
-
-
-
 
 #endregion State determining Variables
 
@@ -118,6 +141,8 @@ var has_just_jumped: bool = false:
 
 #region Variables
 
+
+## Is simply mirroring body.is_on_floor(), and is set every frame, but will, in its setter, make sure that is_just_landed and has_just_left_ground are true in their respective situations, and are only true for one single frame.
 var is_body_on_floor: bool = false:
 	set(new_value):
 		if new_value != is_body_on_floor:
@@ -136,15 +161,11 @@ var is_body_on_floor: bool = false:
 var is_just_landed := false:
 	set(new_value):
 		is_just_landed = new_value
-		if new_value == true:
-			print("From Movement Component: Is just landed!")
-
+		
 ## Used to determine the is in air state.
 var has_just_left_ground := false:
 	set(new_value):
 			has_just_left_ground = new_value
-			if new_value == true:
-				print("From Movement Component: Has just left ground!")
 
 
 @export_category("Jump Parameters")
@@ -199,9 +220,8 @@ func _physics_process(delta: float) -> void:
 		# If the movement position wasn't set by jump() or knockback(), obviously you're falling
 		if movement_position == MovementPosition.MP_ON_SURFACE:
 			movement_position = MovementPosition.MP_IN_AIR_FROM_FALLING
-		determine_state()
 	
-	if not body.is_on_floor():
+	if not is_body_on_floor:
 
 		body.velocity.y -= gravity_local * delta
 	
@@ -216,6 +236,9 @@ func _process(delta: float) -> void:
 		body.get_wall_normal()
 		# print("From Movement Component: Is on Wall only!")
 	
+	if wants_to_jump:
+		jump()
+	
 	move(delta)	
 
 
@@ -227,6 +250,8 @@ func _process(delta: float) -> void:
 ## This method causes the character to jump.
 ## Adds a Y value to the velocity.
 func jump() -> void:
+	
+	wants_to_jump = false
 	
 	match current_state:
 		BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_IDLE:
@@ -349,7 +374,7 @@ func perform_jump(in_jump_strength: float):
 			jump_charges -= 1
 			# Change State!
 			movement_position = MovementPosition.MP_IN_AIR_FROM_JUMP
-			has_just_jumped = true # here determine_state() is called
+			
 		else:
 			# Jump! 
 			body.velocity.y += in_jump_strength * weak_jump_strength_multiplier
@@ -357,7 +382,7 @@ func perform_jump(in_jump_strength: float):
 			jump_charges -= 1
 			# Change State!
 			movement_position = MovementPosition.MP_IN_AIR_FROM_JUMP
-			has_just_jumped = true # here determine_state() is called
+			
 
 
 func perform_knockback(direction: Vector3, directional_strength: float, jump_strength: float):
@@ -372,13 +397,9 @@ func perform_knockback(direction: Vector3, directional_strength: float, jump_str
 	
 	movement_position = MovementPosition.MP_IN_AIR_FROM_KNOCKBACK
 	
-	determine_state()
-	
 	pass
 
-
-
-## determines the current state, depending on the movement position, which is also an enum, and other values.
+## determines the current state, depending on the state determining variables (See the region or the comment with that name).
 ## See the region (and comment) "State determining variable"
 func determine_state():
 		
@@ -386,7 +407,7 @@ func determine_state():
 			
 		MovementPosition.MP_ON_SURFACE:
 				
-			if is_currently_sprinting and is_normal_movement_possible and movement_direction.length() > 0.01:
+			if wants_to_sprint and is_normal_movement_possible and movement_direction.length() > 0.01:
 				
 				current_state = BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_MOVEMENT_SPRINTING
 			
@@ -420,27 +441,6 @@ func determine_state():
 		pass
 	
 	
-
-## will add a 2-dimensional vector to the velocity, which is a 3 dimensional Vector.
-## the 2 dimensional input vector is interpreted as movement on the x-z-plane
-func add_planar_velocity(dir: Vector2):
-	body.velocity += Vector3(dir.x, 0.0, dir.y)
-	
-## gets the length of the vector that emerges from the x and the z value of the velocity
-func get_planar_velocity() -> float:
-	return Vector2(body.velocity.x, body.velocity.z).length()
-	
-## Will return the direction which the caracter is going towards
-func get_movement_direction() -> Vector2:
-	return Vector2(body.velocity.x, body.velocity.z)
-	
-func set_movement_direction(dir: Vector2):
-	
-	body.velocity = Vector3(dir.x, body.velocity.y, dir.y)
-	
-func limit_movement_direction_length(length: float):
-	
-	set_movement_direction(get_movement_direction().limit_length(length))
 
 #endregion helper funtions
 

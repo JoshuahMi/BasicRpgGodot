@@ -20,12 +20,12 @@ func _process(delta: float) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	
 	if input_component.is_jump_pressed:
-		movement_component.jump()
+		movement_component.wants_to_jump = true
 		
 	if input_component.is_sprint_pressed:
-		movement_component.is_currently_sprinting = true
+		movement_component.wants_to_sprint = true
 	else:
-		movement_component.is_currently_sprinting = false
+		movement_component.wants_to_sprint = false
 	
 	movement_component.movement_direction = input_component.move_direction
 	movement_component.look(input_component.look_vector.y, input_component.look_vector.x )
