@@ -14,5 +14,17 @@ enum PlayerMovementStates {
 	
 	ON_WALL_LADDER,			# While on a ladder.
 	ON_WALL_NORMAL,			# Walljump / wallrun
+	ON_WALL_LEDGE_GRAB,		# When ledge grabbing
+	
+}
+
+## The Movement Position. Used to tell if the player is in the air from different causes.
+## Used in the Movement component internally
+enum MovementPosition {
+	
+	MP_ON_SURFACE,
+	MP_IN_AIR_FROM_KNOCKBACK,
+	MP_IN_AIR_FROM_JUMP,
+	MP_IN_AIR_FROM_FALLING,
 	
 }

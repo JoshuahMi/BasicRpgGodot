@@ -1,6 +1,6 @@
 class_name BasicRpgMovementComponent extends Node
 
-## This Movement Component is made up from "Core Functions" meant to be called from outside the class (except "move"),
+## This Movement Component is made up from "Core Functions", called after their respective booleans are set to true from outside the component,
 ## "helper Functions", which help the core functions work, and builtin functions, which take care of the validity of values.
 ## The behaviour of the core functions is dependant on "States", defined in BasicRpgGeneral. 
 
@@ -9,15 +9,6 @@ class_name BasicRpgMovementComponent extends Node
 @export var model: MeshInstance3D
 @export var camera: Camera3D
 
-## The Movement Position. Used to tell if the player is in the air from different causes.
-enum MovementPosition {
-	
-	MP_ON_SURFACE,
-	MP_IN_AIR_FROM_KNOCKBACK,
-	MP_IN_AIR_FROM_JUMP,
-	MP_IN_AIR_FROM_FALLING,
-	
-}
 
 #region Signals
 signal state_changed(new_state: BasicRpgGeneral.PlayerMovementStates)
@@ -88,14 +79,19 @@ var current_state: BasicRpgGeneral.PlayerMovementStates = BasicRpgGeneral.Player
 ## This is because in games usually we have a stamina reserve that is used to perform movement,
 ## and without enough stamina for example sprinting isn't possible. This is implemented by this 
 ## variable, set it to "false" when stamina is depleted.
+## CAN be set on tick/on process, but doesn't have to be
 var is_normal_movement_possible : bool = true:
 	set(new_value):
-		is_normal_movement_possible = new_value
-		determine_state()
+		if new_value == is_normal_movement_possible:
+			is_normal_movement_possible = new_value
+		else:
+			is_normal_movement_possible = new_value
+			determine_state()
 
 ## State determining Variable!
 ## Is set by the jump() and knockback() function, and the _physics_process() function, with their respective situations.
-var movement_position: MovementPosition = MovementPosition.MP_IN_AIR_FROM_FALLING:
+## Shall show what kind of movement is currently active, and why. One can argue that this is an unnecessary doubling of the state, but it works.
+var movement_position: BasicRpgGeneral.MovementPosition = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_FALLING:
 	set(new_value):
 		movement_position = new_value
 		determine_state()
@@ -211,15 +207,15 @@ func _physics_process(delta: float) -> void:
 	is_body_on_floor = body.is_on_floor()
 	
 	if is_just_landed:
-		movement_position = MovementPosition.MP_ON_SURFACE
+		movement_position = BasicRpgGeneral.MovementPosition.MP_ON_SURFACE
 		jump_charges = max_jump_charges
 		determine_state()
 		
 	if has_just_left_ground:
 		
 		# If the movement position wasn't set by jump() or knockback(), obviously you're falling
-		if movement_position == MovementPosition.MP_ON_SURFACE:
-			movement_position = MovementPosition.MP_IN_AIR_FROM_FALLING
+		if movement_position == BasicRpgGeneral.MovementPosition.MP_ON_SURFACE:
+			movement_position = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_FALLING
 	
 	if not is_body_on_floor:
 
@@ -263,7 +259,7 @@ func jump() -> void:
 		BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_JUMP:
 			perform_jump(jump_strength)
 		BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_KNOCKBACK:
-			# Can't jump in the air when knocked back
+			# Can't jump in the air when knocked back, even if the player has jump charges.
 			pass
 		BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING:
 			perform_jump(jump_strength)
@@ -366,14 +362,13 @@ func perform_jump(in_jump_strength: float):
 		
 		# If normal movement is possible (aka the creature component has enough stamina), then perform a full jump.
 		# If it is not, perform a weak jump.
-		
 		if is_normal_movement_possible:
 			# Jump! 
 			body.velocity.y += in_jump_strength 
 			# jump_charges minus one
 			jump_charges -= 1
 			# Change State!
-			movement_position = MovementPosition.MP_IN_AIR_FROM_JUMP
+			movement_position = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_JUMP
 			
 		else:
 			# Jump! 
@@ -381,13 +376,13 @@ func perform_jump(in_jump_strength: float):
 			# jump_charges minus one
 			jump_charges -= 1
 			# Change State!
-			movement_position = MovementPosition.MP_IN_AIR_FROM_JUMP
+			movement_position = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_JUMP
 			
 
 
 func perform_knockback(direction: Vector3, directional_strength: float, jump_strength: float):
 	
-	movement_position = MovementPosition.MP_IN_AIR_FROM_KNOCKBACK
+	movement_position = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_KNOCKBACK
 	body.velocity.y += jump_strength 
 
 	var direction_planar = Vector3(direction.x, 0.0, direction.z)
@@ -395,7 +390,7 @@ func perform_knockback(direction: Vector3, directional_strength: float, jump_str
 
 	body.velocity += direction_planar * directional_strength
 	
-	movement_position = MovementPosition.MP_IN_AIR_FROM_KNOCKBACK
+	movement_position = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_KNOCKBACK
 	
 	pass
 
@@ -405,7 +400,7 @@ func determine_state():
 		
 	match movement_position:
 			
-		MovementPosition.MP_ON_SURFACE:
+		BasicRpgGeneral.MovementPosition.MP_ON_SURFACE:
 				
 			if wants_to_sprint and is_normal_movement_possible and movement_direction.length() > 0.01:
 				
@@ -420,27 +415,19 @@ func determine_state():
 				
 				current_state = BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_IDLE
 			
-		MovementPosition.MP_IN_AIR_FROM_KNOCKBACK:
+		BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_KNOCKBACK:
 			
 			current_state = BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_KNOCKBACK
 		
-			pass
 				
-		MovementPosition.MP_IN_AIR_FROM_JUMP:
+		BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_JUMP:
 				
 			current_state = BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_JUMP
 			
-			pass
 				
-		MovementPosition.MP_IN_AIR_FROM_FALLING:
+		BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_FALLING:
 			
 			current_state = BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING
-			
-			pass
-		
-		pass
-	
-	
 
 #endregion helper funtions
 

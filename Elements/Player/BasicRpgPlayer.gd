@@ -12,12 +12,17 @@ func change_state(new_state: BasicRpgGeneral.PlayerMovementStates):
 	
 	pass
 	
+	
+	
 func _ready() -> void:
+	
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	pass
 	
 func _process(delta: float) -> void:
 	
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+	
 	
 	if input_component.is_jump_pressed:
 		movement_component.wants_to_jump = true
