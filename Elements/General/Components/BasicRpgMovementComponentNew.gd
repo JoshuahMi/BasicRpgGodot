@@ -246,9 +246,11 @@ func move(delta: float):
 			pass
 		BasicRpgGeneral.MovementPlaceState.WALL:
 			
-			var stick_direction = Vector3(wall_normal.x, 0.0, wall_normal.z) 
-			var direction_local: Vector3 = Vector3(movement_direction.x, 0.0, movement_direction.y)
 			
+			
+			var stick_direction = Vector3(wall_normal.x, 0.0, wall_normal.z) 
+			# var direction_local: Vector3 = Vector3(movement_direction.x, 0.0, movement_direction.y)
+			var direction_local: Vector3 = Vector3(0.0, 0.0, movement_direction.y)
 			var movement_speed_local = movement_speed
 
 			# first determine the rotation of the movement vector
@@ -256,14 +258,12 @@ func move(delta: float):
 			var y_rotation = camera.rotation.y
 			direction_local = direction_local.rotated(Vector3.UP, y_rotation)
 			
-			if absf( direction_local.dot(stick_direction)) < 0.001:
-				
-				return
+			#if absf( direction_local.dot(stick_direction)) > 0.01:
+				#
+				#return
+			direction_local *= stick_direction.rotated(Vector3.UP, -90.0)
 			
-			
-			
-			
-			direction_local = (Vector3(movement_direction.x, 0.0, movement_direction.y) - stick_direction).normalized()
+			# direction_local = (Vector3(movement_direction.x, 0.0, movement_direction.y) - stick_direction).normalized()
 			
 			body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, MOVEMENT_ACCELERATION * delta)
 			body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, MOVEMENT_ACCELERATION * delta)
