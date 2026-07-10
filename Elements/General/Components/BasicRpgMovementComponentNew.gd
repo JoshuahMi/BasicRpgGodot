@@ -92,13 +92,15 @@ var has_just_left_ground := false:
 	set(new_value):
 		has_just_left_ground = new_value
 		if new_value == true:
-			print("From Movement Component: Has just left the ground!")
+			movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
+			#print("From Movement Component: Has just left the ground!")
 	
 var has_just_landed := false:
 	set(new_value):
 		has_just_landed = new_value
 		if new_value == true:
-			print("From Movement Component: Has just landed!")
+			movement_place_state = BasicRpgGeneral.MovementPlaceState.GROUND
+			#print("From Movement Component: Has just landed!")
 
 var is_body_on_floor: bool = false:
 	set(new_value):
@@ -113,6 +115,42 @@ var is_body_on_floor: bool = false:
 			has_just_landed = false
 			has_just_left_ground = false
 	
+
+var has_just_touched_wall: bool = false:
+	set(new_value):
+		has_just_touched_wall = new_value
+		if new_value == true:
+			movement_place_state = BasicRpgGeneral.MovementPlaceState.WALL
+			print("From Movement Component: Has just touched a wall!")
+
+var has_just_left_wall: bool = false:
+	set(new_value):
+		has_just_left_wall = new_value
+		if new_value == true:
+			print("From Movement Component: Has just left a wall!")
+			if is_body_on_floor == false:
+				movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
+			else:
+				movement_place_state = BasicRpgGeneral.MovementPlaceState.GROUND
+				
+var is_body_on_wall: bool = false:
+	set(new_value):
+		if new_value != is_body_on_wall:
+			if new_value == true:
+				has_just_touched_wall = true
+			else:
+				has_just_left_wall = true
+			is_body_on_wall = new_value
+		else:
+			is_body_on_wall = new_value
+			has_just_touched_wall = false
+			has_just_left_wall = false
+
+
+var wall_normal: Vector3 = Vector3.RIGHT
+
+
+
 
 #endregion VARIABLES
 
@@ -148,8 +186,28 @@ func _physics_process(delta: float) -> void:
 	apply_gravity(delta)
 	
 	is_body_on_floor = body.is_on_floor()
-	
-	body.move_and_slide()
+	is_body_on_wall = body.is_on_wall_only()
+		
+	match movement_place_state:
+		BasicRpgGeneral.MovementPlaceState.GROUND:
+			body.move_and_slide()
+		BasicRpgGeneral.MovementPlaceState.AIR:
+			body.move_and_slide()
+		BasicRpgGeneral.MovementPlaceState.WALL:
+			#body.apply_floor_snap()
+			body.floor_block_on_wall = true
+			body.floor_snap_length
+			body.floor_stop_on_slope
+			var collision: KinematicCollision3D = body.get_last_slide_collision()
+			wall_normal = collision.get_normal()
+			# print(wall_normal)
+			body.move_and_slide()
+			
+			
+		BasicRpgGeneral.MovementPlaceState.SWIMMING:
+			body.move_and_slide()
+		BasicRpgGeneral.MovementPlaceState.UNDERWATER:
+			body.move_and_slide()
 	
 	move(delta)
 	
@@ -172,7 +230,53 @@ func look(look_up: float, look_right: float):
 	perform_look(look_up, look_right)
 	
 func move(delta: float):
-	perform_move(delta)
+	
+	match movement_place_state:
+		BasicRpgGeneral.MovementPlaceState.GROUND:
+			
+			var direction_local: Vector3 = Vector3(movement_direction.x, 0.0, movement_direction.y)
+			perform_move(direction_local, delta)
+			
+			pass
+		BasicRpgGeneral.MovementPlaceState.AIR:
+			
+			var direction_local: Vector3 = Vector3(movement_direction.x, 0.0, movement_direction.y)
+			perform_move(direction_local, delta)
+			
+			pass
+		BasicRpgGeneral.MovementPlaceState.WALL:
+			
+			var stick_direction = Vector3(wall_normal.x, 0.0, wall_normal.z) 
+			var direction_local: Vector3 = Vector3(movement_direction.x, 0.0, movement_direction.y)
+			
+			var movement_speed_local = movement_speed
+
+			# first determine the rotation of the movement vector
+			# it shall point towards the direction the camera is facing
+			var y_rotation = camera.rotation.y
+			direction_local = direction_local.rotated(Vector3.UP, y_rotation)
+			
+			if absf( direction_local.dot(stick_direction)) < 0.001:
+				
+				return
+			
+			
+			
+			
+			direction_local = (Vector3(movement_direction.x, 0.0, movement_direction.y) - stick_direction).normalized()
+			
+			body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, MOVEMENT_ACCELERATION * delta)
+			body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, MOVEMENT_ACCELERATION * delta)
+			
+			body.velocity.y = 0.0
+			pass
+		BasicRpgGeneral.MovementPlaceState.SWIMMING:
+			pass
+		BasicRpgGeneral.MovementPlaceState.UNDERWATER:
+			pass
+		
+	
+	
 	pass
 	
 func jump():
@@ -198,7 +302,7 @@ func perform_look(look_up: float, look_right: float):
 	camera.rotation.x  = clampf(camera.rotation.x, -1.5, 1.5)
 	camera.rotation.y += (look_right * -1.0 * mouse_sensitivity * 0.01)
 	
-func perform_move(delta: float):
+func perform_move(in_movement_direction: Vector3, delta: float):
 	
 	var movement_speed_local = movement_speed
 
@@ -206,12 +310,13 @@ func perform_move(delta: float):
 	# it shall point towards the direction the camera is facing
 	var y_rotation = camera.rotation.y
 	
-	var direction_local: Vector3 = Vector3(movement_direction.x, 0.0, movement_direction.y)
 	
-	direction_local = direction_local.rotated(Vector3.UP, y_rotation)
+	
+	
+	var direction_local = in_movement_direction.rotated(Vector3.UP, y_rotation)
 	
 	# make velocity local, to interpolate it afterwards to implement the movement strength in the air
-	var velocity_local = body.velocity
+	# var velocity_local = body.velocity
 	
 	# here it can just use "move toward" directily on the velocity
 	body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, MOVEMENT_ACCELERATION * delta)
@@ -268,12 +373,7 @@ func apply_gravity(delta: float):
 		BasicRpgGeneral.MovementPlaceState.UNDERWATER:
 			# Don't apply gravity
 			pass
-	
-	
-	
-	
-	
-	pass
+
 
 func determine_initial_state():
 	
