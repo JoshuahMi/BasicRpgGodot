@@ -78,12 +78,13 @@ func _process(_delta: float) -> void:
 	else:
 		is_sprint_just_released = false
 		
-		
 	if Input.is_action_pressed("Test"):
 		is_test_pressed = true
 
 	if Input.is_action_just_pressed("Test"):
 		is_test_just_pressed = true
+	else: 
+		is_test_just_pressed = false
 	
 	look_vector = Vector2.ZERO
 	

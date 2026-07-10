@@ -4,6 +4,11 @@ class_name BasicRpgMovementComponent extends Node
 ## "helper Functions", which help the core functions work, and builtin functions, which take care of the validity of values.
 ## The behaviour of the core functions is dependant on "States", defined in BasicRpgGeneral. 
 
+## So we get this:
+## Input triggers the core functions to execute.
+## States determine the behaviour of the core functions 
+## things that happen, usually caused by core functions OR the game world outside of this component, determine the state.
+
 @export_category("References")
 @export var body: CharacterBody3D
 @export var model: MeshInstance3D
@@ -36,7 +41,7 @@ var current_state: BasicRpgGeneral.PlayerMovementStates = BasicRpgGeneral.Player
 					pass
 				BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING:
 					pass
-				BasicRpgGeneral.PlayerMovementStates.IN_AIR_WHILE_DASH:
+				BasicRpgGeneral.PlayerMovementStates.DASH:
 					pass
 			
 			## implement all state specific entering logic here!
@@ -55,7 +60,7 @@ var current_state: BasicRpgGeneral.PlayerMovementStates = BasicRpgGeneral.Player
 					# When falling, you get subtracted one jump charge, because it is like you were jumping.
 					jump_charges -= 1
 
-				BasicRpgGeneral.PlayerMovementStates.IN_AIR_WHILE_DASH:
+				BasicRpgGeneral.PlayerMovementStates.DASH:
 					pass
 				
 			current_state = new_value
@@ -64,6 +69,65 @@ var current_state: BasicRpgGeneral.PlayerMovementStates = BasicRpgGeneral.Player
 			current_state = new_value
 
 #endregion Current State
+
+
+
+#region Input
+
+
+## INPUT
+## Is set by the jump() and knockback() function, and the _physics_process() function, with their respective situations.
+## Shall show what kind of movement is currently active, and why. One can argue that this is an unnecessary doubling of the state, but it works.
+var movement_position: BasicRpgGeneral.MovementPosition = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_FALLING:
+	set(new_value):
+		movement_position = new_value
+
+## INPUT
+## This is set by the object that is using this component. Will tell this component that it wants to sprint by setting it to true.
+## The state won't change to sprinting though if is_normal_movement_possible is false. 
+var wants_to_sprint: bool = false:
+	set(new_value):
+		if new_value != wants_to_sprint:
+			wants_to_sprint = new_value
+			pass
+		else:
+			wants_to_sprint = new_value
+			
+## INPUT
+## This is set by the object that is using this component. Will tell this component that it wants to jump by setting this variable to true.
+## Will only be performed as a normal jump then if is_normal_movement_possible is true
+var wants_to_jump: bool = false:
+	set(new_value):
+		wants_to_jump = new_value
+		if new_value == true:
+			jump()
+			wants_to_jump = false
+
+
+## INPUT
+## This is set by the object that is using this component. Will tell this component that it wants to dash by setting this variable to true.
+var wants_to_dash: bool = false:
+	set(new_value):
+		wants_to_dash = new_value
+		if new_value == true:
+			dash()
+			wants_to_dash = false
+
+
+
+
+
+## INPUT
+## Will be set by the class using the component. This will determine the direction the component will let the instance move.
+## Used by the move() function.
+var movement_direction: Vector2 = Vector2.ZERO:
+	set(new_value):
+		if new_value == movement_direction:
+			movement_direction = new_value	
+		else:
+			movement_direction = new_value
+
+#endregion Input
 
 
 
@@ -90,47 +154,6 @@ var is_normal_movement_possible : bool = true:
 			is_normal_movement_possible = new_value
 			determine_state()
 
-## State determining Variable!
-## Is set by the jump() and knockback() function, and the _physics_process() function, with their respective situations.
-## Shall show what kind of movement is currently active, and why. One can argue that this is an unnecessary doubling of the state, but it works.
-var movement_position: BasicRpgGeneral.MovementPosition = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_FALLING:
-	set(new_value):
-		movement_position = new_value
-		determine_state()
-
-## State determining Variable!
-## This is set by the object that is using this component. Will tell this component that it wants to sprint by setting it to true.
-## The state won't change to sprinting though if is_normal_movement_possible is false. 
-var wants_to_sprint: bool = false:
-	set(new_value):
-		if new_value != wants_to_sprint:
-			wants_to_sprint = new_value
-			determine_state()
-			pass
-		else:
-			wants_to_sprint = new_value
-			
-## State determining Variable!
-## This is set by the object that is using this component. Will tell this component that it wants to jump by setting this variable to true.
-## Will only be performed as a normal jump then if is_normal_movement_possible is true
-var wants_to_jump: bool = false:
-	set(new_value):
-		if new_value != wants_to_jump:
-			wants_to_jump = new_value
-			determine_state()
-		else:
-			wants_to_jump = new_value
-
-## Will be set by the class using the component. This will determine the direction the component will let the instance move.
-## Used by the move() function.
-## State determining Variable!
-var movement_direction: Vector2 = Vector2.ZERO:
-	set(new_value):
-		if new_value == movement_direction:
-			movement_direction = new_value	
-		else:
-			movement_direction = new_value
-			determine_state()
 
 ## Is simply mirroring body.is_on_floor(), and is set every frame, but will, in its setter, make sure that is_just_landed and has_just_left_ground are true in their respective situations, and are only true for one single frame.
 ## State determining Variable, because is_just_landed and has_just_left_ground depend on this variable, and movement_position depends on them, and the state depends on movement_position, look at determine_state().
@@ -153,9 +176,9 @@ var is_body_on_floor: bool = false:
 var is_just_landed := false:
 	set(new_value):
 		if new_value == true:
-			#print("From Movement Component: has just landed!")
 			movement_position = BasicRpgGeneral.MovementPosition.MP_ON_SURFACE
 			jump_charges = max_jump_charges
+			dash_charges = max_dash_charges
 		is_just_landed = new_value
 		
 ## Used to determine the is in air state.
@@ -163,7 +186,6 @@ var is_just_landed := false:
 var has_just_left_ground := false:
 	set(new_value):
 		if new_value == true:
-			#print("From Movement Component: Has just left the ground!")
 			# If the movement position wasn't set by jump() or knockback(), obviously you're falling
 			if movement_position == BasicRpgGeneral.MovementPosition.MP_ON_SURFACE:
 				movement_position = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_FALLING
@@ -173,7 +195,7 @@ var has_just_left_ground := false:
 
 
 
-#region Variables
+#region Parameters
 
 
 
@@ -186,7 +208,7 @@ var gravity_local = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 ## How many times the player can jump consequently. "2" is a double jump. "1" is a single jump
 @export var max_jump_charges: int = 2
-var jump_charges = 2
+var jump_charges = max_jump_charges
 
 ## which multiplier is applied to the jump strength when a weak jump is performed
 @export var weak_jump_strength_multiplier: float = 0.25
@@ -195,6 +217,36 @@ var jump_charges = 2
 ## 0.0 = none
 ## 1.0 = like on the ground
 @export var movement_strength_while_jumping: float =  0.0
+
+
+@export_category("Dash Parameters")
+
+
+## The dash charges determine, how many times the player can dash while in the air.
+## Can be set to zero, then the player can't dash.
+@export var max_dash_charges : int = 2
+var dash_charges: int = max_dash_charges
+
+## How far the dash will take the player.
+@export var dash_strength: float = 150.0
+
+## When stamina is depleted, this multiplier will be applied to dash_strength.
+@export var weak_dash_multiplier: float = 0.25
+
+var is_dash_possible: bool = true
+
+## If the dash will be possible when the player is on the ground.
+@export var is_dash_possible_on_ground: bool = false
+
+## how long it will take after a dash for the dash becoming possible again.
+## Can be at zero. Then the player will be able to dash again immediately, will lose a dash charge though.
+@export var dash_replenishing_time: float = 1.0
+
+## This timer will set is_dash_possible to true when timeout.
+## Usually this timer is started immediately when the dash_timer timed out.
+var dash_replenish_timer: Timer = Timer.new()
+
+
 
 @export_category("Movement Parameters")
 
@@ -207,12 +259,16 @@ const MOVEMENT_ACCELERATION := 1000.0
 @export var sprint_multiplier: float = 1.75
 
 
-#endregion Variables
+#endregion Parameters
 
 #region Builtin Functions
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	
+	add_child(dash_replenish_timer)
+	dash_replenish_timer.one_shot = true
+	dash_replenish_timer.timeout.connect(replenish_dash)
 	
 	pass # Replace with function body.
 
@@ -234,13 +290,11 @@ func _process(delta: float) -> void:
 	if body.is_on_wall_only():
 		body.get_wall_normal()
 		# print("From Movement Component: Is on Wall only!")
-	
-	if wants_to_jump:
-		jump()
+
+	#if is_body_on_floor:
+		#dash_charges = max_dash_charges
 	
 	move(delta)	
-
-
 	
 #endregion Builtin Functions
 
@@ -269,8 +323,6 @@ func jump() -> void:
 	
 ## causes the camera to rotate. Will clamp the looking up/down within reasonable values
 func look(look_up: float, look_right: float) -> void:
-	
-	# print("Rotate camera! Up: " + str(look_up) + ", right: " + str(look_right))
 	
 	camera.rotation.x += (look_up * -1.0 * mouse_sensitivity * 0.01)
 	camera.rotation.x  = clampf(camera.rotation.x, -1.5, 1.5)
@@ -351,7 +403,23 @@ func knockback(direction: Vector3, directional_strength: float, in_jump_strength
 		BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING:
 			perform_knockback(direction, directional_strength, in_jump_strength)
 	
+
+func dash():
 	
+	if dash_charges < 1 or not is_dash_possible:
+		return
+		
+	if is_body_on_floor and not is_dash_possible_on_ground:
+		return
+	
+	perform_dash()
+	
+	dash_charges -= 1
+	
+	if dash_replenishing_time > 0.0:
+		is_dash_possible = false
+		dash_replenish_timer.start(dash_replenishing_time)
+		
 
 #endregion Core Functions
 
@@ -382,7 +450,6 @@ func perform_jump(in_jump_strength: float):
 			movement_position = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_JUMP
 			
 
-
 func perform_knockback(direction: Vector3, directional_strength: float, jump_strength: float):
 	
 	movement_position = BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_KNOCKBACK
@@ -397,9 +464,52 @@ func perform_knockback(direction: Vector3, directional_strength: float, jump_str
 	
 	pass
 
+## may or may not be called by the dash() function, depending on the state.
+func perform_dash():
+	
+	if is_normal_movement_possible:
+		var direction: Vector3 = Vector3.FORWARD.rotated(Vector3.UP, camera.rotation.y)
+		
+		body.velocity += direction.normalized() * dash_strength
+	elif weak_dash_multiplier > 0.0:
+		var direction: Vector3 = Vector3.FORWARD.rotated(Vector3.UP, camera.rotation.y)
+		
+		body.velocity += direction.normalized() * dash_strength * weak_dash_multiplier
+	else:
+		pass
+	
+func replenish_dash():
+	is_dash_possible = true
+	
+
+
 ## determines the current state, depending on the state determining variables (See the region or the comment with that name).
 ## See the region (and comment) "State determining Variable"
 func determine_state():
+		
+	# this needs a more streamlined approach.
+	# maybe divide this into "check for input" and "check for things that happen"
+	# And the movement position? 
+	
+	# My new idea was that this function gets a parameter that tells the funtion what exactly has changed, if input was given or something happened.
+	# then it reacts accordingly.
+	# My idea then was that in order to react accordingly, there has to be a function for each of these things that happen, and a lot of match statements, basically.
+	# at least it would cover all possibilities, but it would be bloated.
+	
+	# Okay, BUT: we can either exclude input or something happened. I think.
+	
+	
+	
+	
+	# at least in the current shape it won't be able to handle the many states that can occur.
+	
+	# maybe divide the states into categories? IN_AIR, ON_FLOOR, DASH, UNDERWATER
+	# and then SPRINTING, NORMAL, IDLE
+	
+	# good in theory, but DASH is one of a kind, and IN_AIR would have the source (from knockback etc) attribute to it as well.
+		
+	
+		
 		
 	match movement_position:
 			
@@ -431,6 +541,27 @@ func determine_state():
 		BasicRpgGeneral.MovementPosition.MP_IN_AIR_FROM_FALLING:
 			
 			current_state = BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING
+
+func determine_state_new(ev: BasicRpgGeneral.CharacterMovementEvent):
+	
+	match ev:
+		BasicRpgGeneral.CharacterMovementEvent.NOTHING:
+			pass
+		BasicRpgGeneral.CharacterMovementEvent.ME_NORMAL_MOVEMENT_POSSIBLE_CHANGED:
+			pass
+		BasicRpgGeneral.CharacterMovementEvent.ME_MOVEMENT_POSITION_CHANGED:
+			pass
+		BasicRpgGeneral.CharacterMovementEvent.ME_HAS_JUST_LANDED:
+			pass
+		BasicRpgGeneral.CharacterMovementEvent.ME_HAS_JUST_LEFT_GROUND:
+			pass
+		
+	
+	
+	
+	
+	pass
+		
 
 #endregion helper funtions
 
