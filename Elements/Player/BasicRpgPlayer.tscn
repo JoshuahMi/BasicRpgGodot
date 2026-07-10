@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cg0pchnwybqq0" path="res://Elements/Player/BasicRpgPlayer.gd" id="1_kjpsg"]
 [ext_resource type="Script" uid="uid://ca00nlx430g4c" path="res://Elements/General/Components/BasicRpgInputComponent.gd" id="2_q1ege"]
-[ext_resource type="Script" uid="uid://dqn0htnm5vqau" path="res://Elements/General/Components/BasicRpgMovementComponent.gd" id="3_2c2dr"]
+[ext_resource type="Script" uid="uid://cr4dj6aowyb77" path="res://Elements/General/Components/BasicRpgMovementComponentNew.gd" id="4_q1ege"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_reusg"]
 
@@ -23,9 +23,9 @@ mesh = SubResource("CapsuleMesh_reusg")
 script = ExtResource("2_q1ege")
 metadata/_custom_type_script = "uid://ca00nlx430g4c"
 
-[node name="BasicRpgMovementComponent" type="Node" parent="." unique_id=1253588806 node_paths=PackedStringArray("body", "model", "camera")]
-script = ExtResource("3_2c2dr")
+[node name="BasicRpgMovementComponentNew" type="Node" parent="." unique_id=312858875 node_paths=PackedStringArray("body", "model", "camera")]
+script = ExtResource("4_q1ege")
 body = NodePath("..")
 model = NodePath("../MeshInstance3D")
 camera = NodePath("../Camera3D")
-metadata/_custom_type_script = "uid://dqn0htnm5vqau"
+metadata/_custom_type_script = "uid://cr4dj6aowyb77"

@@ -56,7 +56,25 @@ var wants_to_dash: bool = false:
 
 #region STATE
 
-var movement_place_state: BasicRpgGeneral.MovementPlaceState = BasicRpgGeneral.MovementPlaceState.GROUND
+var movement_place_state: BasicRpgGeneral.MovementPlaceState = BasicRpgGeneral.MovementPlaceState.GROUND:
+	set(new_value):
+		movement_place_state = new_value
+		match new_value:
+			BasicRpgGeneral.MovementPlaceState.GROUND:
+				print("Is on Ground!")
+				pass
+			BasicRpgGeneral.MovementPlaceState.AIR:
+				print("Is in Air!")
+				pass
+			BasicRpgGeneral.MovementPlaceState.WALL:
+				print("Is on a Wall!")
+				pass
+			BasicRpgGeneral.MovementPlaceState.SWIMMING:
+				print("Is swimming!")
+				pass
+			BasicRpgGeneral.MovementPlaceState.UNDERWATER:
+				print("Is underwater!")
+				pass
 var movement_effort_state: BasicRpgGeneral.MovementEffortState = BasicRpgGeneral.MovementEffortState.IDLE
 
 #endregion STATE
@@ -70,15 +88,44 @@ var movement_effort_state: BasicRpgGeneral.MovementEffortState = BasicRpgGeneral
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity_local = ProjectSettings.get_setting("physics/3d/default_gravity")
 
+var has_just_left_ground := false:
+	set(new_value):
+		has_just_left_ground = new_value
+		if new_value == true:
+			print("From Movement Component: Has just left the ground!")
+	
+var has_just_landed := false:
+	set(new_value):
+		has_just_landed = new_value
+		if new_value == true:
+			print("From Movement Component: Has just landed!")
+
+var is_body_on_floor: bool = false:
+	set(new_value):
+		if new_value != is_body_on_floor:
+			if new_value == true:
+				has_just_landed = true
+			else:
+				has_just_left_ground = true
+			is_body_on_floor = new_value
+		else:
+			is_body_on_floor = new_value
+			has_just_landed = false
+			has_just_left_ground = false
+	
+
 #endregion VARIABLES
 
 #region PARAMETER
 
 const MOVEMENT_ACCELERATION: float = 1000.0
 
-@export var movement_speed: float = 300.0
+@export var movement_speed: float = 3.0
 
-@export var jump_strength: float = 150.0
+## The multiplier applied to the regular movement speed when sprinting
+@export var sprint_multiplier: float = 1.75
+
+@export var jump_strength: float = 6.0
 
 @export var dash_strength: float = 150.0
 
@@ -90,13 +137,26 @@ const MOVEMENT_ACCELERATION: float = 1000.0
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	
+	determine_initial_state()
+	
 	pass # Replace with function body.
 
+
+func _physics_process(delta: float) -> void:
+	
+	apply_gravity(delta)
+	
+	is_body_on_floor = body.is_on_floor()
+	
+	body.move_and_slide()
+	
+	move(delta)
+	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	
-	apply_gravity(delta)
 	
 	pass
 	
@@ -156,7 +216,7 @@ func perform_move(delta: float):
 	# here it can just use "move toward" directily on the velocity
 	body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, MOVEMENT_ACCELERATION * delta)
 	body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, MOVEMENT_ACCELERATION * delta)
-	
+	# print("From Movement Component: velocity: " + str(body.velocity))
 	
 	pass
 	
@@ -197,6 +257,7 @@ func apply_gravity(delta: float):
 		BasicRpgGeneral.MovementPlaceState.AIR:
 			# When in the air, apply normal gravity.
 			body.velocity.y -= gravity_local * delta
+			# print("From Movement Component: Apply gravity! Gravity: " + str(gravity_local * delta))
 			pass
 		BasicRpgGeneral.MovementPlaceState.WALL:
 			# At first, don't apply gravity. Then over time, add more and more, until the applied gravity matches gravity_local.
@@ -214,6 +275,11 @@ func apply_gravity(delta: float):
 	
 	pass
 
-
+func determine_initial_state():
+	
+	if body.is_on_floor():
+		movement_place_state = BasicRpgGeneral.MovementPlaceState.GROUND
+	else:
+		movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
 
 #endregion HELPER FUNCTIONS

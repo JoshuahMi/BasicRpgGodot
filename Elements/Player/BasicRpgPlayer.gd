@@ -1,8 +1,8 @@
 extends CharacterBody3D
 
 @onready var input_component: BasicRpgInputComponent = $BasicRpgInputComponent
-@onready var movement_component: BasicRpgMovementComponent = $BasicRpgMovementComponent
-	
+@onready var movement_component: BasicRpgMovementComponentNew = $BasicRpgMovementComponentNew
+
 func _ready() -> void:
 	
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
