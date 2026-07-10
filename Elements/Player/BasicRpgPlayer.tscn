@@ -28,5 +28,4 @@ script = ExtResource("3_2c2dr")
 body = NodePath("..")
 model = NodePath("../MeshInstance3D")
 camera = NodePath("../Camera3D")
-movement_strength_while_jumping = 1.0
 metadata/_custom_type_script = "uid://dqn0htnm5vqau"

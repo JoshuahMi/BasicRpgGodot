@@ -49,3 +49,69 @@ enum CharacterMovementEvent {
 	ME_HAS_JUST_LEFT_GROUND,
 	
 }
+
+# -----------------------------------------------------------------------------------------------------------
+# --------------------- PLANNING ----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------
+
+# PLACE STATE
+# On ground		- when landing
+# On Wall		- when touching a wall mid air -- jump charges get replenished in order to be able to perform a wall jump.
+# in air		- when jumping, falling or getting knocked back
+# underwater 	- when entering/exiting a water volume
+
+# MOVEMENT STYLE STATE
+# normal		- the usual.
+# levitating	- when levitating using a spell
+# gliding		- when using wings
+
+# EFFORT STATE - is completely dependant on input and parameters, see below.
+# Idle			- movement_direction.length() < 0.01
+# regular		- movement_direction.length() == movement_speed
+# sprinting		- movement_direction.length() == movement_speed * sprint_modifier
+# dash			- movement_direction.length() > movement_speed * sprint_modifier
+
+# in air -- normal -- idle: just falling
+# in air -- normal -- regular: interpolated movement, depending on movement_strength_while_jumping
+# in air -- normal -- sprinting: interpolated movement, depending on movement_strength_while_jumping + sprint_modifier
+# in air --- normal -- dash: can't change direction anymore.
+
+# The disadvantage of this is that in every frame the movement speed has to be determined in order to determine the effort state.
+# isn't this a feedback loop? No, but:
+# 				-> input movement_direction * movement speed * sprint + dash (somehow) -> movement vector gets calculated -> it determines the state -> the move() function moves the body accordingly. It can't be dependant on the state, because the state itself is dependant on the input and the parameters.
+
+# ---------------------------------------------------------------------------------------------------------
+# -------------------- Applying the concepts --------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------
+
+enum MovementPlaceState {
+	
+# On Wall		- when touching a wall mid air -- jump charges get replenished in order to be able to perform a wall jump.
+# in air		- when jumping, falling or getting knocked back
+# underwater 	- when entering/exiting a water volume
+	
+	
+	GROUND,			## On ground - when landing
+	WALL,			## when touching a wall mid air -- jump charges get replenished in order to be able to perform a wall jump.
+	AIR,			## when jumping, falling or getting knocked back
+	SWIMMING,		## when inside a water volume, but the head (camera) is above the water surface
+	UNDERWATER,		## when inside a water volume, but the head (camera) is under the water volume
+	
+}
+
+enum MovementStyleState {
+
+	NORMAL,			# the usual type of movement of a humanoid or animal
+	LEVITATE,		# when levitating using a spell
+	GLIDE,			# when using wings
+	
+}
+
+enum MovementEffortState {
+
+	IDLE,			# movement_direction.length() < 0.01
+	REGULAR,		# movement_direction.length() == movement_speed
+	SPRINT,			# movement_direction.length() == movement_speed * sprint_modifier
+	DASH,			# movement_direction.length() > movement_speed * sprint_modifier
+	
+}

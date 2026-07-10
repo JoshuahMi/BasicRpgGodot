@@ -291,6 +291,9 @@ func _process(delta: float) -> void:
 		body.get_wall_normal()
 		# print("From Movement Component: Is on Wall only!")
 
+	
+
+
 	#if is_body_on_floor:
 		#dash_charges = max_dash_charges
 	
@@ -362,7 +365,7 @@ func move(delta: float) -> void:
 			# here it can just use "move toward" directily on the velocity
 			body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, MOVEMENT_ACCELERATION * delta)
 			body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, MOVEMENT_ACCELERATION * delta)
-	
+			
 		BasicRpgGeneral.PlayerMovementStates.ON_FLOOR_MOVEMENT_SPRINTING:
 			# here it can just use "move toward" directily on the velocity
 			body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local * sprint_multiplier, MOVEMENT_ACCELERATION * delta)
@@ -375,6 +378,7 @@ func move(delta: float) -> void:
 		
 			# here it has to interpolate, because we're in the air
 			body.velocity = lerp(body.velocity, velocity_local, movement_strength_while_jumping)	
+			
 		BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_KNOCKBACK:
 			pass
 		BasicRpgGeneral.PlayerMovementStates.IN_AIR_FROM_FALLING:
