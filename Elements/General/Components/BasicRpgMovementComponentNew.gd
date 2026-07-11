@@ -62,20 +62,20 @@ var movement_place_state: BasicRpgGeneral.MovementPlaceState = BasicRpgGeneral.M
 		movement_place_state = new_value
 		match new_value:
 			BasicRpgGeneral.MovementPlaceState.GROUND:
-				print("Is on Ground!")
+				#print("Is on Ground!")
 				pass
 			BasicRpgGeneral.MovementPlaceState.AIR:
-				print("Is in Air!")
+				#print("Is in Air!")
 				pass
 			BasicRpgGeneral.MovementPlaceState.WALL:
 				body.velocity.y = body.velocity.y * 0.1
-				print("Is on a Wall!")
+				#print("Is on a Wall!")
 				pass
 			BasicRpgGeneral.MovementPlaceState.SWIMMING:
-				print("Is swimming!")
+				#print("Is swimming!")
 				pass
 			BasicRpgGeneral.MovementPlaceState.UNDERWATER:
-				print("Is underwater!")
+				#print("Is underwater!")
 				pass
 var movement_effort_state: BasicRpgGeneral.MovementEffortState = BasicRpgGeneral.MovementEffortState.IDLE
 
@@ -130,18 +130,19 @@ var has_just_touched_wall: bool = false:
 			else:
 				wall_normal = body.get_wall_normal()
 
-var has_just_left_wall: bool = false
-	#set(new_value):
-		#has_just_left_wall = new_value
-		#if new_value == true:
-			#print("From Movement Component: Has just left a wall!")
-			#if is_body_on_floor == false:
-				#movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
-			#else:
-				#movement_place_state = BasicRpgGeneral.MovementPlaceState.GROUND
+var has_just_left_wall: bool = false:
+	set(new_value):
+		has_just_left_wall = new_value
+		if new_value == true:
+			print("From Movement Component: Has just left a wall!")
+			if is_body_on_floor == false:
+				movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
+			else:
+				movement_place_state = BasicRpgGeneral.MovementPlaceState.GROUND
 				
 var is_body_on_wall: bool = false:
 	set(new_value):
+		#print(new_value)
 		if new_value != is_body_on_wall:
 			if new_value == true:
 				has_just_touched_wall = true
@@ -175,6 +176,11 @@ const MOVEMENT_ACCELERATION: float = 1000.0
 @export var dash_strength: float = 150.0
 
 @export var mouse_sensitivity: float = 1.0
+
+@export_category("Wall run")
+
+@export var gravity_multiplier_when_on_wall = 0.1
+@export var speed_multiplier_when_on_wall: float = 3.0
 
 #endregion PARAMETER
 
@@ -257,7 +263,7 @@ func move(delta: float):
 			var stick_direction = Vector3(wall_normal.x, 0.0, wall_normal.z)
 			# var direction_local: Vector3 = Vector3(movement_direction.x, 0.0, movement_direction.y)
 			var direction_local: Vector3 = Vector3(0.0, 0.0, movement_direction.y)
-			var movement_speed_local = movement_speed
+			var movement_speed_local = movement_speed * speed_multiplier_when_on_wall
 			#print(wall_normal)
 			
 			# first determine the rotation of the movement vector
@@ -270,11 +276,13 @@ func move(delta: float):
 			if direction_local.dot(wall_direction) < 0.01:
 				wall_direction = stick_direction.rotated(Vector3.UP, 90.0)
 			
+			# print(wall_direction)
 			
-			
-			print(wall_direction)
-			
-			direction_local = wall_direction
+			if direction_local.length_squared() > 0.01:
+				direction_local = wall_direction
+			else:
+				direction_local = Vector3.ZERO
+				
 			direction_local = (direction_local.normalized() + stick_direction * -1.0).normalized()
 			
 			body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, MOVEMENT_ACCELERATION * delta)
@@ -400,7 +408,7 @@ func apply_gravity(delta: float):
 		BasicRpgGeneral.MovementPlaceState.WALL:
 			
 			# At first, don't apply gravity. Then over time, add more and more, until the applied gravity matches gravity_local.
-			body.velocity.y -= gravity_local * 0.03 * delta
+			body.velocity.y -= gravity_local * gravity_multiplier_when_on_wall * delta
 			
 			pass
 		BasicRpgGeneral.MovementPlaceState.SWIMMING:
