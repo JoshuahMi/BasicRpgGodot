@@ -192,7 +192,7 @@ const MOVEMENT_ACCELERATION: float = 1000.0
 ## how good can the player navigate while in air
 ## 0.0 = none
 ## 1.0 = like on the ground
-@export var movement_strength_while_jumping = 0.4
+@export var movement_strength_while_jumping := 0.4
 
 ## This constant is used to correct the value of movement strength while jumping,
 ## since it only works between 0.0 and 0.2. 
@@ -295,6 +295,12 @@ func look(look_up: float, look_right: float):
 	perform_look(look_up, look_right)
 	
 func move(delta: float):
+	var movement_speed_evaluated: float
+	if wants_to_sprint == true:
+		movement_speed_evaluated = movement_speed * sprint_multiplier
+	else:
+		movement_speed_evaluated = movement_speed
+	
 	
 	match movement_place_state:
 		BasicRpgGeneral.MovementPlaceState.GROUND:
@@ -305,7 +311,7 @@ func move(delta: float):
 			pass
 		BasicRpgGeneral.MovementPlaceState.AIR:
 			
-			var movement_speed_local = movement_speed
+			var movement_speed_local = movement_speed_evaluated
 			# make velocity local, to interpolate it afterwards to implement the movement strength in the air
 			var velocity_local = body.velocity
 			
@@ -343,7 +349,7 @@ func move(delta: float):
 				var stick_direction = Vector3(wall_normal.x, 0.0, wall_normal.z)
 				# var direction_local: Vector3 = Vector3(movement_direction.x, 0.0, movement_direction.y)
 				var direction_local: Vector3 = Vector3(0.0, 0.0, movement_direction.y)
-				var movement_speed_local = movement_speed * wall_speed_multiplier
+				var movement_speed_local = movement_speed_evaluated * wall_speed_multiplier
 				#print(wall_normal)
 				
 				# first determine the rotation of the movement vector
@@ -431,7 +437,11 @@ func perform_look(look_up: float, look_right: float):
 	
 func perform_move(in_movement_direction: Vector3, delta: float):
 	
-	var movement_speed_local = movement_speed
+	var movement_speed_local: float
+	if wants_to_sprint:
+		movement_speed_local = movement_speed * sprint_multiplier
+	else:
+		movement_speed_local = movement_speed
 
 	# first determine the rotation of the movement vector
 	# it shall point towards the direction the camera is facing
