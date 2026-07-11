@@ -1,3 +1,5 @@
+# Copyright 2026 Joshuah Skyseed, all rights reserved  
+
 class_name BasicRpgInputComponent extends Node
 
 var look_vector: Vector2 = Vector2.ZERO

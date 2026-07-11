@@ -1,3 +1,5 @@
+# Copyright 2026 Joshuah Skyseed, all rights reserved  
+
 extends CharacterBody3D
 
 @onready var input_component: BasicRpgInputComponent = $BasicRpgInputComponent

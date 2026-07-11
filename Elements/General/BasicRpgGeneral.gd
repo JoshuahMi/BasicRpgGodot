@@ -1,3 +1,5 @@
+# Copyright 2026 Joshuah Skyseed, all rights reserved  
+
 class_name BasicRpgGeneral extends Node
 
 ## We can distinguish two groups of states: the ones on the floor and the ones in the air.

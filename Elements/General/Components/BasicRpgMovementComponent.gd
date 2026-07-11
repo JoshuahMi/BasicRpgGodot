@@ -1,3 +1,5 @@
+# Copyright 2026 Joshuah Skyseed, all rights reserved  
+
 class_name BasicRpgMovementComponent extends Node
 
 ## This Movement Component is made up from "Core Functions", called after their respective booleans are set to true from outside the component,

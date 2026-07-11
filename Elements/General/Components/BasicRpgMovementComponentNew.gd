@@ -1,7 +1,17 @@
+# Copyright 2026 Joshuah Skyseed, all rights reserved  
+
+
 class_name BasicRpgMovementComponentNew extends Node
 
 # For the prototype I will just focus on the states and the functionality of the core functions.
 # 
+
+
+# TODO:
+# climb
+# ledge grab
+# I think I will make the climb first, because obviously it includes going 
+# at the top of the climbable over a ledge.
 
 
 
