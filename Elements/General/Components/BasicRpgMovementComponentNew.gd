@@ -58,6 +58,7 @@ var wants_to_dash: bool = false:
 
 var movement_place_state: BasicRpgGeneral.MovementPlaceState = BasicRpgGeneral.MovementPlaceState.GROUND:
 	set(new_value):
+		
 		movement_place_state = new_value
 		match new_value:
 			BasicRpgGeneral.MovementPlaceState.GROUND:
@@ -67,7 +68,7 @@ var movement_place_state: BasicRpgGeneral.MovementPlaceState = BasicRpgGeneral.M
 				print("Is in Air!")
 				pass
 			BasicRpgGeneral.MovementPlaceState.WALL:
-				body.velocity.y = body.velocity.y * 0.05
+				body.velocity.y = body.velocity.y * 0.1
 				print("Is on a Wall!")
 				pass
 			BasicRpgGeneral.MovementPlaceState.SWIMMING:
@@ -291,8 +292,29 @@ func move(delta: float):
 	pass
 	
 func jump():
-	perform_jump(jump_strength)
-	pass
+	
+	
+	match movement_place_state:
+		BasicRpgGeneral.MovementPlaceState.GROUND:
+			perform_jump(Vector3.UP, jump_strength)
+			pass
+		BasicRpgGeneral.MovementPlaceState.AIR:
+			perform_jump(Vector3.UP, jump_strength)
+			pass
+		BasicRpgGeneral.MovementPlaceState.WALL:
+			
+			
+			#body.velocity += wall_normal * jump_strength * 10.0
+			movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
+			perform_jump((Vector3.UP + wall_normal + Vector3.FORWARD.rotated(Vector3.UP, camera.rotation.y)).normalized(), jump_strength)
+			pass
+		BasicRpgGeneral.MovementPlaceState.SWIMMING:
+			perform_jump(Vector3.UP, jump_strength)
+			pass
+		BasicRpgGeneral.MovementPlaceState.UNDERWATER:
+			perform_jump(Vector3.UP, jump_strength)
+			pass
+			
 
 func dash():
 	perform_dash()
@@ -336,9 +358,9 @@ func perform_move(in_movement_direction: Vector3, delta: float):
 	
 	pass
 	
-func perform_jump(in_jump_strength: float):
+func perform_jump(in_jump_direction: Vector3, in_jump_strength: float):
 	
-	body.velocity.y += in_jump_strength 
+	body.velocity += in_jump_direction * in_jump_strength 
 	
 	pass
 
