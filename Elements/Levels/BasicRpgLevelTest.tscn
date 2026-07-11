@@ -103,13 +103,13 @@ size = Vector3(323.7461, 1, 322.82617)
 material = SubResource("StandardMaterial3D_reusg")
 
 [node name="CSGBox3D2" type="CSGBox3D" parent="." unique_id=1104802978]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30249786, 15.572559, 0)
+transform = Transform3D(0.7957667, 0, -0.6056033, 0, 1, 0, 0.6056033, 0, 0.7957667, 0.30249786, 15.572559, 0)
 use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_14wte")
 
 [node name="CSGBox3D3" type="CSGBox3D" parent="." unique_id=198399025]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.633775, 15.572559, 0)
+transform = Transform3D(0.79294574, 0, 0.6092922, 0, 1, 0, -0.6092922, 0, 0.79294574, -13.633775, 15.572559, 0)
 use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_pmdjt")
