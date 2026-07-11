@@ -22,10 +22,8 @@ class_name BasicRpgMovementComponentNew extends Node
 ## Used by the move() function.
 var movement_direction: Vector2 = Vector2.ZERO:
 	set(new_value):
-		if new_value == movement_direction:
-			movement_direction = new_value	
-		else:
-			movement_direction = new_value
+		movement_direction = new_value	
+		
 
 ## INPUT
 ## This is set by the object that is using this component. Will tell this component that it wants to sprint by setting it to true.
@@ -182,19 +180,6 @@ const MOVEMENT_ACCELERATION: float = 1000.0
 
 ## The multiplier applied to the regular movement speed when sprinting
 @export var sprint_multiplier: float = 2.0
-
-## the current desired movement speed. Shall be determined by the movement direction length, the movement speed and the sprint modifier.
-var desired_movement_speed: float = 0.0:
-	set(new_value):
-		desired_movement_speed = new_value
-		if desired_movement_speed < movement_speed:
-			movement_effort_state = BasicRpgGeneral.MovementEffortState.IDLE
-		elif desired_movement_speed == movement_speed:
-			movement_effort_state = BasicRpgGeneral.MovementEffortState.REGULAR
-		elif desired_movement_speed == movement_speed * sprint_multiplier:
-			movement_effort_state = BasicRpgGeneral.MovementEffortState.SPRINT
-		else:
-			movement_effort_state = BasicRpgGeneral.MovementEffortState.DASH
 
 @export var dash_strength: float = 20.0
 
@@ -452,9 +437,6 @@ func perform_move(in_movement_direction: Vector3, delta: float):
 	# it shall point towards the direction the camera is facing
 	var y_rotation = camera.rotation.y
 	
-	
-	
-	
 	var direction_local = in_movement_direction.rotated(Vector3.UP, y_rotation)
 	
 	# make velocity local, to interpolate it afterwards to implement the movement strength in the air
@@ -532,5 +514,7 @@ func determine_initial_state():
 		movement_place_state = BasicRpgGeneral.MovementPlaceState.GROUND
 	else:
 		movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
+
+
 
 #endregion HELPER FUNCTIONS
