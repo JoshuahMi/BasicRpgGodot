@@ -87,6 +87,12 @@ var movement_effort_state: BasicRpgGeneral.MovementEffortState = BasicRpgGeneral
 
 #region VARIABLES
 
+# JUMP
+
+## When jumping, the velocity will be stored in this variable, to interpolate between it and the movement direction.
+var recorded_velocity: Vector3 = Vector3.ZERO
+
+
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity_local = ProjectSettings.get_setting("physics/3d/default_gravity")
 
@@ -121,6 +127,8 @@ var is_body_on_floor: bool = false:
 var has_just_touched_wall: bool = false:
 	set(new_value):
 		has_just_touched_wall = new_value
+		if is_wall_jump_possible != true:
+			return
 		if new_value == true:
 			movement_place_state = BasicRpgGeneral.MovementPlaceState.WALL
 			var collision: KinematicCollision3D = body.get_last_slide_collision()
@@ -134,7 +142,7 @@ var has_just_left_wall: bool = false:
 	set(new_value):
 		has_just_left_wall = new_value
 		if new_value == true:
-			print("From Movement Component: Has just left a wall!")
+			#print("From Movement Component: Has just left a wall!")
 			if is_body_on_floor == false:
 				movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
 			else:
@@ -164,23 +172,81 @@ var wall_normal: Vector3 = Vector3.RIGHT
 
 #region PARAMETER
 
+
+
+@export_category("General Movement")
+
 const MOVEMENT_ACCELERATION: float = 1000.0
 
 @export var movement_speed: float = 3.0
 
 ## The multiplier applied to the regular movement speed when sprinting
-@export var sprint_multiplier: float = 1.75
+@export var sprint_multiplier: float = 2.0
 
-@export var jump_strength: float = 6.0
+## the current desired movement speed. Shall be determined by the movement direction length, the movement speed and the sprint modifier.
+var desired_movement_speed: float = 0.0:
+	set(new_value):
+		desired_movement_speed = new_value
+		if desired_movement_speed < movement_speed:
+			movement_effort_state = BasicRpgGeneral.MovementEffortState.IDLE
+		elif desired_movement_speed == movement_speed:
+			movement_effort_state = BasicRpgGeneral.MovementEffortState.REGULAR
+		elif desired_movement_speed == movement_speed * sprint_multiplier:
+			movement_effort_state = BasicRpgGeneral.MovementEffortState.SPRINT
+		else:
+			movement_effort_state = BasicRpgGeneral.MovementEffortState.DASH
 
-@export var dash_strength: float = 150.0
+@export var dash_strength: float = 20.0
 
 @export var mouse_sensitivity: float = 1.0
 
+@export_category("Jump")
+
+@export var jump_strength: float = 6.0
+
+## how good can the player navigate while in air
+## 0.0 = none
+## 1.0 = like on the ground
+@export var movement_strength_while_jumping = 0.4
+
+## This constant is used to correct the value of movement strength while jumping,
+## since it only works between 0.0 and 0.2. 
+const MOVEMENT_STRENGTH_WHILE_JUMPING_CORRECTOR := 0.2
+
 @export_category("Wall run")
 
-@export var gravity_multiplier_when_on_wall = 0.1
-@export var speed_multiplier_when_on_wall: float = 3.0
+## If the wall run is possible. If true, wall jump is possible too.
+## Wall run/jump is automatically active when a player doesn't touch the ground, but touches a wall,
+## as long as this variable stays true. Set it to false on demand to implement a wall run on push of a button
+@export var is_wall_run_possible: bool = true:
+	set(new_value):
+		is_wall_run_possible = new_value
+		if new_value == true:
+			is_wall_jump_possible = true
+
+## If the wall jump is possible. Can be true while wall run is not possible.
+## Then the player isn't able to move while on a wall. Gravity will slowly pull them towards the ground.
+## They have to jump away from the wall, or sink to the ground.
+## Wall jump is automatically active when a player doesn't touch the ground, but touches a wall,
+## as long as this variable stays true. Set it to false on demand to implement a wall jump on push of a button
+@export var is_wall_jump_possible: bool = true
+
+## The multiplier that is applied to the gravity strength when on a wall.
+## Does nothing at 1.0
+@export var wall_gravity_multiplier: float = 0.1
+
+## How much the movement speed is increased when on a wall.
+## Does nothing at 1.0
+@export var wall_speed_multiplier: float = 3.0
+
+## When jumping from a wall, this variable is applied to the UP vector.
+## Does nothing at 1.0
+@export var wall_jump_y_multiplier: float = 1.0
+
+
+## When jumping from the wall, this variable tells how strong the player will be kicked into the walls normal direction.
+## Does nothing at 1.0
+@export var wall_jump_normal_multiplier: float = 1.2
 
 #endregion PARAMETER
 
@@ -254,39 +320,68 @@ func move(delta: float):
 			pass
 		BasicRpgGeneral.MovementPlaceState.AIR:
 			
+			var movement_speed_local = movement_speed
+			# make velocity local, to interpolate it afterwards to implement the movement strength in the air
+			var velocity_local = body.velocity
+			
 			var direction_local: Vector3 = Vector3(movement_direction.x, 0.0, movement_direction.y)
-			perform_move(direction_local, delta)
-			
-			pass
-		BasicRpgGeneral.MovementPlaceState.WALL:
-			
-			var stick_direction = Vector3(wall_normal.x, 0.0, wall_normal.z)
-			# var direction_local: Vector3 = Vector3(movement_direction.x, 0.0, movement_direction.y)
-			var direction_local: Vector3 = Vector3(0.0, 0.0, movement_direction.y)
-			var movement_speed_local = movement_speed * speed_multiplier_when_on_wall
-			#print(wall_normal)
-			
 			# first determine the rotation of the movement vector
 			# it shall point towards the direction the camera is facing
 			var y_rotation = camera.rotation.y
 			direction_local = direction_local.rotated(Vector3.UP, y_rotation)
 			
-			var wall_direction: Vector3 = stick_direction.rotated(Vector3.UP, -90.0)
+			var velocity_original = body.velocity
 			
-			if direction_local.dot(wall_direction) < 0.01:
-				wall_direction = stick_direction.rotated(Vector3.UP, 90.0)
+			# then use "move toward" to move the player
+			velocity_local.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, MOVEMENT_ACCELERATION * delta * movement_strength_while_jumping * MOVEMENT_STRENGTH_WHILE_JUMPING_CORRECTOR)
+			velocity_local.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, MOVEMENT_ACCELERATION * delta * movement_strength_while_jumping * MOVEMENT_STRENGTH_WHILE_JUMPING_CORRECTOR)
+			# here it has to interpolate, because we're in the air
+			body.velocity = lerp(velocity_original, velocity_local, movement_strength_while_jumping * MOVEMENT_STRENGTH_WHILE_JUMPING_CORRECTOR)
+			# body.velocity = velocity_local
 			
-			# print(wall_direction)
 			
-			if direction_local.length_squared() > 0.01:
-				direction_local = wall_direction
-			else:
-				direction_local = Vector3.ZERO
+		BasicRpgGeneral.MovementPlaceState.WALL:
+			
+			if is_wall_jump_possible and not is_wall_run_possible:
 				
-			direction_local = (direction_local.normalized() + stick_direction * -1.0).normalized()
-			
-			body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, MOVEMENT_ACCELERATION * delta)
-			body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, MOVEMENT_ACCELERATION * delta)
+				var stick_strength = 5.0
+				
+				var stick_direction: Vector3 = Vector3(wall_normal.x, 0.0, wall_normal.z)
+				
+				var direction_local: Vector3 = (stick_direction * -1.0).normalized()
+				
+				body.velocity.x = move_toward(body.velocity.x, direction_local.x * stick_strength, MOVEMENT_ACCELERATION * delta)
+				body.velocity.z = move_toward(body.velocity.z, direction_local.z * stick_strength, MOVEMENT_ACCELERATION * delta)
+				
+				pass
+			if is_wall_run_possible:
+				var stick_direction = Vector3(wall_normal.x, 0.0, wall_normal.z)
+				# var direction_local: Vector3 = Vector3(movement_direction.x, 0.0, movement_direction.y)
+				var direction_local: Vector3 = Vector3(0.0, 0.0, movement_direction.y)
+				var movement_speed_local = movement_speed * wall_speed_multiplier
+				#print(wall_normal)
+				
+				# first determine the rotation of the movement vector
+				# it shall point towards the direction the camera is facing
+				var y_rotation = camera.rotation.y
+				direction_local = direction_local.rotated(Vector3.UP, y_rotation)
+				
+				var wall_direction: Vector3 = stick_direction.rotated(Vector3.UP, -90.0)
+				
+				if direction_local.dot(wall_direction) < 0.01:
+					wall_direction = stick_direction.rotated(Vector3.UP, 90.0)
+				
+				# print(wall_direction)
+				
+				if direction_local.length_squared() > 0.01:
+					direction_local = wall_direction
+				else:
+					direction_local = Vector3.ZERO
+					
+				direction_local = (direction_local.normalized() + stick_direction * -1.0).normalized()
+				
+				body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, MOVEMENT_ACCELERATION * delta)
+				body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, MOVEMENT_ACCELERATION * delta)
 			#print(body.velocity)
 			
 			pass
@@ -311,11 +406,17 @@ func jump():
 			pass
 		BasicRpgGeneral.MovementPlaceState.WALL:
 			
+			# Actually this if-statement is not necessary, because we won't get
+			# into that state if is wall jump possible is false
 			
-			#body.velocity += wall_normal * jump_strength * 10.0
-			movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
-			perform_jump((Vector3.UP + wall_normal + Vector3.FORWARD.rotated(Vector3.UP, camera.rotation.y)).normalized(), jump_strength)
-			pass
+			if is_wall_jump_possible and not is_wall_run_possible:
+				movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
+				perform_jump(Vector3.UP * wall_jump_y_multiplier + wall_normal * wall_jump_normal_multiplier, jump_strength)
+				
+			else:
+				movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
+				perform_jump(Vector3.UP * wall_jump_y_multiplier + wall_normal * wall_jump_normal_multiplier + Vector3.FORWARD.rotated(Vector3.UP, camera.rotation.y), jump_strength)
+				
 		BasicRpgGeneral.MovementPlaceState.SWIMMING:
 			perform_jump(Vector3.UP, jump_strength)
 			pass
@@ -368,15 +469,21 @@ func perform_move(in_movement_direction: Vector3, delta: float):
 	
 func perform_jump(in_jump_direction: Vector3, in_jump_strength: float):
 	
+	
 	body.velocity += in_jump_direction * in_jump_strength 
+	recorded_velocity = body.velocity
 	
 	pass
 
 func perform_dash():
-	
-	var direction: Vector3 = Vector3.FORWARD.rotated(Vector3.UP, camera.rotation.y)
-		
-	body.velocity += direction.normalized() * dash_strength
+	if movement_strength_while_jumping == 1.0:
+		var direction: Vector3 = Vector3.FORWARD.rotated(Vector3.UP, camera.rotation.y)
+			
+		body.velocity += direction.normalized() * dash_strength
+	else:
+		var direction: Vector3 = Vector3.FORWARD.rotated(Vector3.UP, camera.rotation.y)
+			
+		body.velocity += direction.normalized() * dash_strength * 0.15
 
 
 func perform_knockback(direction: Vector3, directional_strength: float, in_jump_strength: float):
@@ -408,7 +515,7 @@ func apply_gravity(delta: float):
 		BasicRpgGeneral.MovementPlaceState.WALL:
 			
 			# At first, don't apply gravity. Then over time, add more and more, until the applied gravity matches gravity_local.
-			body.velocity.y -= gravity_local * gravity_multiplier_when_on_wall * delta
+			body.velocity.y -= gravity_local * wall_gravity_multiplier * delta
 			
 			pass
 		BasicRpgGeneral.MovementPlaceState.SWIMMING:
