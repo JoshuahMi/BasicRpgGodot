@@ -12,6 +12,7 @@ func _ready() -> void:
 	
 func _process(delta: float) -> void:
 	
+	#print(Engine.get_frames_per_second())
 
 	if input_component.is_test_just_pressed:
 		movement_component.wants_to_dash = true

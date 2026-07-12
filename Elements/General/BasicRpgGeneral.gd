@@ -96,6 +96,7 @@ enum MovementPlaceState {
 	GROUND,			## On ground - when landing
 	WALL,			## when touching a wall mid air -- jump charges get replenished in order to be able to perform a wall jump.
 	AIR,			## when jumping, falling or getting knocked back
+	CLIMB,			## when climbing a climbable object or grabbing a ledge
 	SWIMMING,		## when inside a water volume, but the head (camera) is above the water surface
 	UNDERWATER,		## when inside a water volume, but the head (camera) is under the water volume
 	

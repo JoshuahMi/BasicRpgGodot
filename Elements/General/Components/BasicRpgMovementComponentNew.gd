@@ -79,6 +79,10 @@ var movement_place_state: BasicRpgGeneral.MovementPlaceState = BasicRpgGeneral.M
 				body.velocity.y = body.velocity.y * 0.1
 				#print("Is on a Wall!")
 				pass
+				
+			BasicRpgGeneral.MovementPlaceState.CLIMB:
+				pass
+				
 			BasicRpgGeneral.MovementPlaceState.SWIMMING:
 				#print("Is swimming!")
 				pass
@@ -277,6 +281,9 @@ func _physics_process(delta: float) -> void:
 			move(delta)
 			body.move_and_slide()
 			
+		BasicRpgGeneral.MovementPlaceState.CLIMB:
+			pass
+			
 		BasicRpgGeneral.MovementPlaceState.SWIMMING:
 			move(delta)
 			body.move_and_slide()
@@ -386,6 +393,10 @@ func move(delta: float):
 			#print(body.velocity)
 			
 			pass
+			
+		BasicRpgGeneral.MovementPlaceState.CLIMB:
+			pass
+			
 		BasicRpgGeneral.MovementPlaceState.SWIMMING:
 			pass
 		BasicRpgGeneral.MovementPlaceState.UNDERWATER:
@@ -417,7 +428,10 @@ func jump():
 			else:
 				movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
 				perform_jump(Vector3.UP * wall_jump_y_multiplier + wall_normal * wall_jump_normal_multiplier + Vector3.FORWARD.rotated(Vector3.UP, camera.rotation.y), jump_strength)
-				
+		
+		BasicRpgGeneral.MovementPlaceState.CLIMB:
+			pass
+		
 		BasicRpgGeneral.MovementPlaceState.SWIMMING:
 			perform_jump(Vector3.UP, jump_strength)
 			pass
@@ -471,6 +485,8 @@ func perform_move(in_movement_direction: Vector3, delta: float):
 	
 func perform_jump(in_jump_direction: Vector3, in_jump_strength: float):
 	
+	body.velocity.y = 0.0
+	
 	
 	body.velocity += in_jump_direction * in_jump_strength 
 	recorded_velocity = body.velocity
@@ -520,6 +536,10 @@ func apply_gravity(delta: float):
 			body.velocity.y -= gravity_local * wall_gravity_multiplier * delta
 			
 			pass
+			
+		BasicRpgGeneral.MovementPlaceState.CLIMB:
+			pass
+			
 		BasicRpgGeneral.MovementPlaceState.SWIMMING:
 			# Don't apply gravity
 			pass
@@ -527,14 +547,11 @@ func apply_gravity(delta: float):
 			# Don't apply gravity
 			pass
 
-
 func determine_initial_state():
 	
 	if body.is_on_floor():
 		movement_place_state = BasicRpgGeneral.MovementPlaceState.GROUND
 	else:
 		movement_place_state = BasicRpgGeneral.MovementPlaceState.AIR
-
-
 
 #endregion HELPER FUNCTIONS

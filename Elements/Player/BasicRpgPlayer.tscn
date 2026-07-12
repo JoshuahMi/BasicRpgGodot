@@ -31,5 +31,6 @@ model = NodePath("../MeshInstance3D")
 camera = NodePath("../Camera3D")
 dash_strength = 150.0
 wall_speed_multiplier = 2.0
+wall_jump_y_multiplier = 0.65
 wall_jump_normal_multiplier = 0.5
 metadata/_custom_type_script = "uid://cr4dj6aowyb77"
