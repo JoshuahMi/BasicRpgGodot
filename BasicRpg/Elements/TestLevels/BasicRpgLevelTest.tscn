@@ -1,18 +1,26 @@
 [gd_scene format=3 uid="uid://ccvfjinxrgeti"]
 
-[ext_resource type="Shader" uid="uid://btm1nn8w3cpf4" path="res://Elements/Whitebox/BasicRpgWhiteBox.gdshader" id="1_14wte"]
-[ext_resource type="PackedScene" uid="uid://brn1wmqqcx5ig" path="res://Elements/Player/BasicRpgPlayer.tscn" id="1_f7kc2"]
+[ext_resource type="Shader" uid="uid://btm1nn8w3cpf4" path="res://BasicRpg/Graphics/Shaders/Spatial/BasicRpgWhiteBox.gdshader" id="1_t8ybn"]
+[ext_resource type="PackedScene" uid="uid://brn1wmqqcx5ig" path="res://BasicRpg/Elements/Player/BasicRpgPlayer.tscn" id="2_3ao2y"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_esifo"]
-sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
-ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_q1ege"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_kjpsg"]
+noise = SubResource("FastNoiseLite_q1ege")
+seamless = true
+in_3d_space = true
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_ckn2c"]
+panorama = SubResource("NoiseTexture2D_kjpsg")
 
 [sub_resource type="Sky" id="Sky_f7kc2"]
-sky_material = SubResource("ProceduralSkyMaterial_esifo")
+sky_material = SubResource("PanoramaSkyMaterial_ckn2c")
+radiance_size = 2
 
 [sub_resource type="Environment" id="Environment_14wte"]
 background_mode = 2
 sky = SubResource("Sky_f7kc2")
+sky_rotation = Vector3(0, 0, 1.5707964)
 glow_enabled = true
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_ehmih"]
@@ -25,72 +33,73 @@ albedo_texture = SubResource("NoiseTexture2D_bbcle")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_14wte"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_pmdjt"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5xk2h"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vabrg"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ltetc"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_836ns"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qhjym"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_bnbsa"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5j320"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_rctq4"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qiuua"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_eoml5"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_re5oh"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_m6ece"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_77u87"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7s01x"]
 render_priority = 0
-shader = ExtResource("1_14wte")
+shader = ExtResource("1_t8ybn")
 
 [node name="BasicRpgLevelTest" type="Node3D" unique_id=1171436233]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=775899735]
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+light_energy = 0.018
 shadow_enabled = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2103643649]
@@ -210,5 +219,12 @@ use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_7s01x")
 
-[node name="BasicRpgPlayer" parent="." unique_id=975280074 instance=ExtResource("1_f7kc2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.961998, 4.4997425, -18.684078)
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="." unique_id=2038855897]
+transform = Transform3D(0.0034850328, 0, -0.9999939, 0, 1, 0, 0.9999939, 0, 0.0034850328, -5.4348655, 10.527107, -21.905287)
+use_collision = true
+radius = 6.928711
+height = 23.59668
+sides = 21
+
+[node name="BasicRpgPlayer" parent="." unique_id=975280074 instance=ExtResource("2_3ao2y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.198467, 0.58044434, -51.76515)

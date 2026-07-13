@@ -1,3 +1,5 @@
+// Copyright 2026 Joshuah Skyseed, all rights reserved  
+
 shader_type spatial;
 
 void vertex() {
