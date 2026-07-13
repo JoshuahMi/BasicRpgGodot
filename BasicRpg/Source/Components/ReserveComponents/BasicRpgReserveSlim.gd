@@ -217,7 +217,9 @@ func _emit_value_changed():
 	values_changed.emit(current_value, max_value)
 
 func _emit_value_at_max():
-	value_at_maximum.emit()
+	
+	if current_value == max_value:
+		value_at_maximum.emit()
 
 func _emit_value_depleted():
 	if current_value == 0:
