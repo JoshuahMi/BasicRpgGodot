@@ -7,6 +7,14 @@ extends CharacterBody3D
 
 func _ready() -> void:
 	
+	var res = BasicRpgResistanceSlim.new()
+	
+	res.current_value = 200
+	res.can_be_weakness = true
+	res.can_heal = false
+	print(res.get_multiplier())
+	
+	
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	pass
 	
