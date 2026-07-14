@@ -33,5 +33,5 @@ func _process(delta: float) -> void:
 	else:
 		movement_component.wants_to_sprint = false
 	
-	movement_component.movement_direction = input_component.move_direction
+	movement_component.movement_direction = input_component.movement_direction
 	movement_component.look(input_component.look_vector.y, input_component.look_vector.x )

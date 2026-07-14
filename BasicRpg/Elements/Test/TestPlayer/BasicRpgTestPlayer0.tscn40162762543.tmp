@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://c60jl8tnjl12"]
+
+[ext_resource type="Script" uid="uid://ca00nlx430g4c" path="res://BasicRpg/Source/Components/InputComponents/BasicRpgInputComponent.gd" id="1_3rdj6"]
+[ext_resource type="Script" uid="uid://ma1krtn72c6" path="res://BasicRpg/Elements/Test/TestPlayer/basic_rpg_test_player_0.gd" id="1_m7d8f"]
+[ext_resource type="Script" uid="uid://c1gs4wtogha26" path="res://BasicRpg/Source/Components/MovementComponents/StateMachineMCs/FirstAttempt/BasicRpgMovementStateMachine.gd" id="2_m7d8f"]
+[ext_resource type="PackedScene" uid="uid://5lgodkshivib" path="res://BasicRpg/Elements/Test/TestUI/BasicRpgTestHUD.tscn" id="3_yaa8f"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_reusg"]
+
+[node name="BasicRpgTestPlayer0" type="CharacterBody3D" unique_id=1150420738]
+script = ExtResource("1_m7d8f")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1983449347]
+shape = SubResource("CapsuleShape3D_reusg")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=319836801]
+
+[node name="BasicRpgInputComponent" type="Node" parent="." unique_id=1880762339]
+script = ExtResource("1_3rdj6")
+metadata/_custom_type_script = "uid://ca00nlx430g4c"
+
+[node name="BasicRpgMovementStateMachine" type="Node" parent="." unique_id=2076033625 node_paths=PackedStringArray("body", "camera")]
+script = ExtResource("2_m7d8f")
+body = NodePath("..")
+camera = NodePath("../Camera3D")
+metadata/_custom_type_script = "uid://c1gs4wtogha26"
+
+[node name="BasicRpgTestHud" parent="." unique_id=1337185482 instance=ExtResource("3_yaa8f")]

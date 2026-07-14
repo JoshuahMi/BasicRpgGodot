@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://ccvfjinxrgeti"]
 
-[ext_resource type="Shader" uid="uid://btm1nn8w3cpf4" path="res://BasicRpg/Graphics/Shaders/Spatial/BasicRpgWhiteBox.gdshader" id="1_t8ybn"]
-[ext_resource type="PackedScene" uid="uid://brn1wmqqcx5ig" path="res://BasicRpg/Elements/Player/BasicRpgPlayer.tscn" id="2_3ao2y"]
+[ext_resource type="Shader" uid="uid://btm1nn8w3cpf4" path="res://BasicRpg/Graphics/Shaders/Spatial/BasicRpgWhiteBox.gdshader" id="1_nby6r"]
+[ext_resource type="PackedScene" uid="uid://c60jl8tnjl12" path="res://BasicRpg/Elements/Test/TestPlayer/BasicRpgTestPlayer0.tscn" id="2_xi4co"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_q1ege"]
 
@@ -33,67 +33,67 @@ albedo_texture = SubResource("NoiseTexture2D_bbcle")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_14wte"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_pmdjt"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5xk2h"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vabrg"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ltetc"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_836ns"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qhjym"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_bnbsa"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5j320"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_rctq4"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qiuua"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_eoml5"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_re5oh"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_m6ece"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_77u87"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7s01x"]
 render_priority = 0
-shader = ExtResource("1_t8ybn")
+shader = ExtResource("1_nby6r")
 
 [node name="BasicRpgLevelTest" type="Node3D" unique_id=1171436233]
 
@@ -226,5 +226,5 @@ radius = 6.928711
 height = 23.59668
 sides = 21
 
-[node name="BasicRpgPlayer" parent="." unique_id=975280074 instance=ExtResource("2_3ao2y")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.198467, 0.58044434, -51.76515)
+[node name="BasicRpgTestPlayer0" parent="." unique_id=1449081686 instance=ExtResource("2_xi4co")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.917953, 11.543007, -53.760284)

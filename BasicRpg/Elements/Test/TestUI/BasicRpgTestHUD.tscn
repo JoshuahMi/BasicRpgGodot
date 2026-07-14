@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://5lgodkshivib"]
+
+[ext_resource type="Script" uid="uid://codcwba6yut45" path="res://BasicRpg/Elements/Test/TestUI/basic_rpg_test_hud.gd" id="1_8pmew"]
+[ext_resource type="FontFile" uid="uid://boj4amee1a6rv" path="res://BasicRpg/Graphics/Fonts/Catwalzhari-ywL2Y.ttf" id="2_vrrrs"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_reusg"]
+
+[node name="BasicRpgTestHud" type="Control" unique_id=1337185482]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_8pmew")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=164005276]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_reusg")
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1393932508]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+
+[node name="MovementStateLabel" type="Label" parent="PanelContainer/MarginContainer" unique_id=1140895331]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_vrrrs")
+text = "Bla!"

@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cg0pchnwybqq0" path="res://BasicRpg/Elements/Player/BasicRpgPlayer.gd" id="1_kjpsg"]
 [ext_resource type="Script" uid="uid://ca00nlx430g4c" path="res://BasicRpg/Source/Components/InputComponents/BasicRpgInputComponent.gd" id="2_q1ege"]
 [ext_resource type="Script" uid="uid://cr4dj6aowyb77" path="res://BasicRpg/Source/Components/MovementComponents/BasicRpgMovementComponentNew.gd" id="3_og6xo"]
+[ext_resource type="PackedScene" uid="uid://5lgodkshivib" path="res://BasicRpg/Elements/Test/TestUI/BasicRpgTestHUD.tscn" id="4_p42r6"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_reusg"]
 
@@ -32,3 +33,5 @@ dash_strength = 150.0
 wall_speed_multiplier = 2.0
 wall_jump_y_multiplier = 0.65
 wall_jump_normal_multiplier = 0.5
+
+[node name="BasicRpgTestHud" parent="." unique_id=1337185482 instance=ExtResource("4_p42r6")]

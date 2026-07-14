@@ -3,19 +3,19 @@
 class_name BasicRpgInputComponent extends Node
 
 var look_vector: Vector2 = Vector2.ZERO
-var move_direction: Vector2 = Vector2.ZERO:
+var movement_direction: Vector2 = Vector2.ZERO:
 	set(new_value):
-		if move_direction.length_squared() > 0.01 and new_value.length_squared() < 0.01:
+		if movement_direction.length_squared() > 0.01 and new_value.length_squared() < 0.01:
 			has_just_stopped = true
 		else:
 			has_just_stopped = false
 			
-		if move_direction.length_squared() < 0.01 and new_value.length_squared() > 0.01:
+		if movement_direction.length_squared() < 0.01 and new_value.length_squared() > 0.01:
 			has_just_moved = true
 		else:
 			has_just_moved = false
 			
-		move_direction = new_value
+		movement_direction = new_value
 		
 
 var is_jump_pressed: bool = false
@@ -35,12 +35,13 @@ var is_test_pressed: bool = false
 var is_test_just_pressed: bool = false
 
 func _input(event: InputEvent) -> void:
-	
 	# looking around
 	if event is InputEventMouseMotion:
 		look_vector = Vector2(event.relative.x, event.relative.y)
 	else:
 		look_vector = Vector2.ZERO
+	pass
+	
 
 func _unhandled_input(event: InputEvent) -> void:
 	
@@ -52,11 +53,8 @@ func _ready() -> void:
 	pass # Replace with function body.
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	# moving
-	move_direction = Input.get_vector("MoveLeft", "MoveRight", "MoveForward", "MoveBackwards")
-	
+func _physics_process(delta: float) -> void:
+	movement_direction = Input.get_vector("MoveLeft", "MoveRight", "MoveForward", "MoveBackwards")
 	
 	if Input.is_action_just_pressed("Jump"):
 		is_jump_pressed = true
@@ -82,15 +80,22 @@ func _process(_delta: float) -> void:
 		
 	if Input.is_action_pressed("Test"):
 		is_test_pressed = true
+		
+	else:
+		is_test_pressed = false
 
 	if Input.is_action_just_pressed("Test"):
 		is_test_just_pressed = true
 	else: 
 		is_test_just_pressed = false
 	
+	pass
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(_delta: float) -> void:
+	# moving
+	
 	look_vector = Vector2.ZERO
 	
 	pass
 	
-func _physics_process(_delta: float) -> void:
-	pass
