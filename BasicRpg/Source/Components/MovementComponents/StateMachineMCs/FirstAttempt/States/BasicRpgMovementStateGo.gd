@@ -19,10 +19,10 @@ func update(delta: float):
 
 func physics_update(delta: float):
 	
-	move(delta)
 	
 	happening_management()
 	input_management()
+	move(delta)
 	
 	pass
 
@@ -46,10 +46,32 @@ func move(delta: float):
 	# var velocity_local = body.velocity
 	
 	# here it can just use "move toward" directily on the velocity
-	body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, state_machine.MOVEMENT_ACCELERATION * delta)
-	body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, state_machine.MOVEMENT_ACCELERATION * delta)
-	# print("From Movement Component: velocity: " + str(body.velocity))
+	#body.velocity.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, state_machine.MOVEMENT_ACCELERATION * delta)
+	#body.velocity.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, state_machine.MOVEMENT_ACCELERATION * delta)
 	
+	
+	var movement_acceleration_local: float = clampf(state_machine.movement_acceleration * delta, 0.0, 1.0)
+	
+	body.velocity.x = lerp(body.velocity, direction_local * movement_speed_local, movement_acceleration_local).x
+	body.velocity.z = lerp(body.velocity, direction_local * movement_speed_local, movement_acceleration_local).z
+	
+	# Decelerate when direction local is pointing away from the actual direction
+	
+	var weight := direction_local.dot(body.velocity.normalized()) * 0.5 + 0.5
+	
+	print(weight)
+	
+	if body.velocity.length_squared() > 0.01:
+		
+		# This stops the character when turning.
+		var stopping_while_turning = lerp(Vector3.ZERO, body.velocity , weight)
+		
+		# This doesn't stop the character when turning.
+		var not_stopping_while_turning = lerp(direction_local * movement_speed_local, body.velocity , weight  )
+		
+		# Now we lerp between the two
+		body.velocity = lerp(stopping_while_turning, not_stopping_while_turning, 0.2)
+		
 
 func happening_management():
 	

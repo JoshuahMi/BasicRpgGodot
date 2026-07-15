@@ -50,7 +50,7 @@ func input_management():
 		pass
 		
 	if state_machine.movement_direction.length_squared() > 0.001:
-		transitioned.emit(BasicRpgMovementStateMachine.States.JUMP, BasicRpgMovementStateMachine.States.GO)
+		move()
 		
 func move():
 	
