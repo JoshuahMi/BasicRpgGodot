@@ -31,6 +31,10 @@ func physics_update(delta: float):
 ## value, that the player touches a wall, etc.
 func happening_management():
 	
+	if state_machine.has_just_left_ground:
+		
+		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.AIR)
+		
 	pass
 	
 func input_management():

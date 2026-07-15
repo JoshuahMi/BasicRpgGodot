@@ -5,6 +5,7 @@ class_name BasicRpgMovementStateMachine extends Node
 @export var body: CharacterBody3D = null
 @export var camera: Camera3D = null
 
+var jump_strength: float = 0.1
 var jump_charges: int = 2
 var dash_charges: int = 2
 
@@ -19,14 +20,31 @@ var look_direction: Vector2
 var has_just_moved: bool = false
 var has_just_stopped: bool = false
 
+var is_on_ground: bool = false:
+	set(new_value):
+		if new_value != is_on_ground:
+			if new_value == true:
+				has_just_landed = true
+			else:
+				has_just_left_ground = true
+			is_on_ground = new_value
+		else:
+			is_on_ground = new_value
+			has_just_landed = false
+			has_just_left_ground = false
+			
 var has_just_left_ground: bool = false
 var has_just_landed: bool = false
 
 var wants_to_jump: bool = false
 var wants_to_sprint: bool = false
 var wants_to_dash: bool = false
+var wants_to_crouch: bool = false
 
 var mouse_sensitivity: float = 1.0
+
+signal state_changed(new_state: States)
+
 
 #region STATES
 
@@ -139,9 +157,9 @@ func _ready() -> void:
 	states[States.DIVE].state_machine = self
 	states[States.DIVE].transitioned.connect(_on_state_transitioned)
 	
-	current_state = States.IDLE 
+	_determine_initial_state()
 	
-	states[States.IDLE].enter()
+	states[current_state].enter()
 	
 
 func _physics_process(delta: float) -> void:
@@ -149,6 +167,8 @@ func _physics_process(delta: float) -> void:
 	if states[current_state] == null:
 		return
 		
+		
+	happening_management()
 	states[current_state].physics_update(delta)
 	look()
 	body.move_and_slide()
@@ -162,6 +182,17 @@ func _process(delta: float) -> void:
 		
 	states[current_state].update(delta)
 	
+	
+	
+	pass
+	
+func happening_management():
+	
+	if body.is_on_floor():
+		is_on_ground = true
+	else:
+		is_on_ground = false
+	
 	pass
 	
 func _on_state_transitioned(From: States, To: States):
@@ -173,6 +204,8 @@ func _on_state_transitioned(From: States, To: States):
 	current_state = To
 	states[To].enter()
 	
+	state_changed.emit(current_state)
+	
 	pass
 	
 func look():
@@ -180,3 +213,12 @@ func look():
 	camera.rotation.x  = clampf(camera.rotation.x, -1.5, 1.5)
 	camera.rotation.y += (look_direction.x * -1.0 * mouse_sensitivity * 0.01)
 	pass
+	
+func _determine_initial_state():
+	
+	if body.is_on_floor():
+		current_state = States.IDLE
+	else:
+		current_state = States.AIR
+		
+	state_changed.emit(current_state)

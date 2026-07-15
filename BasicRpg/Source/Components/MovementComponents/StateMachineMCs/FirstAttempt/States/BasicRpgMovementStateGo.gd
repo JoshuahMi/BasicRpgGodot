@@ -21,6 +21,7 @@ func physics_update(delta: float):
 	
 	move(delta)
 	
+	happening_management()
 	input_management()
 	
 	pass
@@ -50,6 +51,15 @@ func move(delta: float):
 	# print("From Movement Component: velocity: " + str(body.velocity))
 	
 
+func happening_management():
+	
+	if state_machine.has_just_left_ground:
+		
+		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.AIR)
+		
+	
+	pass
+
 func input_management():
 	
 	
@@ -61,7 +71,6 @@ func input_management():
 		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.JUMP)
 		
 	if state_machine.movement_direction.length_squared() < 0.001:
-		print("Moved!")
 		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.IDLE)
 		
 	pass
