@@ -15,25 +15,41 @@ var is_normal_movement_possible: bool = true
 #endregion GENERAL
 
 
+#region GROUND MOVEMENT
+
+
+@export_category("Ground")
+
+@export var movement_speed: float = 10.0
+@export var sprint_multiplier: float =  1.8
+@export var movement_acceleration: float = 4.0
+@export var movement_deceleration_when_idle: float = 17.0
+
+#endregion GROUND MOVEMENT
+
 #region JUMP
 
-var jump_strength: float = 10.0
+@export_category("Jump")
+
+@export var jump_strength: float = 10.0
+@export var max_jump_charges: int = 1
 @export var jump_gravity_multiplier: float = 1.0
 @export var fall_gravity_multiplier: float = 1.625
 
-@export var max_jump_charges: int = 1
 
 var jump_charges: int = max_jump_charges
 
 
-@export var movement_strength_while_jumping: float = 0.1
-@export var movement_strength_while_air: float = 0.1
+@export var movement_strength_while_jumping: float = 0.7
+@export var movement_strength_while_air: float = 0.7
 
 @export var coyote_time: float = 0.3
 
 #endregion JUMP
 
 #region DASH
+
+@export_category("Dash")
 
 @export var max_dash_charges: int = 2
 var dash_charges: int = max_dash_charges
@@ -46,17 +62,6 @@ var dash_charges: int = max_dash_charges
 @export var ground_dash_length = 0.1
 
 #endregion DASH
-
-#region GROUND MOVEMENT
-
-
-var movement_speed: float = 10.0
-# const MOVEMENT_ACCELERATION = 1.0
-@export var movement_acceleration: float = 4.0
-@export var movement_deceleration_when_idle: float = 17.0
-var sprint_multiplier: float =  1.8
-
-#endregion GROUND MOVEMENT
 
 #region HAPPENINGS
 
