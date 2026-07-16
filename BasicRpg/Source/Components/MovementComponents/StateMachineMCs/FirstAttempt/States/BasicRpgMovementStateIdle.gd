@@ -66,12 +66,11 @@ func input_management():
 		transitioned.emit(BasicRpgMovementStateMachine.States.IDLE, BasicRpgMovementStateMachine.States.JUMP)
 		
 	if state_machine.movement_direction.length_squared() > 0.001:
-		print("Moved!")
 		transitioned.emit(BasicRpgMovementStateMachine.States.IDLE, BasicRpgMovementStateMachine.States.GO)
 		
 
 func verifications():
-	
+	state_machine.dash_charges = state_machine.max_dash_charges
 	state_machine.jump_charges = state_machine.max_jump_charges
 	
 	pass

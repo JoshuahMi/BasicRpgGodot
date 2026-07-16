@@ -30,6 +30,11 @@ func _physics_process(delta: float) -> void:
 	else:
 		movement_component.wants_to_sprint = false
 	
+	if input_component.is_dash_just_pressed:
+		movement_component.wants_to_dash = true
+	else:
+		movement_component.wants_to_dash = false
+	
 	movement_component.movement_direction = input_component.movement_direction
 	movement_component.look_direction = input_component.look_vector
 	

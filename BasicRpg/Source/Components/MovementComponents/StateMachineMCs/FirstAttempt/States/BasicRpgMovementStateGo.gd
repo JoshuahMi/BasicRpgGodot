@@ -108,6 +108,6 @@ func input_management():
 
 ## Meant for capsuling everything happening at entering the state
 func verifications():
-	
+	state_machine.dash_charges = state_machine.max_dash_charges
 	state_machine.jump_charges = state_machine.max_jump_charges
 	pass

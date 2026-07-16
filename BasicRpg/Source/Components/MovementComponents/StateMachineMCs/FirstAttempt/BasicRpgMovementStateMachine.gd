@@ -21,13 +21,13 @@ var jump_strength: float = 10.0
 @export var jump_gravity_multiplier: float = 1.0
 @export var fall_gravity_multiplier: float = 1.625
 
-@export var max_jump_charges: int = 2
+@export var max_jump_charges: int = 1
 
 var jump_charges: int = max_jump_charges
 
 
-var movement_strength_while_jumping: float = 0.4
-var movement_strength_while_air: float = 0.4
+@export var movement_strength_while_jumping: float = 0.5
+@export var movement_strength_while_air: float = 0.5
 
 @export var coyote_time: float = 0.3
 
@@ -38,6 +38,13 @@ var movement_strength_while_air: float = 0.4
 @export var max_dash_charges: int = 2
 var dash_charges: int = max_dash_charges
 
+@export var air_dash_speed = 250.0
+@export var air_dash_length = 0.1
+
+@export var can_dash_on_ground: bool = false
+@export var ground_dash_speed = 100.0
+@export var ground_dash_length = 0.1
+
 #endregion DASH
 
 #region GROUND MOVEMENT
@@ -45,7 +52,7 @@ var dash_charges: int = max_dash_charges
 
 var movement_speed: float = 10.0
 # const MOVEMENT_ACCELERATION = 1.0
-@export var movement_acceleration = 4.0
+@export var movement_acceleration: float = 4.0
 @export var movement_deceleration_when_idle: float = 17.0
 var sprint_multiplier: float =  1.8
 
@@ -83,7 +90,7 @@ var wants_to_sprint: bool = false
 var wants_to_dash: bool = false
 var wants_to_crouch: bool = false
 
-var mouse_sensitivity: float = 1.0
+var mouse_sensitivity: float = 0.5
 
 #endregion INPUT
 

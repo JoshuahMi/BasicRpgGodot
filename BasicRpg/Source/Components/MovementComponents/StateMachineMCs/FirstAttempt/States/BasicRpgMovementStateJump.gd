@@ -32,6 +32,8 @@ func physics_update(delta: float):
 	
 	apply_gravity(delta)
 	
+	move(delta)
+	
 	pass
 
 func apply_gravity(delta: float):
@@ -51,17 +53,47 @@ func happening_management():
 
 func input_management():
 	
-	if state_machine.wants_to_dash:
+	if state_machine.wants_to_dash and state_machine.dash_charges > 0:
 		transitioned.emit(BasicRpgMovementStateMachine.States.JUMP, BasicRpgMovementStateMachine.States.DASH)
 		
 	if state_machine.wants_to_jump:
 		pass
 		
-	if state_machine.movement_direction.length_squared() > 0.001:
-		move()
+	#if state_machine.movement_direction.length_squared() > 0.001:
+		#move(delta)
 		
-func move():
+func move(delta: float):
 	
+	if state_machine.movement_direction.length_squared() > 0.01:
 	
+		var movement_speed_local = state_machine.movement_speed
+		# make velocity local, to interpolate it afterwards to implement the movement strength in the air
+		var velocity_local = body.velocity
+				
+		var direction_local: Vector3 = Vector3(state_machine.movement_direction.x, 0.0, state_machine.movement_direction.y)
+		# first determine the rotation of the movement vector
+		# it shall point towards the direction the camera is facing
+		var y_rotation = camera.rotation.y
+		direction_local = direction_local.rotated(Vector3.UP, y_rotation)
+				
+		var velocity_original = body.velocity
+				
+		# then use "move toward" to move the player
+		
+		if state_machine.wants_to_sprint:
+			velocity_local.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local * state_machine.sprint_multiplier, state_machine.movement_acceleration * 1000.0 * delta * state_machine.movement_strength_while_jumping * 0.2)
+			velocity_local.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local * state_machine.sprint_multiplier, state_machine.movement_acceleration * 1000.0 * delta * state_machine.movement_strength_while_jumping * 0.2)
+		
+		else:
+			velocity_local.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, state_machine.movement_acceleration * 1000.0 * delta * state_machine.movement_strength_while_jumping * 0.2)
+			velocity_local.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, state_machine.movement_acceleration * 1000.0 * delta * state_machine.movement_strength_while_jumping * 0.2)
+		
+		# here it has to interpolate, because we're in the air
+		body.velocity = lerp(velocity_original, velocity_local, state_machine.movement_strength_while_jumping * 0.2)
+		# body.velocity = velocity_local
+	
+	else:
+		pass
+			
 	
 	pass

@@ -27,10 +27,10 @@ var movement_direction: Vector2 = Vector2.ZERO:
 
 var is_jump_pressed: bool = false
 var is_sprint_pressed: bool = false
-		
 var is_sprint_just_pressed: bool = false
-
 var is_sprint_just_released: bool = false
+
+var is_dash_just_pressed: bool = false
 
 ## if the player just went from staying still to moving, i.e. input from WASD just came from having no input at all
 var has_just_moved: bool = false
@@ -76,7 +76,10 @@ func _physics_process(delta: float) -> void:
 	
 	current_jump_window_time -= delta
 	
-	
+	if Input.is_action_just_pressed("Dash"):
+		is_dash_just_pressed = true
+	else:
+		is_dash_just_pressed = false
 	
 	if Input.is_action_pressed("Sprint"):
 		is_sprint_pressed = true
