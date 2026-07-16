@@ -7,8 +7,6 @@ func enter():
 	
 	verifications()
 	
-	print("From Movement State Idle: Idle state entered!")
-	
 	pass
 
 

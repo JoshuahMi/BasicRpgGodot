@@ -6,13 +6,13 @@ var current_coyote_time = -1.0
 var has_coyote_timer_run_out: bool = false
 
 func enter():
-	#print("From Movement State Air: State entered!")
+	
 	
 	has_coyote_timer_run_out = false
 	
 	if state_machine.history.get_state_before() == BasicRpgMovementStateMachine.States.GO or state_machine.history.get_state_before() == BasicRpgMovementStateMachine.States.IDLE:
 		current_coyote_time = state_machine.coyote_time
-		print("Coyote time: " + str(current_coyote_time))
+		
 	else:
 		current_coyote_time = -1.0
 		has_coyote_timer_run_out = true
@@ -51,7 +51,7 @@ func physics_update(delta: float):
 	
 func apply_gravity(delta: float):
 	
-	body.velocity += body.get_gravity() * delta
+	body.velocity += body.get_gravity() * delta * state_machine.fall_gravity_multiplier
 	
 	pass
 	

@@ -17,7 +17,9 @@ var is_normal_movement_possible: bool = true
 
 #region JUMP
 
-var jump_strength: float = 0.1
+var jump_strength: float = 10.0
+@export var jump_gravity_multiplier: float = 1.0
+@export var fall_gravity_multiplier: float = 1.625
 
 @export var max_jump_charges: int = 2
 

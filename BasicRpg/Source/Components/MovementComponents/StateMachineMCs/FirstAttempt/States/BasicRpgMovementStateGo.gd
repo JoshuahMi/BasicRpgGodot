@@ -8,7 +8,7 @@ func enter():
 	
 
 	
-	print("From Movement State Go: State entered!")
+	# print("From Movement State Go: State entered!")
 	
 	pass
 
@@ -68,7 +68,7 @@ func move(delta: float):
 	
 	var weight := direction_local.dot(body.velocity.normalized()) * 0.5 + 0.5
 	
-	print(weight)
+	# print(weight)
 	
 	if body.velocity.length_squared() > 0.01:
 		

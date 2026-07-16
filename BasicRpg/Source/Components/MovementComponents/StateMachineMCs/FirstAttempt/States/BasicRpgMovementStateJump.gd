@@ -7,9 +7,8 @@ func enter():
 	
 	body.velocity.y = 0.0
 	
-	body.velocity += Vector3.UP * state_machine.jump_strength * 100.0
+	body.velocity += Vector3.UP * state_machine.jump_strength
 	
-	print("From Movement State Jump: State Entered!")
 	pass
 
 
@@ -37,7 +36,7 @@ func physics_update(delta: float):
 
 func apply_gravity(delta: float):
 	
-	body.velocity.y += body.get_gravity().y * delta
+	body.velocity.y += body.get_gravity().y * delta * state_machine.jump_gravity_multiplier
 	
 	pass
 

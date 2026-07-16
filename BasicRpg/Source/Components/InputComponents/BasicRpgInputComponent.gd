@@ -5,7 +5,7 @@ class_name BasicRpgInputComponent extends Node
 ## How forgiving the jump button is, that is how long it will be active after pressing. Will be shown in the jump window bool
 @export var jump_window_time: float = 0.2
 
-var current_jump_window_time = 0.0
+var current_jump_window_time = -1.0
 
 var jump_window = false
 
@@ -45,8 +45,8 @@ func _input(event: InputEvent) -> void:
 	# looking around
 	if event is InputEventMouseMotion:
 		look_vector = Vector2(event.relative.x, event.relative.y)
-	else:
-		look_vector = Vector2.ZERO
+	#else:
+		#look_vector = Vector2.ZERO
 	pass
 	
 
