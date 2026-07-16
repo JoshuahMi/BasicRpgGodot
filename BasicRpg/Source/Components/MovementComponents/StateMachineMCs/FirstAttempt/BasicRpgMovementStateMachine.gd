@@ -37,7 +37,7 @@ const BASIC_RPG_JUMPING_MOVEMENT = preload("uid://dhy3gqot658rg")
 @export_category("Jump")
 
 @export var jump_strength: float = 10.0
-@export var max_jump_charges: int = 1
+@export var max_jump_charges: int = 2
 @export var jump_gravity_multiplier: float = 1.0
 @export var fall_gravity_multiplier: float = 1.625
 

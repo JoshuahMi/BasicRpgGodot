@@ -91,31 +91,6 @@ func input_management():
 func move(delta: float):
 	
 	if state_machine.movement_direction.length_squared() > 0.01:
-	
-		#var movement_speed_local = state_machine.movement_speed
-		## make velocity local, to interpolate it afterwards to implement the movement strength in the air
-		#var velocity_local = body.velocity
-				#
-		#var direction_local: Vector3 = Vector3(state_machine.movement_direction.x, 0.0, state_machine.movement_direction.y)
-		## first determine the rotation of the movement vector
-		## it shall point towards the direction the camera is facing
-		#var y_rotation = camera.rotation.y
-		#direction_local = direction_local.rotated(Vector3.UP, y_rotation)
-				#
-		#var velocity_original = body.velocity
-				#
-		#if state_machine.wants_to_sprint:
-			#
-			#velocity_local.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local * state_machine.sprint_multiplier, state_machine.movement_acceleration * 1000.0 * delta * state_machine.movement_strength_while_jumping * 0.2)
-			#velocity_local.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local * state_machine.sprint_multiplier, state_machine.movement_acceleration * 1000.0 * delta * state_machine.movement_strength_while_jumping * 0.2)
-		#
-		#else:
-			#velocity_local.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, state_machine.movement_acceleration * 1000.0 * delta * state_machine.movement_strength_while_jumping * 0.2)
-			#velocity_local.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, state_machine.movement_acceleration * 1000.0 * delta * state_machine.movement_strength_while_jumping * 0.2)
-		## here it has to interpolate, because we're in the air
-		#body.velocity = lerp(velocity_original, velocity_local, state_machine.movement_strength_while_air * 0.2)
-		## body.velocity = velocity_local
-			
 		modify_velocity(delta)
 	else:
 		pass
@@ -148,10 +123,12 @@ func modify_velocity(delta: float):
 			new_velocity = lerp(body.velocity, direction_local * movement_speed_local, delta)
 		
 		# This is the original output, applied on the body velocity.
+		# The velocity has been altered by the movement of the player, IF it is possible to navigate mid air
 		var altered_velocity : Vector3 = lerp(original_velocity_in_this_iteration, Vector3(new_velocity.x, original_velocity_in_this_iteration.y, new_velocity.z), state_machine.movement_strength_while_jumping * 10.0)
 		
-		# If the jump was from a running/walking motion:
-		if state_machine.history.get_state_before_the_last() == BasicRpgMovementStateMachine.States.GO:
+		# If the jump was from a running/walking motion, correct it in the sense that IF it is possible to navigate in the air, 
+		# the momentum shall not be broken because the player releases the W key.
+		if state_machine.history.get_state_before_the_last() == BasicRpgMovementStateMachine.States.GO and state_machine.history.get_state_before() == BasicRpgMovementStateMachine.States.JUMP:
 			
 			original_direction = original_direction.normalized()
 			
