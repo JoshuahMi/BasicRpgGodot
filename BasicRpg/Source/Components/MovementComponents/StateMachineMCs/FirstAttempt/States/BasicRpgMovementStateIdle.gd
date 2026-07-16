@@ -5,6 +5,8 @@ class_name BasicRpgMovementStateIdle extends BasicRpgMovementState
 
 func enter():
 	
+	verifications()
+	
 	print("From Movement State Idle: Idle state entered!")
 	
 	pass
@@ -12,7 +14,9 @@ func enter():
 
 func exit():
 	
-	print("From Movement State Idle: Idle state exited!")
+	# Adds this state to the history, so that the next state can look up
+	# where it came from.
+	state_machine.history.add_state(BasicRpgMovementStateMachine.States.IDLE)
 	
 	pass
 
@@ -68,6 +72,8 @@ func input_management():
 		transitioned.emit(BasicRpgMovementStateMachine.States.IDLE, BasicRpgMovementStateMachine.States.GO)
 		
 
+func verifications():
 	
+	state_machine.jump_charges = state_machine.max_jump_charges
 	
 	pass

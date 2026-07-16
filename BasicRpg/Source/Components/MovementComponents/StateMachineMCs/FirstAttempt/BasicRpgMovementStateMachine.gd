@@ -5,21 +5,51 @@ class_name BasicRpgMovementStateMachine extends Node
 @export var body: CharacterBody3D = null
 @export var camera: Camera3D = null
 
+
+
+#region GENERAL
+
+var is_normal_movement_possible: bool = true
+
+
+#endregion GENERAL
+
+
+#region JUMP
+
 var jump_strength: float = 0.1
-var jump_charges: int = 2
-var dash_charges: int = 2
+
+@export var max_jump_charges: int = 2
+
+var jump_charges: int = max_jump_charges
+
 
 var movement_strength_while_jumping: float = 0.4
 var movement_strength_while_air: float = 0.4
 
-var is_normal_movement_possible: bool = true
+@export var coyote_time: float = 0.3
+
+#endregion JUMP
+
+#region DASH
+
+@export var max_dash_charges: int = 2
+var dash_charges: int = max_dash_charges
+
+#endregion DASH
+
+#region GROUND MOVEMENT
+
 
 var movement_speed: float = 10.0
-const MOVEMENT_ACCELERATION = 1.0
+# const MOVEMENT_ACCELERATION = 1.0
 @export var movement_acceleration = 4.0
 @export var movement_deceleration_when_idle: float = 17.0
 var sprint_multiplier: float =  1.8
-var look_direction: Vector2
+
+#endregion GROUND MOVEMENT
+
+#region HAPPENINGS
 
 var has_just_moved: bool = false
 var has_just_stopped: bool = false
@@ -40,8 +70,11 @@ var is_on_ground: bool = false:
 var has_just_left_ground: bool = false
 var has_just_landed: bool = false
 
+#endregion HAPPENINGS
+
 #region INPUT
 
+var look_direction: Vector2
 var movement_direction: Vector2
 var wants_to_jump: bool = false
 var wants_to_sprint: bool = false
@@ -58,6 +91,8 @@ signal state_changed(new_state: States)
 #region STATES
 
 enum States {
+	
+	NULL,	## For special cases, e.g. when the state history has to return a value, but no state was added to the history yet
 	
 	IDLE,
 	GO,
@@ -80,6 +115,8 @@ var states: Dictionary = {}
 
 var current_state: States
 
+var history: BasicRpgMovementStateHistory = BasicRpgMovementStateHistory.new()
+
 #endregion STATES
 
 
@@ -93,6 +130,8 @@ func _ready() -> void:
 		return 
 	
 	await body.ready
+	
+	# Initializing the states
 	
 	states[States.IDLE] = BasicRpgMovementStateIdle.new()
 	states[States.IDLE].body = body

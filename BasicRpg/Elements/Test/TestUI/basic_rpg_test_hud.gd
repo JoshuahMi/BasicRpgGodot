@@ -2,6 +2,8 @@
 
 extends Control
 
+var state_machine: BasicRpgMovementStateMachine
+var input_component: BasicRpgInputComponent
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -10,48 +12,139 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	
+	update_last_state_label(state_machine.history.get_state_before())
+	update_state_label(state_machine.current_state)
+	update_movement_speed_label(state_machine.body.velocity.length())
+	update_jump_charges_label(state_machine.jump_charges)
+	
+	update_wants_to_jump_label(input_component.jump_window)
+	
 	pass
+
+func update_wants_to_jump_label(in_value: bool):
+	%WantsToJumpLabel.text = str(in_value)
+	pass
+
+func update_jump_charges_label(in_value: int):
+	
+	%JumpChargesLabel.text = str(in_value)
+	
+
+func update_movement_speed_label(in_value: float):
+	
+	in_value = roundf(in_value)
+	
+	
+	%MovementSpeedLabel.text = str(in_value)
+
+func update_last_state_label(state: BasicRpgMovementStateMachine.States):
+	
+	match state:
+		
+		BasicRpgMovementStateMachine.States.NULL:
+			
+			%LastMovementStateLabel.text = "NULL"
+		
+		BasicRpgMovementStateMachine.States.IDLE:
+			
+			%LastMovementStateLabel.text = "Idle"
+			
+		BasicRpgMovementStateMachine.States.GO:
+			
+			%LastMovementStateLabel.text = "Go"
+
+		BasicRpgMovementStateMachine.States.DASH:
+			
+			%LastMovementStateLabel.text = "Dash"
+
+		BasicRpgMovementStateMachine.States.JUMP:
+			
+			%LastMovementStateLabel.text = "Jump"
+
+		BasicRpgMovementStateMachine.States.WALL:
+			
+			%LastMovementStateLabel.text = "Wall"
+
+		BasicRpgMovementStateMachine.States.AIR:
+			
+			%LastMovementStateLabel.text = "Air"
+			
+		BasicRpgMovementStateMachine.States.KNOCKBACK:
+			%LastMovementStateLabel.text = "Knockback"
+			
+		BasicRpgMovementStateMachine.States.SLIDE:
+			%LastMovementStateLabel.text = "Slide"
+
+		BasicRpgMovementStateMachine.States.CLIMB:
+			
+			%LastMovementStateLabel.text = "Climb"
+
+		BasicRpgMovementStateMachine.States.LEDGE_GRAB:
+			
+			%LastMovementStateLabel.text = "Ledge Grab"
+			
+		BasicRpgMovementStateMachine.States.SWIM:
+			
+			%LastMovementStateLabel.text = "Swim"
+		
+		BasicRpgMovementStateMachine.States.DIVE:
+			
+			%LastMovementStateLabel.text = "Dive"
 
 func update_state_label(state: BasicRpgMovementStateMachine.States):
 	
 	match state:
+		
+		BasicRpgMovementStateMachine.States.NULL:
+			
+			%CurrentMovementStateLabel.text = "NULL"
+		
 		BasicRpgMovementStateMachine.States.IDLE:
 			
-			%MovementStateLabel.text = "Idle"
+			%CurrentMovementStateLabel.text = "Idle"
 			
 		BasicRpgMovementStateMachine.States.GO:
 			
-			%MovementStateLabel.text = "Go"
+			%CurrentMovementStateLabel.text = "Go"
 
 		BasicRpgMovementStateMachine.States.DASH:
 			
-			%MovementStateLabel.text = "Dash"
+			%CurrentMovementStateLabel.text = "Dash"
 
 		BasicRpgMovementStateMachine.States.JUMP:
 			
-			%MovementStateLabel.text = "Jump"
+			%CurrentMovementStateLabel.text = "Jump"
 
 		BasicRpgMovementStateMachine.States.WALL:
 			
-			%MovementStateLabel.text = "Wall"
+			%CurrentMovementStateLabel.text = "Wall"
 
 		BasicRpgMovementStateMachine.States.AIR:
 			
-			%MovementStateLabel.text = "Air"
+			%CurrentMovementStateLabel.text = "Air"
 			
 		BasicRpgMovementStateMachine.States.KNOCKBACK:
-			%MovementStateLabel.text = "Knockback"
+			%CurrentMovementStateLabel.text = "Knockback"
 			
 		BasicRpgMovementStateMachine.States.SLIDE:
-			%MovementStateLabel.text = "Slide"
+			%CurrentMovementStateLabel.text = "Slide"
 
 		BasicRpgMovementStateMachine.States.CLIMB:
 			
-			%MovementStateLabel.text = "Climb"
+			%CurrentMovementStateLabel.text = "Climb"
 
 		BasicRpgMovementStateMachine.States.LEDGE_GRAB:
 			
-			%MovementStateLabel.text = "Ledge Grab"
+			%CurrentMovementStateLabel.text = "Ledge Grab"
+			
+		BasicRpgMovementStateMachine.States.SWIM:
+			
+			%CurrentMovementStateLabel.text = "Swim"
+		
+		BasicRpgMovementStateMachine.States.DIVE:
+			
+			%CurrentMovementStateLabel.text = "Dive"
 
 	
 	

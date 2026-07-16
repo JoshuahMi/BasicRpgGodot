@@ -4,12 +4,21 @@ class_name BasicRpgMovementStateGo extends BasicRpgMovementState
 
 func enter():
 	
+	verifications()
+	
+
+	
 	print("From Movement State Go: State entered!")
 	
 	pass
 
 
 func exit():
+	
+	# Adds this state to the history, so that the next state can look up
+	# where it came from.
+	state_machine.history.add_state(BasicRpgMovementStateMachine.States.GO)
+	
 	pass
 
 
@@ -40,7 +49,7 @@ func move(delta: float):
 	
 	var movement_direction_local = Vector3(state_machine.movement_direction.x, 0.0, state_machine.movement_direction.y)
 	
-	var direction_local = movement_direction_local.rotated(Vector3.UP, y_rotation)
+	var direction_local := movement_direction_local.rotated(Vector3.UP, y_rotation)
 	
 	# make velocity local, to interpolate it afterwards to implement the movement strength in the air
 	# var velocity_local = body.velocity
@@ -75,8 +84,8 @@ func move(delta: float):
 
 func happening_management():
 	
+	# If the player falls off a cliff
 	if state_machine.has_just_left_ground:
-		
 		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.AIR)
 		
 	
@@ -95,4 +104,10 @@ func input_management():
 	if state_machine.movement_direction.length_squared() < 0.001:
 		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.IDLE)
 		
+	pass
+
+## Meant for capsuling everything happening at entering the state
+func verifications():
+	
+	state_machine.jump_charges = state_machine.max_jump_charges
 	pass

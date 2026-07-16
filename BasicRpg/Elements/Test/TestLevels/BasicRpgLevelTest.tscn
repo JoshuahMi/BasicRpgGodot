@@ -227,4 +227,4 @@ height = 23.59668
 sides = 21
 
 [node name="BasicRpgTestPlayer0" parent="." unique_id=1449081686 instance=ExtResource("2_xi4co")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.917953, 11.543007, -53.760284)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.917953, 3.622035, -142.54405)

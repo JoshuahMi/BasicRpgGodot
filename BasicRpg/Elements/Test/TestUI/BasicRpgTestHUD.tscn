@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://codcwba6yut45" path="res://BasicRpg/Elements/Test/TestUI/basic_rpg_test_hud.gd" id="1_8pmew"]
 [ext_resource type="FontFile" uid="uid://brwieex32i6vy" path="res://BasicRpg/Graphics/Fonts/Altenglisch.ttf" id="2_5d5wd"]
-[ext_resource type="FontFile" uid="uid://boj4amee1a6rv" path="res://BasicRpg/Graphics/Fonts/Catwalzhari-ywL2Y.ttf" id="2_vrrrs"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_reusg"]
 
@@ -52,18 +51,60 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("2_5d5wd")
 text = "Current State: "
 
+[node name="Label4" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer" unique_id=1506508379]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Last State: "
+
 [node name="Label2" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer" unique_id=2057803635]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_5d5wd")
 text = "Movement Speed: "
 
+[node name="Label3" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer" unique_id=98217386]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Jump Charges:"
+
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer2/HBoxContainer" unique_id=644324027]
 layout_mode = 2
 size_flags_horizontal = 0
 
-[node name="MovementStateLabel" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer2" unique_id=1140895331]
+[node name="CurrentMovementStateLabel" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer2" unique_id=1140895331]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 1
-theme_override_fonts/font = ExtResource("2_vrrrs")
+theme_override_fonts/font = ExtResource("2_5d5wd")
 text = "Bla!"
+
+[node name="LastMovementStateLabel" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer2" unique_id=809297219]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Bla!"
+
+[node name="MovementSpeedLabel" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer2" unique_id=1205628404]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Bla!"
+
+[node name="JumpChargesLabel" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer2" unique_id=441261145]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Bla!"
+
+[node name="MarginContainer3" type="MarginContainer" parent="PanelContainer" unique_id=656981404]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+
+[node name="WantsToJumpLabel" type="Label" parent="PanelContainer/MarginContainer3" unique_id=321022278]
+unique_name_in_owner = true
+layout_mode = 2

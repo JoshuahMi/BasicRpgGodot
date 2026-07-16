@@ -7,7 +7,9 @@ func enter():
 
 
 func exit():
-	pass
+	# Adds this state to the history, so that the next state can look up
+	# where it came from.
+	state_machine.history.add_state(BasicRpgMovementStateMachine.States.SLIDE)
 
 
 func update(delta: float):

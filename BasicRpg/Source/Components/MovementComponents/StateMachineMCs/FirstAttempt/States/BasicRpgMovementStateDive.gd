@@ -7,6 +7,11 @@ func enter():
 
 
 func exit():
+	
+	# Adds this state to the history, so that the next state can look up
+	# where it came from.
+	state_machine.history.add_state(BasicRpgMovementStateMachine.States.DIVE)
+	
 	pass
 
 

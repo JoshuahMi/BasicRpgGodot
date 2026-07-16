@@ -2,6 +2,13 @@
 
 class_name BasicRpgInputComponent extends Node
 
+## How forgiving the jump button is, that is how long it will be active after pressing. Will be shown in the jump window bool
+@export var jump_window_time: float = 0.2
+
+var current_jump_window_time = 0.0
+
+var jump_window = false
+
 var look_vector: Vector2 = Vector2.ZERO
 var movement_direction: Vector2 = Vector2.ZERO:
 	set(new_value):
@@ -58,8 +65,18 @@ func _physics_process(delta: float) -> void:
 	
 	if Input.is_action_just_pressed("Jump"):
 		is_jump_pressed = true
+		current_jump_window_time = jump_window_time
 	else:
 		is_jump_pressed = false
+	
+	if current_jump_window_time > 0.0:
+		jump_window = true
+	else:
+		jump_window = false
+	
+	current_jump_window_time -= delta
+	
+	
 	
 	if Input.is_action_pressed("Sprint"):
 		is_sprint_pressed = true

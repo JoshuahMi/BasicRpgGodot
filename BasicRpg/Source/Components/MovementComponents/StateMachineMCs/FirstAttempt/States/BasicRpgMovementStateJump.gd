@@ -3,6 +3,10 @@
 class_name BasicRpgMovementStateJump extends BasicRpgMovementState
 func enter():
 	
+	state_machine.jump_charges -= 1
+	
+	body.velocity.y = 0.0
+	
 	body.velocity += Vector3.UP * state_machine.jump_strength * 100.0
 	
 	print("From Movement State Jump: State Entered!")
@@ -10,6 +14,11 @@ func enter():
 
 
 func exit():
+	
+	# Adds this state to the history, so that the next state can look up
+	# where it came from.
+	state_machine.history.add_state(BasicRpgMovementStateMachine.States.JUMP)
+	
 	pass
 
 
