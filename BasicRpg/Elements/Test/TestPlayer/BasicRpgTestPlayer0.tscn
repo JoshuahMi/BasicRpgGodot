@@ -23,6 +23,8 @@ metadata/_custom_type_script = "uid://ca00nlx430g4c"
 script = ExtResource("2_m7d8f")
 body = NodePath("..")
 camera = NodePath("../Camera3D")
+movement_strength_while_jumping = 1.0
+movement_strength_while_air = 1.0
 air_dash_length = 0.07
 metadata/_custom_type_script = "uid://c1gs4wtogha26"
 

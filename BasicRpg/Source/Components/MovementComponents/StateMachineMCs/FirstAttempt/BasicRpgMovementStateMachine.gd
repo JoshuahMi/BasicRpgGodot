@@ -18,6 +18,7 @@ var is_normal_movement_possible: bool = true
 #region GROUND MOVEMENT
 
 
+
 @export_category("Ground")
 
 @export var movement_speed: float = 10.0
@@ -30,6 +31,8 @@ var is_normal_movement_possible: bool = true
 #endregion GROUND MOVEMENT
 
 #region JUMP
+
+const BASIC_RPG_JUMPING_MOVEMENT = preload("uid://dhy3gqot658rg")
 
 @export_category("Jump")
 

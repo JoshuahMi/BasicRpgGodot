@@ -5,8 +5,15 @@ class_name BasicRpgMovementStateAir extends BasicRpgMovementState
 var current_coyote_time = -1.0
 var has_coyote_timer_run_out: bool = false
 
+var original_velocity_from_enter_state: Vector3
+var original_direction: Vector3
+var original_speed: float
+
 func enter():
 	
+	original_velocity_from_enter_state = body.velocity
+	original_direction = Vector3(body.velocity.x, 0.0, body.velocity.z).normalized()
+	original_speed = Vector3(body.velocity.x, 0.0, body.velocity.z).length()
 	
 	has_coyote_timer_run_out = false
 	
@@ -119,31 +126,44 @@ func modify_velocity(delta: float):
 	if state_machine.movement_direction.length_squared() > 0.01:
 	
 		var movement_speed_local = state_machine.movement_speed
-		# make velocity local, to interpolate it afterwards to implement the movement strength in the air
-		var velocity_local = body.velocity
+		
+		var new_velocity = body.velocity
+		var original_velocity_in_this_iteration = body.velocity
 				
 		var direction_local: Vector3 = Vector3(state_machine.movement_direction.x, 0.0, state_machine.movement_direction.y)
 		# first determine the rotation of the movement vector
 		# it shall point towards the direction the camera is facing
 		var y_rotation = camera.rotation.y
 		direction_local = direction_local.rotated(Vector3.UP, y_rotation)
-				
-		var velocity_original = body.velocity
+		
+		
+		
 				
 		if state_machine.wants_to_sprint:
 			
-			velocity_local = lerp(body.velocity, direction_local * movement_speed_local * state_machine.sprint_multiplier, delta)
-			
-			#velocity_local.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local * state_machine.sprint_multiplier, state_machine.movement_acceleration * 1000.0 * delta * state_machine.movement_strength_while_jumping * 0.2)
-			#velocity_local.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local * state_machine.sprint_multiplier, state_machine.movement_acceleration * 1000.0 * delta * state_machine.movement_strength_while_jumping * 0.2)
+			new_velocity = lerp(body.velocity, direction_local * movement_speed_local * state_machine.sprint_multiplier, delta)
 		
 		else:
 			
-			velocity_local = lerp(body.velocity, direction_local * movement_speed_local, delta)
+			new_velocity = lerp(body.velocity, direction_local * movement_speed_local, delta)
+		
+		# This is the original output, applied on the body velocity.
+		var altered_velocity : Vector3 = lerp(original_velocity_in_this_iteration, Vector3(new_velocity.x, original_velocity_in_this_iteration.y, new_velocity.z), state_machine.movement_strength_while_jumping * 10.0)
+		
+		# If the jump was from a running/walking motion:
+		if state_machine.history.history[1] == BasicRpgMovementStateMachine.States.GO:
 			
-			#velocity_local.x = move_toward(body.velocity.x, direction_local.x * movement_speed_local, state_machine.movement_acceleration * 1000.0 * delta * state_machine.movement_strength_while_jumping * 0.2)
-			#velocity_local.z = move_toward(body.velocity.z, direction_local.z * movement_speed_local, state_machine.movement_acceleration * 1000.0 * delta * state_machine.movement_strength_while_jumping * 0.2)
-		# here it has to interpolate, because we're in the air
-		body.velocity = lerp(velocity_original, Vector3(velocity_local.x, velocity_original.y, velocity_local.z), state_machine.movement_strength_while_air * 10.0)
-		# body.velocity = velocity_local
+			original_direction = original_direction.normalized()
+			
+			var correction: float = state_machine.BASIC_RPG_JUMPING_MOVEMENT.sample(original_direction.dot(Vector3(direction_local.x, 0.0, direction_local.z).normalized()) * 0.5 + 0.5)
+			
+			var corrected_velocity: Vector3 = lerp(altered_velocity, Vector3(original_velocity_from_enter_state.x, original_velocity_in_this_iteration.y, original_velocity_from_enter_state.z),  correction)
+			
+			
+			
+			body.velocity = corrected_velocity
+		
+		else:
+			body.velocity = altered_velocity
+
 	pass
