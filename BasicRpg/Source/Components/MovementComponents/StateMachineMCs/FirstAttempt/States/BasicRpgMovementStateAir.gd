@@ -151,7 +151,7 @@ func modify_velocity(delta: float):
 		var altered_velocity : Vector3 = lerp(original_velocity_in_this_iteration, Vector3(new_velocity.x, original_velocity_in_this_iteration.y, new_velocity.z), state_machine.movement_strength_while_jumping * 10.0)
 		
 		# If the jump was from a running/walking motion:
-		if state_machine.history.history[1] == BasicRpgMovementStateMachine.States.GO:
+		if state_machine.history.get_state_before_the_last() == BasicRpgMovementStateMachine.States.GO:
 			
 			original_direction = original_direction.normalized()
 			
