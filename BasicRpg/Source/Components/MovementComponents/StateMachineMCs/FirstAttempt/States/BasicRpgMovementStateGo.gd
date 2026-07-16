@@ -79,7 +79,7 @@ func move(delta: float):
 		var not_stopping_while_turning = lerp(direction_local * movement_speed_local, body.velocity , weight  )
 		
 		# Now we lerp between the two
-		body.velocity = lerp(stopping_while_turning, not_stopping_while_turning, 0.2)
+		body.velocity = lerp(stopping_while_turning, not_stopping_while_turning, 0.5)
 		
 
 func happening_management():

@@ -59,7 +59,12 @@ text = "Last State: "
 [node name="Label2" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer" unique_id=2057803635]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_5d5wd")
-text = "Movement Speed: "
+text = "Movement Speed XZ: "
+
+[node name="Label5" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer" unique_id=1861009604]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Movement Speed Y: "
 
 [node name="Label3" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer" unique_id=98217386]
 layout_mode = 2
@@ -91,6 +96,13 @@ size_flags_vertical = 1
 theme_override_fonts/font = ExtResource("2_5d5wd")
 text = "Bla!"
 
+[node name="MovementSpeedLabel2" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer2" unique_id=971322658]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Bla!"
+
 [node name="JumpChargesLabel" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer2" unique_id=441261145]
 unique_name_in_owner = true
 layout_mode = 2
@@ -108,3 +120,5 @@ theme_override_constants/margin_right = 40
 [node name="WantsToJumpLabel" type="Label" parent="PanelContainer/MarginContainer3" unique_id=321022278]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Bla"

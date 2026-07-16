@@ -26,8 +26,8 @@ var jump_strength: float = 10.0
 var jump_charges: int = max_jump_charges
 
 
-@export var movement_strength_while_jumping: float = 0.5
-@export var movement_strength_while_air: float = 0.5
+@export var movement_strength_while_jumping: float = 0.1
+@export var movement_strength_while_air: float = 0.1
 
 @export var coyote_time: float = 0.3
 

@@ -15,7 +15,10 @@ func _process(delta: float) -> void:
 	
 	update_last_state_label(state_machine.history.get_state_before())
 	update_state_label(state_machine.current_state)
-	update_movement_speed_label(state_machine.body.velocity.length())
+	update_movement_speed_label(   Vector3(state_machine.body.velocity.x, 0.0, state_machine.body.velocity.z).length())
+	update_y_speed_label(state_machine.body.velocity.y)
+	
+	
 	update_jump_charges_label(state_machine.jump_charges)
 	
 	update_wants_to_jump_label(input_component.jump_window)
@@ -37,6 +40,11 @@ func update_movement_speed_label(in_value: float):
 	
 	
 	%MovementSpeedLabel.text = str(in_value)
+	
+func update_y_speed_label(in_value: float):
+	in_value = roundf(in_value)
+	%MovementSpeedLabel2.text = str(in_value)
+	pass
 
 func update_last_state_label(state: BasicRpgMovementStateMachine.States):
 	
