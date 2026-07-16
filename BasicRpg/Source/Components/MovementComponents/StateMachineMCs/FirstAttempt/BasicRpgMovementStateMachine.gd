@@ -25,6 +25,8 @@ var is_normal_movement_possible: bool = true
 @export var movement_acceleration: float = 4.0
 @export var movement_deceleration_when_idle: float = 17.0
 
+@export var stopping_when_turning_strength: float = 0.5
+
 #endregion GROUND MOVEMENT
 
 #region JUMP
