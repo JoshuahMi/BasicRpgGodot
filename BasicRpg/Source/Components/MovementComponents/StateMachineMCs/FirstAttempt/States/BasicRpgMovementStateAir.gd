@@ -11,6 +11,8 @@ var original_speed: float
 
 func enter():
 	
+	
+	
 	original_velocity_from_enter_state = body.velocity
 	original_direction = Vector3(body.velocity.x, 0.0, body.velocity.z).normalized()
 	original_speed = Vector3(body.velocity.x, 0.0, body.velocity.z).length()
@@ -128,15 +130,16 @@ func modify_velocity(delta: float):
 		
 		# If the jump was from a running/walking motion, correct it in the sense that IF it is possible to navigate in the air, 
 		# the momentum shall not be broken because the player releases the W key.
-		if state_machine.history.get_state_before_the_last() == BasicRpgMovementStateMachine.States.GO and state_machine.history.get_state_before() == BasicRpgMovementStateMachine.States.JUMP:
+		if state_machine.has_moved_while_jumping == false and state_machine.is_jump_from_moving == true and ((not state_machine.history.get_state_before() == BasicRpgMovementStateMachine.States.GO) and (not state_machine.history.get_state_before() == BasicRpgMovementStateMachine.States.GO)):
 			
 			original_direction = original_direction.normalized()
 			
 			var correction: float = state_machine.BASIC_RPG_JUMPING_MOVEMENT.sample(original_direction.dot(Vector3(direction_local.x, 0.0, direction_local.z).normalized()) * 0.5 + 0.5)
 			
-			var corrected_velocity: Vector3 = lerp(altered_velocity, Vector3(original_velocity_from_enter_state.x, original_velocity_in_this_iteration.y, original_velocity_from_enter_state.z),  correction)
+			var corrected_velocity: Vector3 = lerp(altered_velocity, Vector3(state_machine.jump_momentum.x, original_velocity_in_this_iteration.y, state_machine.jump_momentum.z),  correction)
 			
-			
+			if correction < 0.8:
+				state_machine.has_moved_while_jumping = true
 			
 			body.velocity = corrected_velocity
 		

@@ -99,6 +99,7 @@ func input_management():
 		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.DASH)
 		
 	if state_machine.wants_to_jump:
+		state_machine.is_jump_from_moving = true
 		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.JUMP)
 		
 	if state_machine.movement_direction.length_squared() < 0.001:
@@ -108,6 +109,8 @@ func input_management():
 
 ## Meant for capsuling everything happening at entering the state
 func verifications():
+	state_machine.is_jump_from_moving = false
+	state_machine.has_moved_while_jumping = false
 	state_machine.dash_charges = state_machine.max_dash_charges
 	state_machine.jump_charges = state_machine.max_jump_charges
 	pass

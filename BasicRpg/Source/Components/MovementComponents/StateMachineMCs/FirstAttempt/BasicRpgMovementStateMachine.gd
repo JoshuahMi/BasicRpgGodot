@@ -42,6 +42,19 @@ const BASIC_RPG_JUMPING_MOVEMENT = preload("uid://dhy3gqot658rg")
 @export var fall_gravity_multiplier: float = 1.625
 
 
+## The saved jump momentum. Not used when jumping from idle state.
+## see *is jump from moving* bool
+var jump_momentum: Vector3
+
+## If the currently performed jump was from a movement. 
+## Used in the move function of the jump and air state to determine if the jump
+## momentum should be kept.
+var is_jump_from_moving: bool = false
+
+
+## If the player has moved significantly away from the momentum while jumping.
+var has_moved_while_jumping: bool = false
+
 var jump_charges: int = max_jump_charges
 
 

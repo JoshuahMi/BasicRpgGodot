@@ -17,8 +17,9 @@ func _process(delta: float) -> void:
 	update_state_label(state_machine.current_state)
 	update_movement_speed_label(   Vector3(state_machine.body.velocity.x, 0.0, state_machine.body.velocity.z).length())
 	update_y_speed_label(state_machine.body.velocity.y)
-	
-	
+	%JumpMomentumLabel.text = str(state_machine.jump_momentum)
+	%JumpedFromRunningLabel.text = str(state_machine.is_jump_from_moving)
+	%MovedWhileJumpingLabel.text = str(state_machine.has_moved_while_jumping)
 	update_jump_charges_label(state_machine.jump_charges)
 	
 	update_wants_to_jump_label(input_component.jump_window)
