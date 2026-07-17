@@ -11,8 +11,6 @@ var original_speed: float
 
 func enter():
 	
-	
-	
 	original_velocity_from_enter_state = body.velocity
 	original_direction = Vector3(body.velocity.x, 0.0, body.velocity.z).normalized()
 	original_speed = Vector3(body.velocity.x, 0.0, body.velocity.z).length()
@@ -113,9 +111,6 @@ func modify_velocity(delta: float):
 		var y_rotation = camera.rotation.y
 		direction_local = direction_local.rotated(Vector3.UP, y_rotation)
 		
-		
-		
-				
 		if state_machine.wants_to_sprint:
 			
 			new_velocity = lerp(body.velocity, direction_local * movement_speed_local * state_machine.sprint_multiplier, delta)
@@ -138,7 +133,8 @@ func modify_velocity(delta: float):
 			
 			var corrected_velocity: Vector3 = lerp(altered_velocity, Vector3(state_machine.jump_momentum.x, original_velocity_in_this_iteration.y, state_machine.jump_momentum.z),  correction)
 			
-			if correction < 0.8:
+			# The momentum is broken when the player significantly moves mid air
+			if correction < 0.5:
 				state_machine.has_moved_while_jumping = true
 			
 			body.velocity = corrected_velocity

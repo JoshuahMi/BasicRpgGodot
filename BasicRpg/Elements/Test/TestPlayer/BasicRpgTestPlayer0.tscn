@@ -23,7 +23,12 @@ metadata/_custom_type_script = "uid://ca00nlx430g4c"
 script = ExtResource("2_m7d8f")
 body = NodePath("..")
 camera = NodePath("../Camera3D")
+movement_acceleration = 8.0
+movement_strength_while_jumping = 1.0
+movement_strength_while_air = 1.0
 air_dash_length = 0.07
+can_dash_on_ground = true
+ground_dash_speed = 75.0
 metadata/_custom_type_script = "uid://c1gs4wtogha26"
 
 [node name="BasicRpgTestHud" parent="." unique_id=1337185482 instance=ExtResource("3_yaa8f")]

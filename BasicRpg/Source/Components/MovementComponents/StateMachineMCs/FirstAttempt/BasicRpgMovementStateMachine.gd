@@ -73,13 +73,39 @@ var jump_charges: int = max_jump_charges
 var dash_charges: int = max_dash_charges
 
 @export var air_dash_speed = 250.0
+## How long the duration of the air dash is in seconds
 @export var air_dash_length = 0.1
 
+## If the player can dash on the ground. Is meant to be slower than the air dash.
+## Is dependant on a cooldown.
 @export var can_dash_on_ground: bool = false
+
+## Is meant to tell if the player can dash on the ground, so if the cooldown has run out to be able to dash again, not if he is able to dash at all.
+var can_dash: bool = true
+
+## The ground dash cooldown in seconds. After dashing, the player has to wait for the cooldown to run out to be able to dash again.
+@export var ground_dash_cooldown: float = 4.0
+var ground_dash_cooldown_status = ground_dash_cooldown
+
+
 @export var ground_dash_speed = 100.0
+
+## How long the duration of the ground dash is in seconds
 @export var ground_dash_length = 0.1
 
 #endregion DASH
+
+#region WALL RUN
+
+@export_category("Wall Run")
+@export var is_wall_run_possible: bool = true
+
+@export var wall_gravity_multiplier: float = 0.1
+
+var wall_run_momentum: Vector3
+
+
+#endregion WALL RUN
 
 #region HAPPENINGS
 
@@ -243,6 +269,12 @@ func _ready() -> void:
 	
 
 func _physics_process(delta: float) -> void:
+	
+	if can_dash == false:
+		ground_dash_cooldown_status -= delta
+		if ground_dash_cooldown_status < 0.0:
+			can_dash = true
+			ground_dash_cooldown_status = ground_dash_cooldown
 	
 	if states[current_state] == null:
 		return

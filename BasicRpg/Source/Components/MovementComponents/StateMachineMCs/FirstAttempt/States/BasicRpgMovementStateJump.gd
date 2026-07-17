@@ -61,6 +61,9 @@ func happening_management():
 	if body.velocity.y < 0.0:
 		transitioned.emit(BasicRpgMovementStateMachine.States.JUMP, BasicRpgMovementStateMachine.States.AIR)
 	
+	if body.is_on_wall_only() and state_machine.is_jump_from_moving:
+		transitioned.emit(BasicRpgMovementStateMachine.States.JUMP, BasicRpgMovementStateMachine.States.WALL)
+	
 	pass
 
 func input_management():
@@ -121,7 +124,8 @@ func modify_velocity(delta: float):
 			
 			var correction: float = state_machine.BASIC_RPG_JUMPING_MOVEMENT.sample(original_direction.dot(Vector3(direction_local.x, 0.0, direction_local.z).normalized()) * 0.5 + 0.5)
 			
-			if correction < 0.8:
+			# The momentum is broken when the player significantly moves mid air
+			if correction < 0.5:
 				state_machine.has_moved_while_jumping = true
 			
 			var corrected_velocity: Vector3 = lerp(altered_velocity, Vector3(state_machine.jump_momentum.x, original_velocity_in_this_iteration.y, state_machine.jump_momentum.z),  correction)

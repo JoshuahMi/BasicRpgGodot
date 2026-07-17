@@ -66,11 +66,6 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("2_5d5wd")
 text = "Movement Speed Y: "
 
-[node name="Label3" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer" unique_id=98217386]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_5d5wd")
-text = "Jump Charges:"
-
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer2/HBoxContainer" unique_id=644324027]
 layout_mode = 2
 size_flags_horizontal = 0
@@ -97,13 +92,6 @@ theme_override_fonts/font = ExtResource("2_5d5wd")
 text = "Bla!"
 
 [node name="MovementSpeedLabel2" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer2" unique_id=971322658]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_vertical = 1
-theme_override_fonts/font = ExtResource("2_5d5wd")
-text = "Bla!"
-
-[node name="JumpChargesLabel" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer2" unique_id=441261145]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 1
@@ -143,6 +131,26 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("2_5d5wd")
 text = "Has moved while jumping: "
 
+[node name="Label5" type="Label" parent="PanelContainer/MarginContainer3/HBoxContainer/VBoxContainer" unique_id=98217386]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Jump Charges:"
+
+[node name="Label6" type="Label" parent="PanelContainer/MarginContainer3/HBoxContainer/VBoxContainer" unique_id=374564829]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Dash Charges:"
+
+[node name="Label7" type="Label" parent="PanelContainer/MarginContainer3/HBoxContainer/VBoxContainer" unique_id=201308294]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Can Dash:"
+
+[node name="Label8" type="Label" parent="PanelContainer/MarginContainer3/HBoxContainer/VBoxContainer" unique_id=500523201]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Dash Cooldown:"
+
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer3/HBoxContainer" unique_id=1908380828]
 layout_mode = 2
 
@@ -169,3 +177,31 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_5d5wd")
 text = "Bla"
+
+[node name="JumpChargesLabel" type="Label" parent="PanelContainer/MarginContainer3/HBoxContainer/VBoxContainer2" unique_id=441261145]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Bla!"
+
+[node name="DashChargesLabel" type="Label" parent="PanelContainer/MarginContainer3/HBoxContainer/VBoxContainer2" unique_id=573970421]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Bla!"
+
+[node name="CanDashLabel" type="Label" parent="PanelContainer/MarginContainer3/HBoxContainer/VBoxContainer2" unique_id=1034910205]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Bla!"
+
+[node name="DashCooldownLabel" type="Label" parent="PanelContainer/MarginContainer3/HBoxContainer/VBoxContainer2" unique_id=1983317501]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Bla!"

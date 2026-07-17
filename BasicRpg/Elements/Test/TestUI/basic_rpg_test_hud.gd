@@ -21,7 +21,9 @@ func _process(delta: float) -> void:
 	%JumpedFromRunningLabel.text = str(state_machine.is_jump_from_moving)
 	%MovedWhileJumpingLabel.text = str(state_machine.has_moved_while_jumping)
 	update_jump_charges_label(state_machine.jump_charges)
-	
+	%DashChargesLabel.text = str(state_machine.dash_charges)
+	%CanDashLabel.text = str(state_machine.can_dash)
+	%DashCooldownLabel.text = str(roundf(state_machine.ground_dash_cooldown_status))
 	update_wants_to_jump_label(input_component.jump_window)
 	
 	pass

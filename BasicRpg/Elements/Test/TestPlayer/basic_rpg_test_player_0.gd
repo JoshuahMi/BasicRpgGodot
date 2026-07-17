@@ -3,7 +3,6 @@ extends CharacterBody3D
 @onready var movement_component: BasicRpgMovementStateMachine = $BasicRpgMovementStateMachine
 @onready var hud: Control = $BasicRpgTestHud
 
-
 func _ready() -> void:
 	
 	hud.state_machine = movement_component
