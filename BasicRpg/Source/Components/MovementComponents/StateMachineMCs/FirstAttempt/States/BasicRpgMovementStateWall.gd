@@ -1,37 +1,47 @@
 # Copyright 2026 Joshuah Skyseed, all rights reserved  
 
+
 class_name BasicRpgMovementStateWall extends BasicRpgMovementState
+
+
+
 func enter():
 	
-	# if it's the same wall you came from, transition to the state before
+	# if it's the same wall you came from, transition
 	
 	var collision: KinematicCollision3D = body.get_last_slide_collision()
 	if collision != null:
-		collision.get_position()
-		if state_machine.wall_normal == collision.get_normal():
+		#print (collision.get_instance_id())
+		
+		#print (state_machine.wall_run_last_collider_id)
+		
+		if state_machine.wall_normal == collision.get_normal() and state_machine.wall_run_last_collider == collision.get_collider_shape() and state_machine.has_wall_run_before:
+			collision.get_instance_id()
 			
-			# Transition to the state before
-			transitioned.emit(BasicRpgMovementStateMachine.States.WALL, state_machine.history.get_state_before())
-			pass
-		
-		
-		
+			#print("From Movement State Wall: This is the same Wall you came from!")
+			
+			transition()
+			return
+			
+		state_machine.wall_run_last_collider = collision.get_collider_shape()
 	else:
-		if state_machine.wall_normal == body.get_wall_normal():
-			transitioned.emit(BasicRpgMovementStateMachine.States.WALL, state_machine.history.get_state_before())
-			pass
+		if state_machine.wall_normal == body.get_wall_normal() and state_machine.has_wall_run_before:
+			
+			transition()
+			return
 		
 	
 	
 	
+	
+	state_machine.has_wall_run_before = true
 	state_machine.jump_charges += 1
-	
+		
 	body.velocity.y *= 0.2
-	
+		
 	state_machine.wall_run_momentum = body.velocity
 	
-	pass
-
+	
 
 func exit():
 	# Adds this state to the history, so that the next state can look up
@@ -109,3 +119,23 @@ func happening_management():
 	elif body.is_on_floor():
 		transitioned.emit(BasicRpgMovementStateMachine.States.WALL, BasicRpgMovementStateMachine.States.IDLE)
 	pass
+
+func transition():
+	
+	if body.is_on_floor():
+				
+		if state_machine.movement_direction.length_squared() > 0.01:
+				
+			transitioned.emit(BasicRpgMovementStateMachine.States.WALL, BasicRpgMovementStateMachine.States.GO)
+				
+		else:
+					
+			transitioned.emit(BasicRpgMovementStateMachine.States.WALL, BasicRpgMovementStateMachine.States.IDLE)
+
+				
+	else:
+		transitioned.emit(BasicRpgMovementStateMachine.States.WALL, BasicRpgMovementStateMachine.States.AIR)
+	
+	
+	
+	

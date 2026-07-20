@@ -106,6 +106,9 @@ var wall_run_momentum: Vector3
 @export var wall_jump_strength: float = 10.0
 var wall_normal: Vector3 = Vector3.ZERO
 
+var wall_run_last_collider: Object
+var has_wall_run_before = false
+
 #endregion WALL RUN
 
 #region HAPPENINGS
