@@ -7,25 +7,22 @@ class_name BasicRpgMovementStateWall extends BasicRpgMovementState
 
 func enter():
 	
-	# if it's the same wall you came from, transition
 	
+	
+	# if it's the same wall you came from, transition
+	state_machine.current_wall_run_cheese_cooldown = state_machine.wall_run_cheese_cooldown
 	var collision: KinematicCollision3D = body.get_last_slide_collision()
 	if collision != null:
-		#print (collision.get_instance_id())
 		
-		#print (state_machine.wall_run_last_collider_id)
 		
-		if state_machine.wall_normal == collision.get_normal() and state_machine.wall_run_last_collider == collision.get_collider_shape() and state_machine.has_wall_run_before:
-			collision.get_instance_id()
-			
-			#print("From Movement State Wall: This is the same Wall you came from!")
+		if state_machine.current_wall_run_cheese_cooldown > 0.0 and state_machine.wall_normal == collision.get_normal() and state_machine.wall_run_last_collider == collision.get_collider_shape() and state_machine.has_wall_run_before:
 			
 			transition()
 			return
 			
 		state_machine.wall_run_last_collider = collision.get_collider_shape()
 	else:
-		if state_machine.wall_normal == body.get_wall_normal() and state_machine.has_wall_run_before:
+		if state_machine.current_wall_run_cheese_cooldown > 0.0 and state_machine.wall_normal == body.get_wall_normal() and state_machine.has_wall_run_before:
 			
 			transition()
 			return
@@ -35,7 +32,9 @@ func enter():
 	
 	
 	state_machine.has_wall_run_before = true
-	state_machine.jump_charges += 1
+	
+	if state_machine.jump_charges < 1:
+		state_machine.jump_charges = 1
 		
 	body.velocity.y *= 0.2
 		

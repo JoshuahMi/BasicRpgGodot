@@ -102,11 +102,23 @@ var ground_dash_cooldown_status = ground_dash_cooldown
 
 @export var wall_gravity_multiplier: float = 0.1
 
+## Currently useless. Maybe delete this variable in the future.
 var wall_run_momentum: Vector3
+
 @export var wall_jump_strength: float = 10.0
+
+## Stored for the sticking on the wall, the anti cheesing feature, and the wall jump itself, that the jump "ejects" the player from the wall
 var wall_normal: Vector3 = Vector3.ZERO
 
+## For checking if the player is currently cheesing a wall, by spamming the jump key, 
+## continuously "wall running" the same wall to get higher.
+## This variable gets emptied every *wall run cheese cooldown* seconds,
+## so that wall running on the same wall gets possible again.
 var wall_run_last_collider: Object
+
+var wall_run_cheese_cooldown: float = 0.3
+var current_wall_run_cheese_cooldown: float = -1.0
+
 var has_wall_run_before = false
 
 #endregion WALL RUN
@@ -273,6 +285,8 @@ func _ready() -> void:
 	
 
 func _physics_process(delta: float) -> void:
+	
+	current_wall_run_cheese_cooldown -= delta
 	
 	if can_dash == false:
 		ground_dash_cooldown_status -= delta
