@@ -85,7 +85,7 @@ func move(delta: float):
 func happening_management():
 	
 	# If the player falls off a cliff
-	if state_machine.has_just_left_ground:
+	if not state_machine.is_on_ground:
 		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.AIR)
 		
 	
@@ -109,6 +109,10 @@ func input_management():
 
 ## Meant for capsuling everything happening at entering the state
 func verifications():
+	
+	# Set the wall normal to zero, so the wall run is possible on the wall that was ran on before (see enter function in Wall state)
+	state_machine.wall_normal = Vector3.ZERO
+	
 	state_machine.is_jump_from_moving = false
 	state_machine.has_moved_while_jumping = false
 	state_machine.dash_charges = state_machine.max_dash_charges

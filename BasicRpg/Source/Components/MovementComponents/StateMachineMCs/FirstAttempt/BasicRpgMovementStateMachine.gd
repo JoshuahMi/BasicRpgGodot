@@ -84,7 +84,7 @@ var dash_charges: int = max_dash_charges
 var can_dash: bool = true
 
 ## The ground dash cooldown in seconds. After dashing, the player has to wait for the cooldown to run out to be able to dash again.
-@export var ground_dash_cooldown: float = 4.0
+@export var ground_dash_cooldown: float = 0.4
 var ground_dash_cooldown_status = ground_dash_cooldown
 
 
@@ -103,7 +103,8 @@ var ground_dash_cooldown_status = ground_dash_cooldown
 @export var wall_gravity_multiplier: float = 0.1
 
 var wall_run_momentum: Vector3
-
+@export var wall_jump_strength: float = 10.0
+var wall_normal: Vector3 = Vector3.ZERO
 
 #endregion WALL RUN
 

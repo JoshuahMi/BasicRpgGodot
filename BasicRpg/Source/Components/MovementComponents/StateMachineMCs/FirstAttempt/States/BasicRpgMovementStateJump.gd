@@ -19,6 +19,12 @@ func enter():
 	
 	body.velocity.y = 0.0
 	
+	
+	# If from wall (history), then add wall normal to the velocity.
+	
+	if state_machine.history.get_state_before() == BasicRpgMovementStateMachine.States.WALL:
+		body.velocity += state_machine.wall_normal * state_machine.wall_jump_strength
+	
 	body.velocity += Vector3.UP * state_machine.jump_strength
 	
 	pass

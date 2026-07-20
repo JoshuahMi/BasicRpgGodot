@@ -3,7 +3,30 @@
 class_name BasicRpgMovementStateWall extends BasicRpgMovementState
 func enter():
 	
-	body.velocity.y *= 0.3
+	# if it's the same wall you came from, transition to the state before
+	
+	var collision: KinematicCollision3D = body.get_last_slide_collision()
+	if collision != null:
+		collision.get_position()
+		if state_machine.wall_normal == collision.get_normal():
+			
+			# Transition to the state before
+			transitioned.emit(BasicRpgMovementStateMachine.States.WALL, state_machine.history.get_state_before())
+			pass
+		
+		
+		
+	else:
+		if state_machine.wall_normal == body.get_wall_normal():
+			transitioned.emit(BasicRpgMovementStateMachine.States.WALL, state_machine.history.get_state_before())
+			pass
+		
+	
+	
+	
+	state_machine.jump_charges += 1
+	
+	body.velocity.y *= 0.2
 	
 	state_machine.wall_run_momentum = body.velocity
 	
@@ -37,8 +60,14 @@ func stick(delta: float):
 	var collision: KinematicCollision3D = body.get_last_slide_collision()
 	if collision != null:
 		collision.get_position()
+		
+		state_machine.wall_normal = collision.get_normal()
+		
 		wall_normal = collision.get_normal()
 	else:
+		
+		state_machine.wall_normal = body.get_wall_normal()
+		
 		wall_normal = body.get_wall_normal()
 	
 	var stick_strength = 5.0
@@ -64,7 +93,7 @@ func apply_gravity(delta: float):
 	
 func input_management():
 	
-	if state_machine.wants_to_jump:
+	if state_machine.wants_to_jump and state_machine.jump_charges > 0:
 		transitioned.emit(BasicRpgMovementStateMachine.States.WALL, BasicRpgMovementStateMachine.States.JUMP)
 	
 	pass

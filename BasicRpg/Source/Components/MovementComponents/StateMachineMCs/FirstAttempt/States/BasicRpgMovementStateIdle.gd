@@ -71,6 +71,10 @@ func input_management():
 		
 
 func verifications():
+	
+	# Set the wall normal to zero, so the wall run is possible on the wall that was ran on before (see enter function in Wall state)
+	state_machine.wall_normal = Vector3.ZERO
+	
 	state_machine.is_jump_from_moving = false
 	state_machine.has_moved_while_jumping = false
 	state_machine.dash_charges = state_machine.max_dash_charges
