@@ -9,6 +9,8 @@ var original_velocity_from_enter_state: Vector3
 var original_direction: Vector3
 var original_speed: float
 
+const WALL_RUNNING_TOLERANCE: float = 0.11
+
 func enter():
 	
 	original_velocity_from_enter_state = body.velocity
@@ -71,7 +73,7 @@ func happening_management():
 	elif state_machine.is_on_ground and state_machine.movement_direction.length_squared() < 0.01:
 		transitioned.emit(BasicRpgMovementStateMachine.States.AIR, BasicRpgMovementStateMachine.States.IDLE)
 
-	if body.is_on_wall_only() and Vector2(body.velocity.x, body.velocity.z).length_squared() * 0.01 > absf(body.velocity.y) :
+	if body.is_on_wall_only() and Vector2(body.velocity.x, body.velocity.z).length_squared() * WALL_RUNNING_TOLERANCE > absf(body.velocity.y) :
 		transitioned.emit(BasicRpgMovementStateMachine.States.AIR, BasicRpgMovementStateMachine.States.WALL)
 
 

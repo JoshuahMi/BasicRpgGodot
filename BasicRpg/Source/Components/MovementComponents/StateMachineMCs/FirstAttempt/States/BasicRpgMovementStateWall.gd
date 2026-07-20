@@ -3,11 +3,15 @@
 
 class_name BasicRpgMovementStateWall extends BasicRpgMovementState
 
-
+const ANTI_CHEESING_POSITION_LENGTH: float = 20.0
 
 func enter():
 	
 	
+	
+	if state_machine.is_wall_run_possible == false:
+		transition()
+		return
 	
 	# if it's the same wall you came from, transition
 	state_machine.current_wall_run_cheese_cooldown = state_machine.wall_run_cheese_cooldown
@@ -15,20 +19,22 @@ func enter():
 	if collision != null:
 		
 		
-		if state_machine.current_wall_run_cheese_cooldown > 0.0 and state_machine.wall_normal == collision.get_normal() and state_machine.wall_run_last_collider == collision.get_collider_shape() and state_machine.has_wall_run_before:
+		#if state_machine.current_wall_run_cheese_cooldown > 0.0 and state_machine.wall_normal == collision.get_normal() and state_machine.wall_run_last_collider == collision.get_collider_shape() and state_machine.has_wall_run_before:
+		if (Vector3(collision.get_position().x, 0.0, collision.get_position().z) - state_machine.wall_touch_position).length_squared() < ANTI_CHEESING_POSITION_LENGTH and state_machine.has_wall_run_before:
+
+			#print("From Movement State Wall: Was on the same Wall!")
 			
 			transition()
 			return
 			
-		state_machine.wall_run_last_collider = collision.get_collider_shape()
 	else:
 		if state_machine.current_wall_run_cheese_cooldown > 0.0 and state_machine.wall_normal == body.get_wall_normal() and state_machine.has_wall_run_before:
-			
+			#print("From Movement State Wall: Was on the same Wall!")
 			transition()
 			return
 		
 	
-	
+	state_machine.wall_touch_position = Vector3(body.position.x, 0.0, body.position.z)
 	
 	
 	state_machine.has_wall_run_before = true
@@ -38,7 +44,7 @@ func enter():
 		
 	body.velocity.y *= 0.2
 		
-	state_machine.wall_run_momentum = body.velocity
+	#state_machine.wall_run_momentum = body.velocity
 	
 	
 

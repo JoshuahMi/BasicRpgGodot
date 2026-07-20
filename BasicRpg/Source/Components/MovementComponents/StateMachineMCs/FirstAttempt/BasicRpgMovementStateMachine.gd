@@ -105,7 +105,11 @@ var ground_dash_cooldown_status = ground_dash_cooldown
 ## Currently useless. Maybe delete this variable in the future.
 var wall_run_momentum: Vector3
 
-@export var wall_jump_strength: float = 10.0
+## How strong the wall jump repels from the wall
+@export var wall_jump_strength_xz: float = 10.0
+
+## How much of height you gain by jumping from a wall
+@export var wall_jump_strength_y: float = 7.0
 
 ## Stored for the sticking on the wall, the anti cheesing feature, and the wall jump itself, that the jump "ejects" the player from the wall
 var wall_normal: Vector3 = Vector3.ZERO
@@ -116,7 +120,9 @@ var wall_normal: Vector3 = Vector3.ZERO
 ## so that wall running on the same wall gets possible again.
 var wall_run_last_collider: Object
 
-var wall_run_cheese_cooldown: float = 0.3
+var wall_touch_position: Vector3 = Vector3.ZERO
+
+var wall_run_cheese_cooldown: float = 0.1
 var current_wall_run_cheese_cooldown: float = -1.0
 
 var has_wall_run_before = false
