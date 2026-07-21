@@ -151,6 +151,11 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("2_5d5wd")
 text = "Dash Cooldown:"
 
+[node name="Label9" type="Label" parent="PanelContainer/MarginContainer3/HBoxContainer/VBoxContainer" unique_id=1244486024]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "---------------------------"
+
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer3/HBoxContainer" unique_id=1908380828]
 layout_mode = 2
 
@@ -205,3 +210,9 @@ layout_mode = 2
 size_flags_vertical = 1
 theme_override_fonts/font = ExtResource("2_5d5wd")
 text = "Bla!"
+
+[node name="----" type="Label" parent="PanelContainer/MarginContainer3/HBoxContainer/VBoxContainer2" unique_id=1776609326]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "-----"

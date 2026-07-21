@@ -122,8 +122,8 @@ var wall_run_last_collider: Object
 
 var wall_touch_position: Vector3 = Vector3.ZERO
 
-var wall_run_cheese_cooldown: float = 0.1
-var current_wall_run_cheese_cooldown: float = -1.0
+#var wall_run_cheese_cooldown: float = 0.05
+#var current_wall_run_cheese_cooldown: float = -1.0
 
 var has_wall_run_before = false
 
@@ -292,7 +292,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	
-	current_wall_run_cheese_cooldown -= delta
+	#current_wall_run_cheese_cooldown -= delta
 	
 	if can_dash == false:
 		ground_dash_cooldown_status -= delta

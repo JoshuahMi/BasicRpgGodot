@@ -25,6 +25,7 @@ func _process(delta: float) -> void:
 	%CanDashLabel.text = str(state_machine.can_dash)
 	%DashCooldownLabel.text = str(roundf(state_machine.ground_dash_cooldown_status))
 	update_wants_to_jump_label(input_component.jump_window)
+	# %WRCheeseCooldownLabel.text = str(state_machine.current_wall_run_cheese_cooldown)
 	
 	pass
 
