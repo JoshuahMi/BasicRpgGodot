@@ -11,10 +11,11 @@
 script = ExtResource("1_m7d8f")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1983449347]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_reusg")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=319836801]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 
 [node name="BasicRpgInputComponent" type="Node" parent="." unique_id=1880762339]
 script = ExtResource("1_3rdj6")
@@ -22,6 +23,8 @@ metadata/_custom_type_script = "uid://ca00nlx430g4c"
 
 [node name="BasicRpgMovementStateMachine" type="Node" parent="." unique_id=2076033625 node_paths=PackedStringArray("body", "camera")]
 script = ExtResource("2_m7d8f")
+body = NodePath("..")
+camera = NodePath("../Camera3D")
 movement_speed = null
 sprint_multiplier = null
 movement_acceleration = 8.0
@@ -45,8 +48,6 @@ is_wall_run_possible = null
 wall_gravity_multiplier = 0.3
 wall_jump_strength_xz = null
 wall_jump_strength_y = null
-body = NodePath("..")
-camera = NodePath("../Camera3D")
 metadata/_custom_type_script = "uid://c1gs4wtogha26"
 
 [node name="BasicRpgTestHud" parent="." unique_id=1337185482 instance=ExtResource("3_yaa8f")]
