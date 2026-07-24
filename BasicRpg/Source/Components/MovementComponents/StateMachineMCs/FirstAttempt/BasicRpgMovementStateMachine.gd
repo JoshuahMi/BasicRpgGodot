@@ -183,6 +183,8 @@ enum States {
 	KNOCKBACK,
 	SLIDE,
 	
+	CROUCH,
+	
 	CLIMB,
 	LEDGE_GRAB,
 	
@@ -260,6 +262,12 @@ func _ready() -> void:
 	states[States.SLIDE].camera = camera
 	states[States.SLIDE].state_machine = self
 	states[States.SLIDE].transitioned.connect(_on_state_transitioned)
+	
+	states[States.CROUCH] = BasicRpgMovementStateCrouch.new()
+	states[States.CROUCH].body = body
+	states[States.CROUCH].camera = camera
+	states[States.CROUCH].state_machine = self
+	states[States.CROUCH].transitioned.connect(_on_state_transitioned)
 	
 	states[States.CLIMB] = BasicRpgMovementStateClimb.new()
 	states[States.CLIMB].body = body
