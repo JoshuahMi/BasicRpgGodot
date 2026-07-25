@@ -1,10 +1,19 @@
-extends Node3D
+class_name BasicRpgGrapplingHookEdgeDetector extends Node3D
 
-@onready var debug_mesh: MeshInstance3D = $DebugMesh
+## A helper class for detecting valid points for the grappling hook to hang on to.
 
-@export var camera: Camera3D
+# TODO: Keeping the last known valid edge point AND validating it in the sense of checking if something is between the player and the point.
+# TODO: Add more debug functionality
 
-@export var debug_box: bool = true
+
+@onready var debug_mesh: MeshInstance3D
+@onready var debug_mesh_0: MeshInstance3D
+
+@onready var debug_meshes_star: Array[MeshInstance3D]
+
+@export var camera: Node3D
+
+@export var debug: bool = true
 @export var platform_detection_distance: float = 100.0
 
 ## Used to determine how big the radius shall be to detect ledges on a wall
@@ -17,12 +26,29 @@ var edge_point: Vector3 = Vector3.ZERO
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	
+	
+	if debug:
+		debug_initialize_debug_shapes()
+	
+	
 	pass # Replace with function body.
 
 func _physics_process(delta: float) -> void:
 	# first, detect the platform
 	#detect_platform()
-	detect_ledge()
+	var result: Dictionary = detect_ledge()
+	
+	if result.is_empty():
+		debug_hide_all()
+		return
+		
+	if validate_evaluated_point(result):
+		
+		set_ledge_position(result["position"])
+		
+		pass
+	
 	pass
 
 
@@ -32,8 +58,8 @@ func _process(delta: float) -> void:
 	
 	
 
-## TODO: The more sophisticated version of the detection function
-func detect_ledge():
+## The more sophisticated version of the detection function
+func detect_ledge() -> Dictionary:
 	
 	# first, get the wall collision position. 
 	# if the normals absolute y value is above a certain value, the ledge position isn't valid.
@@ -44,7 +70,12 @@ func detect_ledge():
 	# use the normal of the wall to float above the wall and cast rays left and right, as well as up and down.
 	
 	if cast_0.is_empty():
-		return
+		return {}
+	
+	
+	if debug:
+		debug_place_sphere(cast_0["position"])
+	
 	
 	var ledge_around_point: Dictionary = cast_star(cast_0["position"], cast_0["normal"], star_cast_distance)
 	
@@ -71,14 +102,15 @@ func detect_ledge():
 	
 	#region DEBUG
 	
-	if not result.is_empty():
-		debug_place_box(result["position"])
-	else:
-		pass
-		#debug_hide_box()
+	#if not result.is_empty():
+		#debug_place_box(result["position"])
+	#else:
+		#pass
+		##debug_hide_box()
 	
 	#endregion DEBUG
 
+	return result
 
 ## Detects a platform edge in a very basic way. 
 func detect_platform():
@@ -92,7 +124,7 @@ func detect_platform():
 	var edge = get_ledge_from_collision_point(cast_0["position"], 10.0)
 	
 	if edge.is_empty():
-		debug_hide_box()
+		debug_hide_all()
 		return
 	else:
 		set_ledge_position(edge["position"])
@@ -131,6 +163,19 @@ func detect_platform_simple():
 	
 #region HELPER FUNCTIONS
 
+func compare_float(float0: float, float1: float, epsilon: float) -> bool:
+	return abs(float0 - float1) < epsilon
+
+## Used after detecting a point that is supposedly a valid edge to hang a grappling hook on.
+## Works by checking the normal y value.
+func validate_evaluated_point(result: Dictionary) -> bool:
+	
+	if result.is_empty():
+		return false
+	
+	return compare_float(result["normal"].y, 0.0, 0.1)
+
+
 func set_ledge_position(pos: Vector3):
 	
 	debug_place_box(pos)
@@ -168,7 +213,7 @@ func cast_ray(start: Vector3, target: Vector3, shall_hit_from_inside: bool) -> D
 	result = space_state.intersect_ray(query)
 	
 	return result
-
+	
 
 func cast_forward() -> Dictionary:
 	
@@ -233,6 +278,14 @@ func cast_star(start: Vector3, normal: Vector3, radius: float) -> Dictionary:
 	
 	var results: Array[Dictionary] = [up_result, down_result, right_result, left_result, right_up_result, right_down_result, left_up_result, left_down_result]
 	
+	#region DEBUG
+	if debug == true:
+		debug_place_star_spheres(results)
+	else:
+		debug_hide_all()
+	#endregion DEBUG
+	
+	
 	var nearest_result = up_result
 	
 	for result in results:
@@ -265,9 +318,13 @@ func get_ledge_from_star_cast(star_cast_hit_result: Dictionary, distance: float)
 		#if it points upward
 		if star_cast_hit_result["normal"].y > 0.0:
 			
-			edge = cast_ray(star_cast_hit_result["position"], star_cast_hit_result["position"] + star_cast_hit_result["normal"] * 10.0, true)
 			
+			# simply shoot from the normal vector to the point where the star collided
+			# Why not from the player?
+			# edge = cast_ray( star_cast_hit_result["position"] + star_cast_hit_result["normal"] * 10.0, star_cast_hit_result["position"], true)
 			
+			# okay, I'm gonna try from the player
+			edge = cast_ray_from_player_xz(star_cast_hit_result["position"].y, star_cast_hit_result["position"], false)
 			
 			return edge
 		
@@ -276,13 +333,12 @@ func get_ledge_from_star_cast(star_cast_hit_result: Dictionary, distance: float)
 			
 			
 			# first, get the height of the ledge
-			# BUG: In this line is the problem.
 			var roof := cast_ray(star_cast_hit_result["position"] + Vector3(0.0, 0.01, 0.0), star_cast_hit_result["position"] + Vector3.UP * 10.0, false)
 			
 			if roof.is_empty():
 				
 				roof = cast_ray(star_cast_hit_result["position"] + Vector3(0.0, 10.0, 0.0), star_cast_hit_result["position"] + Vector3.DOWN * 10.0, false)
-				
+				#print(roof["position"])
 			else:
 				
 				roof = cast_ray(roof["position"], roof["position"] + Vector3.DOWN, false)
@@ -303,15 +359,15 @@ func get_ledge_from_star_cast(star_cast_hit_result: Dictionary, distance: float)
 			return edge
 			
 		## The normal points to the side if the y value is 0.0
+	## BUG - here lies the problem. When the normal points to the side, no valid point can be found.
 	elif abs(star_cast_hit_result["normal"].y) < 0.1:
 		
-		edge = cast_ray(star_cast_hit_result["position"], star_cast_hit_result["position"] + Vector3.UP * 10.0, true)
-
+		edge = cast_ray(star_cast_hit_result["position"] + star_cast_hit_result["normal"] * -0.01, star_cast_hit_result["position"] + star_cast_hit_result["normal"] * -0.01 + Vector3.UP * 10.0, true)
+		return edge
+		
 	else:
 		return {}
 	
-	
-	return {}
 
 
 ## Most basic function that will return the ledge that is within the y tolerance above the given point. 
@@ -325,15 +381,33 @@ func get_ledge_from_collision_point(collision_point: Vector3, y_tolerance: float
 	var platform_edge := cast_ray(Vector3(global_position.x, platform_roof["position"].y, global_position.z ), platform_roof["position"], false)
 	
 	return platform_edge
+
+
+
+
+
+#endregion HELPER FUNCTIONS
+
+#region DEBUG FUNCTIONS
+
+## Will place the debug spheres where the star cast hit something.
+func debug_place_star_spheres(results: Array[Dictionary]):
 	
-
-
-
-
+	for index in range(0, 8):
+		
+		if results[index].is_empty():
+			debug_meshes_star[index].visible = false
+			continue
+		else:
+			debug_meshes_star[index].global_position = results[index]["position"]
+			debug_meshes_star[index].visible = true
+	
+	
+	pass
 
 func debug_place_box(target: Vector3):
 	
-	if debug_box:
+	if debug:
 	
 		debug_mesh.visible = true
 		
@@ -342,8 +416,55 @@ func debug_place_box(target: Vector3):
 	debug_mesh.global_position = target
 	pass
 	
-func debug_hide_box():
+func debug_hide_all():
 	debug_mesh.visible = false
+	debug_mesh_0.visible = false
+	
+	for mesh in debug_meshes_star:
+		mesh.visible = false
 
 
-#endregion HELPER FUNCTIONS
+
+
+func debug_place_sphere(target: Vector3):
+	
+	if debug_mesh_0 != null:
+		
+		debug_mesh_0.global_position = target
+		debug_mesh_0.visible = true
+		
+	
+	
+	
+	pass
+
+func debug_initialize_shape(colour: Color) -> MeshInstance3D:
+	
+	var mesh_instance = MeshInstance3D.new()
+	
+	var debug_sphere_0 := SphereMesh.new()
+	
+	var debug_material := StandardMaterial3D.new()
+	debug_material.albedo_color = colour
+	
+	mesh_instance.mesh = debug_sphere_0
+	mesh_instance.material_override = debug_material
+	
+	add_child(mesh_instance)
+	
+	mesh_instance.scale = Vector3(0.1, 0.1, 0.1)
+	
+	return mesh_instance
+
+func debug_initialize_debug_shapes():
+	
+	debug_mesh = debug_initialize_shape(Color.RED)
+	debug_mesh_0 = debug_initialize_shape(Color.BLUE)
+	
+	var star_color = Color.CHARTREUSE
+	
+	debug_meshes_star = [debug_initialize_shape(star_color), debug_initialize_shape(star_color), debug_initialize_shape(star_color), debug_initialize_shape(star_color), debug_initialize_shape(star_color), debug_initialize_shape(star_color), debug_initialize_shape(star_color), debug_initialize_shape(star_color)]
+	
+
+
+#endregion DEBUG FUNCTIONS
