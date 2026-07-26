@@ -72,7 +72,7 @@ var jump_charges: int = max_jump_charges
 @export var max_dash_charges: int = 2
 var dash_charges: int = max_dash_charges
 
-@export var air_dash_speed = 250.0
+@export var air_dash_speed : float = 250.0
 ## How long the duration of the air dash is in seconds
 @export var air_dash_length = 0.1
 
@@ -88,10 +88,10 @@ var can_dash: bool = true
 var ground_dash_cooldown_status = ground_dash_cooldown
 
 
-@export var ground_dash_speed = 100.0
+@export var ground_dash_speed : float = 100.0
 
 ## How long the duration of the ground dash is in seconds
-@export var ground_dash_length = 0.1
+@export var ground_dash_length : float = 0.1
 
 #endregion DASH
 

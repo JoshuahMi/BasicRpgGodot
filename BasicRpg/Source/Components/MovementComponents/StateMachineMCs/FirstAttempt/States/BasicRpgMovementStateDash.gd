@@ -17,8 +17,8 @@ func enter():
 	state_machine.can_dash = false
 	
 	if state_machine.is_on_ground:
-	
-		current_dash_time = state_machine.ground_dash_length
+		
+		current_dash_time = state_machine.ground_dash_length 
 		
 	else:
 		current_dash_time = state_machine.air_dash_length
@@ -45,7 +45,9 @@ func physics_update(delta: float):
 		body.velocity = dash_direction * state_machine.ground_dash_speed
 	
 	else:
-		body.velocity = dash_direction * state_machine.air_dash_speed
+		
+		
+		body.velocity = dash_direction * state_machine.air_dash_speed 
 	current_dash_time -= delta
 	
 	if current_dash_time < 0.0:
