@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Clockwork="*uid://1e0h3m17xiax"
 Dice="*uid://dun7q4xeo3eec"
+DebugShapes="*uid://c3l2dcd7yirkl"
 
 [display]
 

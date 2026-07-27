@@ -5,7 +5,7 @@ class_name BasicRpgMovementState extends RefCounted
 
 var state_machine: BasicRpgMovementStateMachine = null
 var body: CharacterBody3D = null
-var camera: Camera3D = null
+var camera: Node3D = null
 
 signal transitioned(From: BasicRpgMovementStateMachine.States, To: BasicRpgMovementStateMachine.States)
 

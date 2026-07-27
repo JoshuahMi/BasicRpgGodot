@@ -4,7 +4,7 @@ class_name BasicRpgGrapplingHookEdgeDetector extends Node3D
 
 # TODO: Keeping the last known valid edge point AND validating it in the sense of checking if something is between the player and the point.
 # TODO: Add more debug functionality
-
+# TODO: Add "Abtasten" function in a reasonable way
 
 @onready var debug_mesh: MeshInstance3D
 @onready var debug_mesh_0: MeshInstance3D
@@ -19,51 +19,85 @@ class_name BasicRpgGrapplingHookEdgeDetector extends Node3D
 ## Used to determine how big the radius shall be to detect ledges on a wall
 @export var star_cast_distance: float = 1.0
 
-var detected_platform_point: Vector3 = Vector3.ZERO
+## This is the point that is detected by this detector. The most important variable,
+## since the edge detector exists to detect this point.
+var valid_detected_platform_point: Vector3 = Vector3.ZERO
+	
+## currently invalidated detected platform point. If it gets validated, it will become the new
+## *valid deteted platform point*
+var detected_platform_point: Dictionary
+
+
+
+## If the point currently stored in *detected platform point* is actually 
+## a good point for the grappling hook to hang onto, regardless of where the player is or looks to.
+var is_detected_platform_point_a_valid_ledge: bool = false
+
+## If the point currently stored in *detected platform point* is still valid in the sense that nothing is between the player and the point.
+## TODO: check if the player still looks in the direction of the point.
+var is_detected_platform_point_valid: bool = true:
+	set(new_value):
+		is_detected_platform_point_valid = new_value
+		#print(new_value)
+
+
+
+
+## If in the current physics frame a ledge or a climbable edge was found. If not, the *detected platform point* is from a previous
+## frame that detected a valid point and it needs to be validated in the sense that nothing is between the player
+## and the point.
 var is_platform_detected: bool = false
 
-var edge_point: Vector3 = Vector3.ZERO
-
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	
-	
 	if debug:
 		debug_initialize_debug_shapes()
-	
-	
-	pass # Replace with function body.
+
 
 func _physics_process(delta: float) -> void:
+	
 	# first, detect the platform
-	#detect_platform()
+
 	var result: Dictionary = detect_ledge()
+	detected_platform_point = result
 	
-	if result.is_empty():
-		debug_hide_all()
-		return
+	
 		
-	if validate_evaluated_point(result):
+	if not result.is_empty():
 		
-		set_ledge_position(result["position"])
+		# First check if the result is actually a valid point
 		
-		pass
+		validate_evaluated_as_valid_edge_point(result)
+		if is_detected_platform_point_a_valid_ledge:
+			
+			# If so, set it as the new *valid detected platform point*
+			valid_detected_platform_point = result["position"]
+			is_detected_platform_point_valid = true
+			
+			
+		# If not, validate the *valid detected platform point* anew
+		else:
+			
+			validate_evaluated_as_from_player(valid_detected_platform_point)
+			pass
+		
 	
-	pass
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+	#if is_detected_platform_point_valid:
+		#
+		#debug_place_evaluated_sphere(valid_detected_platform_point)
+	#
+	#else:
+		#debug_hide_all()
 	
+	# debug_place_evaluated_sphere(valid_detected_platform_point)
 	
+#region MAIN FUNCTIONS
 
 ## The more sophisticated version of the detection function
 func detect_ledge() -> Dictionary:
 	
 	# first, get the wall collision position. 
 	# if the normals absolute y value is above a certain value, the ledge position isn't valid.
-	# search for a better wall collision point then.
+	# TODO: search for a better wall collision point then.
 	var cast_0 := cast_forward()
 	
 	# then check if around the collision point is a ledge.
@@ -99,16 +133,6 @@ func detect_ledge() -> Dictionary:
 	else:
 		result = get_ledge_from_collision_point(cast_0["position"], 10.0)
 		pass
-	
-	#region DEBUG
-	
-	#if not result.is_empty():
-		#debug_place_box(result["position"])
-	#else:
-		#pass
-		##debug_hide_box()
-	
-	#endregion DEBUG
 
 	return result
 
@@ -127,8 +151,8 @@ func detect_platform():
 		debug_hide_all()
 		return
 	else:
-		set_ledge_position(edge["position"])
-		debug_place_box(edge["position"])
+		detected_platform_point = edge["position"]
+		
 		return
 		
 	
@@ -161,26 +185,84 @@ func detect_platform_simple():
 	
 	return
 	
+	
+	
+#endregion MAIN FUNCTIONS
+	
 #region HELPER FUNCTIONS
 
 func compare_float(float0: float, float1: float, epsilon: float) -> bool:
 	return abs(float0 - float1) < epsilon
 
+## Checks if the given detected point is a valid edge point the player could hang on
+## with the grappling hook.
+func validate_evaluated_as_valid_edge_point(result: Dictionary):
+	if result.is_empty():
+		is_detected_platform_point_valid = false
+
+	var is_valid_edge_point = compare_float(result["normal"].y, 0.0, 0.1)
+	
+	is_detected_platform_point_valid = is_valid_edge_point
+	
+## TODO: Will take an edge point and check if something is between the player and the edge point, making it invalid.
+## Used when in the current frame no new edge point is found, so it will validate the last.
+func validate_evaluated_as_from_player(result: Vector3):
+	
+	# first, check how far the distance between the evaluated point and the camera is.
+	
+	var distance_between_camera_and_point = (result - camera.global_position).length()
+	
+	# Then check if something is between the player and the edge
+	
+	var result_between := cast_ray(camera.global_position, result, false)
+	
+	if result_between.is_empty():
+		is_detected_platform_point_valid = true
+		return
+	
+	if (result_between["position"] - camera.global_position).length() < distance_between_camera_and_point:
+		
+		# then something is between the player and the point
+		is_detected_platform_point_valid = false
+	else:
+		
+		is_detected_platform_point_valid = true
+
+
 ## Used after detecting a point that is supposedly a valid edge to hang a grappling hook on.
 ## Works by checking the normal y value.
-func validate_evaluated_point(result: Dictionary) -> bool:
+func validate_evaluated_point(result: Dictionary):
 	
 	if result.is_empty():
+		is_detected_platform_point_valid = false
 		return false
 	
-	return compare_float(result["normal"].y, 0.0, 0.1)
-
-
-func set_ledge_position(pos: Vector3):
+	var is_valid_edge_point = compare_float(result["normal"].y, 0.0, 0.1)
 	
-	debug_place_box(pos)
-	detected_platform_point = pos
-
+	# first, check how far the distance between the evaluated point and the camera is.
+	
+	var distance_between_camera_and_point = (result["position"] - camera.global_position).length()
+	
+	# Then check if something is between the player and the edge
+	
+	var result_between := cast_ray(camera.global_position, result["position"], false)
+	
+	
+	# if it didn't hit anything then it outreached
+	if result_between.is_empty():
+		
+		is_detected_platform_point_valid = true
+		
+		return
+	
+	if (result_between["position"] - camera.global_position).length() < distance_between_camera_and_point or not is_valid_edge_point:
+		
+		# then something is between the player and the point
+		is_detected_platform_point_valid = false
+	else:
+		
+		is_detected_platform_point_valid = true
+	
 ## casts a ray from a given point downwards (-y) by a given distance
 func cast_ray_down(start: Vector3, distance: float, shall_hit_from_inside: bool) -> Dictionary:
 	
@@ -198,7 +280,7 @@ func cast_ray_from_player_xz(y: float, target: Vector3, shall_hit_from_inside: b
 	
 func cast_ray_from_player(target: Vector3, shall_hit_from_inside: bool) -> Dictionary:
 	
-	return cast_ray(global_position, target, shall_hit_from_inside)
+	return cast_ray(camera.global_position, target, shall_hit_from_inside)
 
 ## Casts a ray based on this nodes 3D world and returns the result
 func cast_ray(start: Vector3, target: Vector3, shall_hit_from_inside: bool) -> Dictionary:
@@ -217,7 +299,20 @@ func cast_ray(start: Vector3, target: Vector3, shall_hit_from_inside: bool) -> D
 
 func cast_forward() -> Dictionary:
 	
-	return cast_ray_from_player(%PlatformDetector.global_position, false) 
+	var distant_point: Vector3 = Vector3.FORWARD.rotated(Vector3.UP, camera.rotation.y)
+	distant_point = distant_point.rotated(Vector3.LEFT, camera.rotation.x)
+	
+	distant_point *= platform_detection_distance
+	
+	var result: Dictionary
+	
+	if camera is BasicRpgCameraComponent:
+		
+		result = cast_ray_from_player(camera.perception_point.global_position, false) 
+		if not result.is_empty():
+			debug_place_evaluated_sphere(result["position"])
+		
+	return result
 
 ## Will cast a star shaped series of casts around the start with the given radius
 ## And return the hit result that is nearest to the start.
@@ -260,20 +355,6 @@ func cast_star(start: Vector3, normal: Vector3, radius: float) -> Dictionary:
 	var left_up_result: Dictionary = cast_ray(start_floating, start_floating + left_up * radius, false)
 	var left_down_result: Dictionary = cast_ray(start_floating, start_floating + left_down * radius, false)
 	
-	
-	
-	#region DEBUG
-	
-	#if not left_result.is_empty():
-		#debug_place_box(left_result["position"])
-	#else:
-		#debug_hide_box()
-	#
-	#endregion DEBUG
-	
-	
-	
-	
 	# then determine what is the nearest result to the starting point 
 	
 	var results: Array[Dictionary] = [up_result, down_result, right_result, left_result, right_up_result, right_down_result, left_up_result, left_down_result]
@@ -284,7 +365,6 @@ func cast_star(start: Vector3, normal: Vector3, radius: float) -> Dictionary:
 	else:
 		debug_hide_all()
 	#endregion DEBUG
-	
 	
 	var nearest_result = up_result
 	
@@ -373,11 +453,14 @@ func get_ledge_from_star_cast(star_cast_hit_result: Dictionary, distance: float)
 ## Most basic function that will return the ledge that is within the y tolerance above the given point. 
 func get_ledge_from_collision_point(collision_point: Vector3, y_tolerance: float) -> Dictionary:
 	
+	
+	# First get the total height of the object that was collided with.
 	var platform_roof := cast_ray_down(Vector3(collision_point.x, collision_point.y + y_tolerance, collision_point.z), y_tolerance + 0.1, false)
 	
 	if platform_roof.is_empty():
 		return {}
-
+	
+	# Then cast a ray from the players xz position to the roof point. It will hit the edge.
 	var platform_edge := cast_ray(Vector3(global_position.x, platform_roof["position"].y, global_position.z ), platform_roof["position"], false)
 	
 	return platform_edge
@@ -405,7 +488,7 @@ func debug_place_star_spheres(results: Array[Dictionary]):
 	
 	pass
 
-func debug_place_box(target: Vector3):
+func debug_place_evaluated_sphere(target: Vector3):
 	
 	if debug:
 	
@@ -414,6 +497,16 @@ func debug_place_box(target: Vector3):
 	else:
 		debug_mesh.visible = false
 	debug_mesh.global_position = target
+	pass
+	
+func debug_hide_evaluated_sphere():
+	debug_mesh.visible = false
+
+	
+func debug_hide_star_spheres():
+	
+	for mesh in debug_meshes_star:
+		mesh.visible = false
 	pass
 	
 func debug_hide_all():
@@ -432,11 +525,7 @@ func debug_place_sphere(target: Vector3):
 		
 		debug_mesh_0.global_position = target
 		debug_mesh_0.visible = true
-		
-	
-	
-	
-	pass
+
 
 func debug_initialize_shape(colour: Color) -> MeshInstance3D:
 	
@@ -451,7 +540,7 @@ func debug_initialize_shape(colour: Color) -> MeshInstance3D:
 	mesh_instance.material_override = debug_material
 	
 	add_child(mesh_instance)
-	
+	mesh_instance.top_level = true
 	mesh_instance.scale = Vector3(0.1, 0.1, 0.1)
 	
 	return mesh_instance

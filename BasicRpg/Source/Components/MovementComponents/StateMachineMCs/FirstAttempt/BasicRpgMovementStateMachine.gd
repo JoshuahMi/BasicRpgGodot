@@ -3,7 +3,7 @@
 class_name BasicRpgMovementStateMachine extends Node
 
 @export var body: CharacterBody3D = null
-@export var camera: Camera3D = null
+@export var camera: Node3D = null
 
 
 
