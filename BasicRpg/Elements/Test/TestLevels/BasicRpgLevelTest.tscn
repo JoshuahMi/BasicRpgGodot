@@ -2,6 +2,7 @@
 
 [ext_resource type="Shader" uid="uid://btm1nn8w3cpf4" path="res://BasicRpg/Graphics/Shaders/Spatial/BasicRpgWhiteBox.gdshader" id="1_nby6r"]
 [ext_resource type="PackedScene" uid="uid://c60jl8tnjl12" path="res://BasicRpg/Elements/Test/TestPlayer/BasicRpgTestPlayer0.tscn" id="2_xi4co"]
+[ext_resource type="PackedScene" uid="uid://dmgy4n8xqbl61" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/TestBuilding_0.tscn" id="3_xi4co"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_q1ege"]
 
@@ -22,38 +23,6 @@ background_mode = 2
 sky = SubResource("Sky_f7kc2")
 sky_rotation = Vector3(0, 0, 1.5707964)
 glow_enabled = true
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_ehmih"]
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_bbcle"]
-noise = SubResource("FastNoiseLite_ehmih")
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_reusg"]
-albedo_texture = SubResource("NoiseTexture2D_bbcle")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_14wte"]
-render_priority = 0
-shader = ExtResource("1_nby6r")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_pmdjt"]
-render_priority = 0
-shader = ExtResource("1_nby6r")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_5xk2h"]
-render_priority = 0
-shader = ExtResource("1_nby6r")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_vabrg"]
-render_priority = 0
-shader = ExtResource("1_nby6r")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ltetc"]
-render_priority = 0
-shader = ExtResource("1_nby6r")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_836ns"]
-render_priority = 0
-shader = ExtResource("1_nby6r")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qhjym"]
 render_priority = 0
@@ -87,6 +56,38 @@ shader = ExtResource("1_nby6r")
 render_priority = 0
 shader = ExtResource("1_nby6r")
 
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ehmih"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_bbcle"]
+noise = SubResource("FastNoiseLite_ehmih")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_reusg"]
+albedo_texture = SubResource("NoiseTexture2D_bbcle")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_14wte"]
+render_priority = 0
+shader = ExtResource("1_nby6r")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pmdjt"]
+render_priority = 0
+shader = ExtResource("1_nby6r")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5xk2h"]
+render_priority = 0
+shader = ExtResource("1_nby6r")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vabrg"]
+render_priority = 0
+shader = ExtResource("1_nby6r")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ltetc"]
+render_priority = 0
+shader = ExtResource("1_nby6r")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_836ns"]
+render_priority = 0
+shader = ExtResource("1_nby6r")
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_77u87"]
 render_priority = 0
 shader = ExtResource("1_nby6r")
@@ -105,126 +106,141 @@ shadow_enabled = true
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2103643649]
 environment = SubResource("Environment_14wte")
 
-[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=1074898439]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.91955376, 0)
-use_collision = true
-size = Vector3(323.7461, 1, 322.82617)
-material = SubResource("StandardMaterial3D_reusg")
+[node name="BasicRpgTestPlayer0" parent="." unique_id=1449081686 instance=ExtResource("2_xi4co")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.917953, 3.622035, -142.54405)
 
-[node name="CSGBox3D2" type="CSGBox3D" parent="." unique_id=1104802978]
-transform = Transform3D(0.7957667, 0, -0.6056033, 0, 1, 0, 0.6056033, 0, 0.7957667, 0.30249786, 15.572559, 0)
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="." unique_id=583101616]
 use_collision = true
-size = Vector3(7.513672, 44.353516, 8.784912)
-material = SubResource("ShaderMaterial_14wte")
 
-[node name="CSGBox3D3" type="CSGBox3D" parent="." unique_id=198399025]
-transform = Transform3D(0.79294574, 0, 0.6092922, 0, 1, 0, -0.6092922, 0, 0.79294574, -13.633775, 15.572559, 0)
-use_collision = true
-size = Vector3(7.513672, 44.353516, 8.784912)
-material = SubResource("ShaderMaterial_pmdjt")
-
-[node name="CSGBox3D4" type="CSGBox3D" parent="." unique_id=1304928422]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.18245, 15.572559, 0)
-use_collision = true
-size = Vector3(7.513672, 44.353516, 8.784912)
-material = SubResource("ShaderMaterial_5xk2h")
-
-[node name="CSGBox3D5" type="CSGBox3D" parent="." unique_id=1440119656]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.994175, 15.572559, 0)
-use_collision = true
-size = Vector3(7.513672, 44.353516, 8.784912)
-material = SubResource("ShaderMaterial_vabrg")
-
-[node name="CSGBox3D6" type="CSGBox3D" parent="." unique_id=275931700]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30249786, 15.572559, 17.640694)
-use_collision = true
-size = Vector3(7.513672, 44.353516, 8.784912)
-material = SubResource("ShaderMaterial_ltetc")
-
-[node name="CSGBox3D7" type="CSGBox3D" parent="." unique_id=1055309366]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.633775, 15.572559, 17.640694)
-use_collision = true
-size = Vector3(7.513672, 44.353516, 8.784912)
-material = SubResource("ShaderMaterial_836ns")
-
-[node name="CSGBox3D8" type="CSGBox3D" parent="." unique_id=1319033804]
+[node name="CSGBox3D8" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1319033804]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.18245, 15.572559, 17.640694)
 use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_qhjym")
 
-[node name="CSGBox3D9" type="CSGBox3D" parent="." unique_id=1522648209]
+[node name="CSGBox3D9" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1522648209]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.994175, 15.572559, 17.640694)
 use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_bnbsa")
 
-[node name="CSGBox3D10" type="CSGBox3D" parent="." unique_id=1438008083]
+[node name="CSGBox3D10" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1438008083]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30249786, 15.572559, 36.550026)
 use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_5j320")
 
-[node name="CSGBox3D11" type="CSGBox3D" parent="." unique_id=798356272]
+[node name="CSGBox3D11" type="CSGBox3D" parent="CSGCombiner3D" unique_id=798356272]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.633775, 15.572559, 36.550026)
 use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_rctq4")
 
-[node name="CSGBox3D18" type="CSGBox3D" parent="." unique_id=971886052]
+[node name="CSGBox3D18" type="CSGBox3D" parent="CSGCombiner3D" unique_id=971886052]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 1.7065773, 4.646435, -55.36419)
 use_collision = true
 size = Vector3(39.214844, 6.1540527, 0.65527344)
 material = SubResource("ShaderMaterial_rctq4")
 
-[node name="CSGBox3D19" type="CSGBox3D" parent="." unique_id=2107463265]
+[node name="CSGBox3D19" type="CSGBox3D" parent="CSGCombiner3D" unique_id=2107463265]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.8782825, 4.646435, -55.36419)
 use_collision = true
 size = Vector3(28.487305, 6.1540527, 0.65527344)
 material = SubResource("ShaderMaterial_rctq4")
 
-[node name="CSGBox3D12" type="CSGBox3D" parent="." unique_id=140845639]
+[node name="CSGBox3D12" type="CSGBox3D" parent="CSGCombiner3D" unique_id=140845639]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.18245, 15.572559, 36.550026)
 use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_qiuua")
 
-[node name="CSGBox3D13" type="CSGBox3D" parent="." unique_id=127705786]
+[node name="CSGBox3D13" type="CSGBox3D" parent="CSGCombiner3D" unique_id=127705786]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.994175, 15.572559, 36.550026)
 use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_eoml5")
 
-[node name="CSGBox3D14" type="CSGBox3D" parent="." unique_id=1251887541]
+[node name="CSGBox3D14" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1251887541]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30249786, 15.572559, 55.7845)
 use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_re5oh")
 
-[node name="CSGBox3D15" type="CSGBox3D" parent="." unique_id=503052948]
+[node name="CSGBox3D15" type="CSGBox3D" parent="CSGCombiner3D" unique_id=503052948]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.633775, 15.572559, 55.7845)
 use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_m6ece")
 
-[node name="CSGBox3D16" type="CSGBox3D" parent="." unique_id=1697500176]
+[node name="CSGBox3D" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1074898439]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.91955376, 0)
+use_collision = true
+size = Vector3(323.7461, 1, 322.82617)
+material = SubResource("StandardMaterial3D_reusg")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1104802978]
+transform = Transform3D(0.7957667, 0, -0.6056033, 0, 1, 0, 0.6056033, 0, 0.7957667, 0.30249786, 15.572559, 0)
+use_collision = true
+size = Vector3(7.513672, 44.353516, 8.784912)
+material = SubResource("ShaderMaterial_14wte")
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="CSGCombiner3D" unique_id=198399025]
+transform = Transform3D(0.79294574, 0, 0.6092922, 0, 1, 0, -0.6092922, 0, 0.79294574, -13.633775, 15.572559, 0)
+use_collision = true
+size = Vector3(7.513672, 44.353516, 8.784912)
+material = SubResource("ShaderMaterial_pmdjt")
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1304928422]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.18245, 15.572559, 0)
+use_collision = true
+size = Vector3(7.513672, 44.353516, 8.784912)
+material = SubResource("ShaderMaterial_5xk2h")
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1440119656]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.994175, 15.572559, 0)
+use_collision = true
+size = Vector3(7.513672, 44.353516, 8.784912)
+material = SubResource("ShaderMaterial_vabrg")
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="CSGCombiner3D" unique_id=275931700]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30249786, 15.572559, 17.640694)
+use_collision = true
+size = Vector3(7.513672, 44.353516, 8.784912)
+material = SubResource("ShaderMaterial_ltetc")
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1055309366]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.633775, 15.572559, 17.640694)
+use_collision = true
+size = Vector3(7.513672, 44.353516, 8.784912)
+material = SubResource("ShaderMaterial_836ns")
+
+[node name="CSGBox3D16" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1697500176]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.18245, 15.572559, 55.7845)
 use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_77u87")
 
-[node name="CSGBox3D17" type="CSGBox3D" parent="." unique_id=466424648]
+[node name="CSGBox3D17" type="CSGBox3D" parent="CSGCombiner3D" unique_id=466424648]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.994175, 15.572559, 55.7845)
 use_collision = true
 size = Vector3(7.513672, 44.353516, 8.784912)
 material = SubResource("ShaderMaterial_7s01x")
 
-[node name="CSGCylinder3D" type="CSGCylinder3D" parent="." unique_id=2038855897]
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="CSGCombiner3D" unique_id=2038855897]
 transform = Transform3D(0.0034850328, 0, -0.9999939, 0, 1, 0, 0.9999939, 0, 0.0034850328, -5.4348655, 10.527107, -21.905287)
 use_collision = true
 radius = 6.928711
 height = 23.59668
 sides = 21
 
-[node name="BasicRpgTestPlayer0" parent="." unique_id=1449081686 instance=ExtResource("2_xi4co")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.917953, 3.622035, -142.54405)
+[node name="TestBuilding0" parent="." unique_id=348293384 instance=ExtResource("3_xi4co")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 104.552284, -2.0695705, -4.4502645)
+use_collision = true
+
+[node name="TestBuilding1" parent="." unique_id=1040783370 instance=ExtResource("3_xi4co")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 92.30013, -1.9319324, -4.4502645)
+use_collision = true
+
+[node name="TestBuilding2" parent="." unique_id=768654189 instance=ExtResource("3_xi4co")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79.29622, -1.6538963, -4.4502645)
+use_collision = true

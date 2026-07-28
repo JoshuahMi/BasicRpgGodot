@@ -38,6 +38,6 @@ func _physics_process(delta: float) -> void:
 	movement_component.look_direction = input_component.look_vector
 	
 	
-func _on_state_changed(new_state):
+func _on_state_changed(_new_state):
 	
 	pass

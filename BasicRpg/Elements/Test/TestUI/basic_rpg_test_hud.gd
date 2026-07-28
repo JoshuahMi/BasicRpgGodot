@@ -11,7 +11,7 @@ func _ready() -> void:
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	
 	update_last_state_label(state_machine.history.get_state_before())
 	update_state_label(state_machine.current_state)

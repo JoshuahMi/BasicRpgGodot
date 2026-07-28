@@ -50,7 +50,7 @@ func _input(event: InputEvent) -> void:
 	pass
 	
 
-func _unhandled_input(event: InputEvent) -> void:
+func _unhandled_input(_event: InputEvent) -> void:
 	
 	pass
 
