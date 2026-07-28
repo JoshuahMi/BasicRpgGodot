@@ -351,7 +351,8 @@ func test_cast_forward():
 	
 	if not result.is_empty():
 		DebugShapes.place_the_blue_sphere(result["position"])
-	
+	else:
+		DebugShapes.hide_the_blue_sphere()
 	
 	
 	

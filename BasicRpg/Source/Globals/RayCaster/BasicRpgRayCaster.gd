@@ -50,14 +50,11 @@ func cast_forward(node_this_was_called_from: Node3D, object: Node3D, cast_distan
 	# Get the given object and takes its rotation to make a vector to point at.
 	
 	var direction_y_rotated: Vector3 = Vector3.FORWARD.rotated(Vector3.UP, object.global_rotation.y)
-	#direction_y_rotated = Vector3.ZERO
 	
-	
-	var direction_x_rotated: Vector3 = direction_y_rotated.rotated(Vector3.RIGHT, object.global_rotation.x)
-	# direction_x_rotated =  Vector3.ZERO
-	
+	var x_axis: Vector3 = Vector3.RIGHT.rotated(Vector3.UP, object.global_rotation.y)
 
-	# BUG
+	var direction_x_rotated: Vector3 = direction_y_rotated.rotated(x_axis, object.global_rotation.x)
+	
 	var direction: Vector3 = (direction_x_rotated).normalized()
 	
 	var direction_scaled = direction * cast_distance
