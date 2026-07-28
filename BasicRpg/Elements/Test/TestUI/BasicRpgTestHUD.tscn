@@ -5,6 +5,15 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_reusg"]
 
+[sub_resource type="Gradient" id="Gradient_8pmew"]
+colors = PackedColorArray(0, 0, 0, 1, 1, 0, 0.101960786, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_bbcle"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_reusg"]
+noise = SubResource("FastNoiseLite_bbcle")
+color_ramp = SubResource("Gradient_8pmew")
+
 [node name="BasicRpgTestHud" type="Control" unique_id=1337185482]
 layout_mode = 3
 anchors_preset = 15
@@ -216,3 +225,10 @@ layout_mode = 2
 size_flags_vertical = 1
 theme_override_fonts/font = ExtResource("2_5d5wd")
 text = "-----"
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer" unique_id=387640771]
+custom_maximum_size = Vector2(4, 4)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = SubResource("NoiseTexture2D_reusg")

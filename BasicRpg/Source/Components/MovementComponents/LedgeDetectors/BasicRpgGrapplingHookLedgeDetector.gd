@@ -47,32 +47,42 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	
+	test_cast_forward()
+	
+	
+	
+	
+	
+	
+	
+	
+	pass
 	# first, detect the platform
 
-	var result: Dictionary = detect_ledge()
-	detected_platform_point = result
-	
-	
-	if debug and not result.is_empty():
-		DebugShapes.place_a_red_sphere(result["position"])
-		
-	if not result.is_empty():
-		
-		# First check if the result is actually a valid point
-		
-		validate_evaluated_as_valid_edge_point(result)
-		if is_detected_platform_point_a_valid_ledge:
-			
-			# If so, set it as the new *valid detected platform point*
-			valid_detected_platform_point = result["position"]
-			is_detected_platform_point_valid = true
-			
-			
-		# If not, validate the *valid detected platform point* anew
-		else:
-			
-			validate_evaluated_as_from_player(valid_detected_platform_point)
-			pass
+	#var result: Dictionary = detect_ledge()
+	#detected_platform_point = result
+	#
+	#
+	#if debug and not result.is_empty():
+		#DebugShapes.place_a_red_sphere(result["position"])
+		#
+	#if not result.is_empty():
+		#
+		## First check if the result is actually a valid point
+		#
+		#validate_evaluated_as_valid_edge_point(result)
+		#if is_detected_platform_point_a_valid_ledge:
+			#
+			## If so, set it as the new *valid detected platform point*
+			#valid_detected_platform_point = result["position"]
+			#is_detected_platform_point_valid = true
+			#
+			#
+		## If not, validate the *valid detected platform point* anew
+		#else:
+			#
+			#validate_evaluated_as_from_player(valid_detected_platform_point)
+			#pass
 	
 #region MAIN FUNCTIONS
 
@@ -332,3 +342,25 @@ func get_ledge_from_collision_point(collision_point: Vector3, y_tolerance: float
 	return platform_edge
 
 #endregion HELPER FUNCTIONS
+
+#region TEST FUNCTIONS
+
+func test_cast_forward():
+	
+	var result := RayCaster.cast_forward(self, camera, 10.0)
+	
+	if not result.is_empty():
+		DebugShapes.place_the_blue_sphere(result["position"])
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	pass
+
+
+#endregion TEST FUNCTIONS

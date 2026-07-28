@@ -49,14 +49,20 @@ func cast_forward(node_this_was_called_from: Node3D, object: Node3D, cast_distan
 	
 	# Get the given object and takes its rotation to make a vector to point at.
 	
-	var distant_point: Vector3 = Vector3.FORWARD.rotated(Vector3.UP, object.rotation.y)
-	var distant_point_0: Vector3 = Vector3.FORWARD.rotated(Vector3.LEFT, object.rotation.x)
+	var direction_y_rotated: Vector3 = Vector3.FORWARD.rotated(Vector3.UP, object.global_rotation.y)
+	#direction_y_rotated = Vector3.ZERO
 	
-	var direction: Vector3 = (distant_point + distant_point_0).normalized()
 	
-	direction *= cast_distance
+	var direction_x_rotated: Vector3 = direction_y_rotated.rotated(Vector3.RIGHT, object.global_rotation.x)
+	# direction_x_rotated =  Vector3.ZERO
 	
-	return cast_ray(node_this_was_called_from, object.global_position, object.global_position + direction, false)
+
+	# BUG
+	var direction: Vector3 = (direction_x_rotated).normalized()
+	
+	var direction_scaled = direction * cast_distance
+	
+	return cast_ray(node_this_was_called_from, object.global_position, object.global_position + direction_scaled, false)
 
 
 
@@ -121,3 +127,33 @@ func cast_star(node_this_was_called_from: Node3D, start: Vector3, normal: Vector
 				nearest_result = result
 	
 	return nearest_result
+
+
+## Will cast a series of horizonzal rays in a specific direction between a minimum and a maximum height.
+## The output array will be ordered by height.
+func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Vector3, direction_xz: Vector3, ray_length: float, minimum_y: float, maximum_y: float, number_of_rays: int) -> Array[Dictionary]:
+	
+	# The output array that will be returned:
+	var out: Array[Dictionary] = []
+	
+	# First, get the y range, so the frame of the rays to be cast in
+	
+	var y_frame: float = abs(minimum_y - maximum_y)
+	
+	# Then get the height interval in which the rays shall be cast in
+	var y_interval : float = y_frame / number_of_rays
+	
+	# Scale the direction vector to the ray length, so it can be used to determine the 
+	var direction_xz_scaled = Vector3(direction_xz.x, 0.0, direction_xz.z).normalized() * ray_length
+	
+	# Then cast the rays
+	for index in range(1, number_of_rays + 1):
+		
+		var height: float = minimum_y + y_interval * index
+		var start: Vector3 = Vector3(start_point_xz.x, height, start_point_xz.z)
+		var target: Vector3 = start + Vector3(direction_xz_scaled.x, height, direction_xz_scaled.z)
+		out.append(cast_ray(node_this_was_called_from, start, target, false))
+		
+
+	return out
+	
