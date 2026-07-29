@@ -21,7 +21,11 @@ var valid_detected_platform_point: Vector3 = Vector3.ZERO
 	
 ## currently invalidated detected platform point. If it gets validated, it will become the new
 ## *valid deteted platform point*
-var detected_platform_point: Dictionary
+var detected_platform_point: Dictionary:
+	set(new_value):
+		detected_platform_point = new_value
+		if not new_value.is_empty():
+			DebugShapes.place_the_red_sphere(new_value["position"])
 
 
 
@@ -64,9 +68,12 @@ func test_detect_ledge() -> Dictionary:
 	
 	var cast_0 := RayCaster.cast_forward(self, camera, platform_detection_distance)
 	
-	if not cast_0.is_empty():
-		scan_surface_from_perceived_point(cast_0)
+	#if not cast_0.is_empty():
+		#DebugShapes.place_the_blue_sphere(cast_0["position"])
 	
+	if not cast_0.is_empty():
+		detected_platform_point = scan_surface_from_perceived_point(cast_0)
+		
 	return {}
 
 
@@ -142,6 +149,7 @@ func detect_platform():
 func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionary:
 	
 	var source_position := perceived_point
+	var normal_float := 1.0
 	var direction : Vector3 = perceived_point["normal"] * -1.0
 	var ray_length : float = 3.0
 	
@@ -150,9 +158,9 @@ func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionar
 	var minimum_y: float = perceived_point["position"].y
 	var maximum_y: float = perceived_point["position"].y + y_tolerance
 	
-	var number_of_rays: int = 8
+	var number_of_rays: int = 6
 	
-	var scan_results := RayCaster.cast_vertical_row(self, source_position, direction, ray_length, minimum_y, maximum_y, number_of_rays )
+	var scan_results := RayCaster.cast_vertical_row(self, source_position, normal_float, direction, ray_length, minimum_y, maximum_y, number_of_rays )
 	
 	# Then evaluate the scan results.
 	
@@ -175,21 +183,17 @@ func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionar
 		if not result.is_empty():
 			if result["length"] < shortest_result["length"]:
 				shortest_result = result
-			DebugShapes.place_a_green_sphere(result["position"])
+			#DebugShapes.place_a_green_sphere(result["position"])
 	
 	if shortest_result.has("position"):
-		DebugShapes.place_the_blue_sphere(shortest_result["position"])
+		pass
+		#DebugShapes.place_the_blue_sphere(shortest_result["position"])
 		
 		out = get_edge_from_collision_point(shortest_result["position"], y_tolerance)
 		
-		if not out.is_empty():
-			DebugShapes.place_the_red_sphere(out["position"])
-		
-		
-		
-		
-	else:
-		pass
+		#if not out.is_empty():
+			#DebugShapes.place_the_red_sphere(out["position"])
+
 
 	return out
 

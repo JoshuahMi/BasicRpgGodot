@@ -135,9 +135,13 @@ func cast_star(node_this_was_called_from: Node3D, start: Vector3, normal: Vector
 
 
 ## Will cast a series of horizonzal rays in a specific direction between a minimum and a maximum height.
-## The output array will be ordered by height.
+## The output array will be ordered by height from the lowest to the highest.
 ## Will take a hit result as *start point xz* input.
-func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictionary, direction_xz: Vector3, ray_length: float, minimum_y: float, maximum_y: float, number_of_rays: int) -> Array[Dictionary]:
+## The start of the rays will be above the normal that the *start point xz* is providing, by the *normal float* value.
+func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictionary, normal_float: float, direction_xz: Vector3, ray_length: float, minimum_y: float, maximum_y: float, number_of_rays: int) -> Array[Dictionary]:
+	
+	if start_point_xz.is_empty():
+		return []
 	
 	# The output array that will be returned:
 	var out: Array[Dictionary] = []
@@ -154,17 +158,25 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 	# Scale the direction vector to the ray length, so it can be used to determine the 
 	var direction_xz_scaled = Vector3(direction_xz.x, 0.0, direction_xz.z).normalized() * ray_length
 	
+	DebugShapes.hide_blue_spheres()
+	
 	# Then cast the rays
 	for index in range(1, number_of_rays + 1):
 		
 		var height: float = minimum_y + y_interval * index
-		var start: Vector3 = Vector3(start_point_xz["position"].x, height, start_point_xz["position"].z)
+		var start: Vector3 = Vector3(start_point_xz["position"].x, height, start_point_xz["position"].z) + Vector3(start_point_xz["normal"].x, 0.0, start_point_xz["normal"].z).normalized() * normal_float
 		
 		# DebugShapes.place_a_blue_sphere(start)
 		
 		var target: Vector3 = start + Vector3(direction_xz_scaled.x, 0.0, direction_xz_scaled.z)
-		out.append(cast_ray(node_this_was_called_from, start, target, false))
 		
-
+		var hit_result = cast_ray(node_this_was_called_from, start, target, false)
+		
+		if not hit_result.is_empty():
+			DebugShapes.place_a_blue_sphere(hit_result["position"])
+		
+		out.append(hit_result)
+		
+	
 	return out
 	

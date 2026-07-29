@@ -3,6 +3,7 @@
 [ext_resource type="Shader" uid="uid://btm1nn8w3cpf4" path="res://BasicRpg/Graphics/Shaders/Spatial/BasicRpgWhiteBox.gdshader" id="1_nby6r"]
 [ext_resource type="PackedScene" uid="uid://c60jl8tnjl12" path="res://BasicRpg/Elements/Test/TestPlayer/BasicRpgTestPlayer0.tscn" id="2_xi4co"]
 [ext_resource type="PackedScene" uid="uid://dmgy4n8xqbl61" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/TestBuilding_0.tscn" id="3_xi4co"]
+[ext_resource type="PackedScene" uid="uid://c2nrohv4jicp2" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/TestBuilding_1.tscn" id="4_ll54g"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_q1ege"]
 
@@ -261,3 +262,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.18365, 2.960915, -41.26970
 use_collision = true
 size = Vector3(4.7441406, 7.335327, 3.600586)
 material = SubResource("StandardMaterial3D_xi4co")
+
+[node name="TestBuilding3" parent="." unique_id=791167807 instance=ExtResource("4_ll54g")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 106.63684, -1.1486521, -24.456558)
+
+[node name="TestBuilding4" parent="." unique_id=750902898 instance=ExtResource("4_ll54g")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96.70803, -1.1486521, -24.456558)
+
+[node name="TestBuilding5" parent="." unique_id=1708403297 instance=ExtResource("4_ll54g")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.053665, -1.1486521, -24.456558)
