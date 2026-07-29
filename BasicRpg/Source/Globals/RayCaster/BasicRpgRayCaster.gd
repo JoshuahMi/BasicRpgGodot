@@ -42,7 +42,14 @@ func cast_ray(node_this_was_called_from: Node3D, start: Vector3, target: Vector3
 	
 	var space_state = node_this_was_called_from.get_world_3d().direct_space_state
 	
-	return space_state.intersect_ray(query)
+	# TODO: add a "length" 
+	
+	var result = space_state.intersect_ray(query)
+	
+	if not result.is_empty():
+		result["length"] = (result["position"] - start).length()
+	
+	return result
 	
 ## Will cast a ray forward, from the given *object*, taking its rotation into account. Will cast a ray as long as *cast distance*
 func cast_forward(node_this_was_called_from: Node3D, object: Node3D, cast_distance: float) -> Dictionary:
@@ -51,6 +58,7 @@ func cast_forward(node_this_was_called_from: Node3D, object: Node3D, cast_distan
 	
 	var direction_y_rotated: Vector3 = Vector3.FORWARD.rotated(Vector3.UP, object.global_rotation.y)
 	
+	# Rotate the x-axis, because the vector has to be rotated on the x-axis too.
 	var x_axis: Vector3 = Vector3.RIGHT.rotated(Vector3.UP, object.global_rotation.y)
 
 	var direction_x_rotated: Vector3 = direction_y_rotated.rotated(x_axis, object.global_rotation.x)
@@ -128,10 +136,13 @@ func cast_star(node_this_was_called_from: Node3D, start: Vector3, normal: Vector
 
 ## Will cast a series of horizonzal rays in a specific direction between a minimum and a maximum height.
 ## The output array will be ordered by height.
-func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Vector3, direction_xz: Vector3, ray_length: float, minimum_y: float, maximum_y: float, number_of_rays: int) -> Array[Dictionary]:
+## Will take a hit result as *start point xz* input.
+func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictionary, direction_xz: Vector3, ray_length: float, minimum_y: float, maximum_y: float, number_of_rays: int) -> Array[Dictionary]:
 	
 	# The output array that will be returned:
 	var out: Array[Dictionary] = []
+	
+	out.append(start_point_xz)
 	
 	# First, get the y range, so the frame of the rays to be cast in
 	
@@ -147,8 +158,11 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Vector
 	for index in range(1, number_of_rays + 1):
 		
 		var height: float = minimum_y + y_interval * index
-		var start: Vector3 = Vector3(start_point_xz.x, height, start_point_xz.z)
-		var target: Vector3 = start + Vector3(direction_xz_scaled.x, height, direction_xz_scaled.z)
+		var start: Vector3 = Vector3(start_point_xz["position"].x, height, start_point_xz["position"].z)
+		
+		# DebugShapes.place_a_blue_sphere(start)
+		
+		var target: Vector3 = start + Vector3(direction_xz_scaled.x, 0.0, direction_xz_scaled.z)
 		out.append(cast_ray(node_this_was_called_from, start, target, false))
 		
 

@@ -47,44 +47,28 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	
-	test_cast_forward()
-	
-	
-	
-	
-	
-	
-	
-	
-	pass
-	# first, detect the platform
-
-	#var result: Dictionary = detect_ledge()
-	#detected_platform_point = result
+	# test_cast_forward()
+	test_detect_ledge()
+	#var result := detect_ledge()
 	#
-	#
-	#if debug and not result.is_empty():
-		#DebugShapes.place_a_red_sphere(result["position"])
-		#
 	#if not result.is_empty():
-		#
-		## First check if the result is actually a valid point
-		#
-		#validate_evaluated_as_valid_edge_point(result)
-		#if is_detected_platform_point_a_valid_ledge:
-			#
-			## If so, set it as the new *valid detected platform point*
-			#valid_detected_platform_point = result["position"]
-			#is_detected_platform_point_valid = true
-			#
-			#
-		## If not, validate the *valid detected platform point* anew
-		#else:
-			#
-			#validate_evaluated_as_from_player(valid_detected_platform_point)
-			#pass
+		#DebugShapes.place_the_red_sphere(result["position"])
+	#else:
+		#DebugShapes.hide_the_red_sphere()
+	
+
 	
 #region MAIN FUNCTIONS
+
+func test_detect_ledge() -> Dictionary:
+	
+	var cast_0 := RayCaster.cast_forward(self, camera, platform_detection_distance)
+	
+	if not cast_0.is_empty():
+		scan_surface_from_perceived_point(cast_0)
+	
+	return {}
+
 
 ## The more sophisticated version of the detection function
 func detect_ledge() -> Dictionary:
@@ -125,7 +109,7 @@ func detect_ledge() -> Dictionary:
 		
 	# If no ledge is found, simply get the roof ledge
 	else:
-		result = get_ledge_from_collision_point(cast_0["position"], 10.0)
+		result = get_edge_from_collision_point(cast_0["position"], 10.0)
 		pass
 
 	return result
@@ -139,7 +123,7 @@ func detect_platform():
 	if cast_0.is_empty():
 		return
 		
-	var edge = get_ledge_from_collision_point(cast_0["position"], 10.0)
+	var edge = get_edge_from_collision_point(cast_0["position"], 10.0)
 	
 	if edge.is_empty():
 		#debug_hide_all()
@@ -151,39 +135,63 @@ func detect_platform():
 		
 	
 
-
-func detect_platform_simple():
-	
-	# First, let the player cast a ray to a world object:
-	var cast_0 = RayCaster.cast_ray_from_node(self, %PlatformDetector.global_position, false) 
-	
-	if cast_0.is_empty():
-		return
-		
-	var platform_roof := RayCaster.cast_ray_down(self, Vector3(cast_0["position"].x, cast_0["position"].y + 10.0, cast_0["position"].z), 20.0, false)
-	
-	if platform_roof.is_empty():
-		return
-
-	var platform_edge := RayCaster.cast_ray(self, Vector3(global_position.x, platform_roof["position"].y, global_position.z ), platform_roof["position"], false)
-	
-	if platform_edge.is_empty():
-		is_platform_detected = false
-		pass
-	else:
-		
-		detected_platform_point = platform_edge["position"]
-		is_platform_detected = true
-		pass
-		
-	
-	return
-	
-	
-	
 #endregion MAIN FUNCTIONS
 	
 #region HELPER FUNCTIONS
+
+func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionary:
+	
+	var source_position := perceived_point
+	var direction : Vector3 = perceived_point["normal"] * -1.0
+	var ray_length : float = 3.0
+	
+	var y_tolerance: float = 1.0
+	
+	var minimum_y: float = perceived_point["position"].y
+	var maximum_y: float = perceived_point["position"].y + y_tolerance
+	
+	var number_of_rays: int = 8
+	
+	var scan_results := RayCaster.cast_vertical_row(self, source_position, direction, ray_length, minimum_y, maximum_y, number_of_rays )
+	
+	# Then evaluate the scan results.
+	
+	DebugShapes.hide_green_spheres()
+	
+	# If all results have the same xz, it's a flat surface
+	
+	# TODO: For this we need the length of the ray cast
+	
+	# if a ray is shorter than the others, we know there's a ledge.
+	
+		# then do the *get edge fom collision point* on it and validate the point
+		
+	
+	var shortest_result: Dictionary = {"length": ray_length}
+	
+	var out: Dictionary = {}
+	
+	for result in scan_results:
+		if not result.is_empty():
+			if result["length"] < shortest_result["length"]:
+				shortest_result = result
+			DebugShapes.place_a_green_sphere(result["position"])
+	
+	if shortest_result.has("position"):
+		DebugShapes.place_the_blue_sphere(shortest_result["position"])
+		
+		out = get_edge_from_collision_point(shortest_result["position"], y_tolerance)
+		
+		if not out.is_empty():
+			DebugShapes.place_the_red_sphere(out["position"])
+		
+		
+		
+		
+	else:
+		pass
+
+	return out
 
 func compare_float(float0: float, float1: float, epsilon: float) -> bool:
 	
@@ -327,7 +335,7 @@ func get_ledge_from_star_cast(star_cast_hit_result: Dictionary) -> Dictionary:
 	
 
 ## Most basic function that will return the ledge that is within the y tolerance above the given point. 
-func get_ledge_from_collision_point(collision_point: Vector3, y_tolerance: float) -> Dictionary:
+func get_edge_from_collision_point(collision_point: Vector3, y_tolerance: float) -> Dictionary:
 	
 	
 	# First get the total height of the object that was collided with.
@@ -337,7 +345,7 @@ func get_ledge_from_collision_point(collision_point: Vector3, y_tolerance: float
 		return {}
 	
 	# Then cast a ray from the players xz position to the roof point. It will hit the edge.
-	var platform_edge := RayCaster.cast_ray(self, Vector3(global_position.x, platform_roof["position"].y, global_position.z ), platform_roof["position"], false)
+	var platform_edge := RayCaster.cast_ray(self, Vector3(camera.global_position.x, platform_roof["position"].y, camera.global_position.z ), platform_roof["position"], false)
 	
 	return platform_edge
 

@@ -96,6 +96,14 @@ shader = ExtResource("1_nby6r")
 render_priority = 0
 shader = ExtResource("1_nby6r")
 
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_o4wng"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ll54g"]
+noise = SubResource("FastNoiseLite_o4wng")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xi4co"]
+albedo_texture = SubResource("NoiseTexture2D_ll54g")
+
 [node name="BasicRpgLevelTest" type="Node3D" unique_id=1171436233]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=775899735]
@@ -235,12 +243,21 @@ sides = 21
 
 [node name="TestBuilding0" parent="." unique_id=348293384 instance=ExtResource("3_xi4co")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 104.552284, -2.0695705, -4.4502645)
-use_collision = true
 
 [node name="TestBuilding1" parent="." unique_id=1040783370 instance=ExtResource("3_xi4co")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 92.30013, -1.9319324, -4.4502645)
-use_collision = true
 
 [node name="TestBuilding2" parent="." unique_id=768654189 instance=ExtResource("3_xi4co")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79.29622, -1.6538963, -4.4502645)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=341099400]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.18365, 6.1609955, -41.269707)
 use_collision = true
+size = Vector3(9.11499, 1, 9.94043)
+material = SubResource("StandardMaterial3D_xi4co")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="." unique_id=559840619]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.18365, 2.960915, -41.269707)
+use_collision = true
+size = Vector3(4.7441406, 7.335327, 3.600586)
+material = SubResource("StandardMaterial3D_xi4co")
