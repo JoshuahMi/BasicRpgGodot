@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://c60jl8tnjl12" path="res://BasicRpg/Elements/Test/TestPlayer/BasicRpgTestPlayer0.tscn" id="2_xi4co"]
 [ext_resource type="PackedScene" uid="uid://dmgy4n8xqbl61" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/TestBuilding_0.tscn" id="3_xi4co"]
 [ext_resource type="PackedScene" uid="uid://c2nrohv4jicp2" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/TestBuilding_1.tscn" id="4_ll54g"]
+[ext_resource type="PackedScene" uid="uid://bntt7hevl0jd0" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/Test.fbx" id="5_o4wng"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_q1ege"]
 
@@ -271,3 +272,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96.70803, -1.1486521, -24.456
 
 [node name="TestBuilding5" parent="." unique_id=1708403297 instance=ExtResource("4_ll54g")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.053665, -1.1486521, -24.456558)
+
+[node name="Test" parent="." unique_id=1324270921 instance=ExtResource("5_o4wng")]
+transform = Transform3D(8.095, 0, 0, 0, 8.095, 0, 0, 0, 8.095, 67.46795, -0.41955936, 32.367165)

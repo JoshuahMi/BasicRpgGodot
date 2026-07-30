@@ -181,13 +181,13 @@ func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionar
 	
 	for result in scan_results:
 		if not result.is_empty():
-			if result["length"] < shortest_result["length"]:
+			if result["length"] <= shortest_result["length"]:
 				shortest_result = result
 			#DebugShapes.place_a_green_sphere(result["position"])
 	
 	if shortest_result.has("position"):
 		pass
-		#DebugShapes.place_the_blue_sphere(shortest_result["position"])
+		DebugShapes.place_the_blue_sphere(shortest_result["position"])
 		
 		out = get_edge_from_collision_point(shortest_result["position"], y_tolerance)
 		
