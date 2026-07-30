@@ -166,11 +166,7 @@ func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionar
 	
 	DebugShapes.hide_green_spheres()
 	
-	# If all results have the same xz, it's a flat surface
 	
-	# TODO: For this we need the length of the ray cast
-	
-	# if a ray is shorter than the others, we know there's a ledge.
 	
 		# then do the *get edge fom collision point* on it and validate the point
 		
@@ -179,20 +175,12 @@ func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionar
 	
 	var out: Dictionary = {}
 	
-	for result in scan_results:
-		if not result.is_empty():
-			if result["length"] <= shortest_result["length"]:
-				shortest_result = result
-			#DebugShapes.place_a_green_sphere(result["position"])
 	
-	if shortest_result.has("position"):
-		pass
-		DebugShapes.place_the_blue_sphere(shortest_result["position"])
 		
-		out = get_edge_from_collision_point(shortest_result["position"], y_tolerance)
+	#out = get_edge_from_collision_point(shortest_result["position"], y_tolerance)
 		
-		#if not out.is_empty():
-			#DebugShapes.place_the_red_sphere(out["position"])
+	#if not out.is_empty():
+		#DebugShapes.place_the_red_sphere(out["position"])
 
 
 	return out

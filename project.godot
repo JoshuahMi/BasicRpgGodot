@@ -24,7 +24,6 @@ RayCaster="*uid://d3i021mhvfsc2"
 
 [display]
 
-window/size/mode=2
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 

@@ -135,18 +135,21 @@ func cast_star(node_this_was_called_from: Node3D, start: Vector3, normal: Vector
 
 
 ## Will cast a series of horizonzal rays in a specific direction between a minimum and a maximum height.
-## The output array will be ordered by height from the lowest to the highest.
+## The hit result array will be ordered by height from the lowest to the highest.
 ## Will take a hit result as *start point xz* input.
 ## The start of the rays will be above the normal that the *start point xz* is providing, by the *normal float* value.
-func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictionary, normal_float: float, direction_xz: Vector3, ray_length: float, minimum_y: float, maximum_y: float, number_of_rays: int) -> Array[Dictionary]:
+func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictionary, normal_float: float, direction_xz: Vector3, ray_length: float, minimum_y: float, maximum_y: float, number_of_rays: int) -> Dictionary:
 	
 	if start_point_xz.is_empty():
-		return []
+		return {}
 	
-	# The output array that will be returned:
-	var out: Array[Dictionary] = []
+	# The output Dictionary that will be returned later
+	var out: Dictionary = {}
 	
-	out.append(start_point_xz)
+	# The Array that contains all the hit results:
+	var out_hit_results: Array[Dictionary] = []
+	
+	out_hit_results.append(start_point_xz)
 	
 	# First, get the y range, so the frame of the rays to be cast in
 	
@@ -172,11 +175,80 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 		
 		var hit_result = cast_ray(node_this_was_called_from, start, target, false)
 		
-		if not hit_result.is_empty():
-			DebugShapes.place_a_blue_sphere(hit_result["position"])
+		#if not hit_result.is_empty():
+			#DebugShapes.place_a_blue_sphere(hit_result["position"])
 		
-		out.append(hit_result)
+		out_hit_results.append(hit_result)
 		
 	
+	# Put the hit results into the output Dictionary
+	out["hit_results"] = out_hit_results
+	
+	# ----------------- INTERPRETATION OF THE RESULTS --------------------------------
+	
+	# TODO: # If all results have the same xz, it's a flat surface
+	
+	var is_flat_surface = true
+	
+	# Now check, which of the hit results is the shortest (and highest of the shortest, if 2 have the same length)
+	
+	var shortest_result: Dictionary = {"length": ray_length}
+	
+	
+	
+	for result in out_hit_results:
+		if not result.is_empty():
+			
+			DebugShapes.place_a_blue_sphere(result["position"])
+			
+			# if a result has a different x or z than the starting point, the vertical row cast is obviously not scanning a perfectly flat surface.
+			
+			var is_x_equal : bool = are_these_floats_equal(result["position"].x, start_point_xz["position"].x, 0.1)
+			var is_z_equal : bool = are_these_floats_equal(result["position"].z, start_point_xz["position"].z, 0.1)
+			
+			
+			
+			if !is_x_equal or !is_z_equal:
+				
+				is_flat_surface = false
+			
+			if result["length"] <= shortest_result["length"]:
+				shortest_result = result
+		# If one hit result is empty, it went beyond the surface, so not all hit results share the same xz
+		else:
+			# print("From RayCaster: Result is empty.")
+			is_flat_surface = false
+			
+	
+	if shortest_result.has("position"):
+		pass
+		DebugShapes.place_the_green_sphere(shortest_result["position"])
+	
+	
+	
+	# TODO: Then check where the "breakpoint" is in the hit results, i.e. the two hit results that are the highest shortest, and the one above it.
+	# Obviously it can be valid if the result above the highest shortest is empty. Then it simply shot beyond the surface
+	
+	if shortest_result["position"].y == start_point_xz["position"].y + y_frame:
+		
+		pass
+	
+	
+	
+	
+	
+	# What if the Highest shortest actually IS the highest?
+	# Then there is no ledge. I guess
+	# Make it so that it is possible to do a second vertical row cast easily from the format this specific output provides.
+	
+	#if is_flat_surface:
+		#print("From RayCaster: Is a flat surface!")
+	#else:
+		#print("From RayCaster: Is not a flat surface!")
 	return out
+	
+func are_these_floats_equal(float_a: float, float_b: float, epsilon: float) -> bool:
+	
+	return abs(float_a - float_b) < epsilon
+	
 	
