@@ -153,37 +153,42 @@ func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionar
 	var direction : Vector3 = perceived_point["normal"] * -1.0
 	var ray_length : float = 3.0
 	
-	var y_tolerance: float = 1.0
+	var y_tolerance: float = 3.0
 	
 	var minimum_y: float = perceived_point["position"].y
 	var maximum_y: float = perceived_point["position"].y + y_tolerance
 	
-	var number_of_rays: int = 6
+	var number_of_rays: int = 16
 	
 	var scan_results := RayCaster.cast_vertical_row(self, source_position, normal_float, direction, ray_length, minimum_y, maximum_y, number_of_rays )
 	
 	# Then evaluate the scan results.
 	
-	DebugShapes.hide_green_spheres()
+	#DebugShapes.hide_green_spheres()
 	
-	
-	
-		# then do the *get edge fom collision point* on it and validate the point
+	if not scan_results["breakpoint"]["result"].is_empty():
 		
-	
-	var shortest_result: Dictionary = {"length": ray_length}
-	
-	var out: Dictionary = {}
-	
-	
+		var second_cast_y_frame: float = scan_results["breakpoint"]["y_frame"]
+		var second_cast_start_point: Dictionary = scan_results["breakpoint"]["result"]
 		
-	#out = get_edge_from_collision_point(shortest_result["position"], y_tolerance)
+		var second_cast_scan_results: Dictionary = RayCaster.cast_vertical_row(self, second_cast_start_point, 0.5, second_cast_start_point["normal"] * -1.0, 1.0, second_cast_start_point["position"].y, second_cast_start_point["position"].y + second_cast_y_frame, 8)
 		
-	#if not out.is_empty():
-		#DebugShapes.place_the_red_sphere(out["position"])
+		for result in second_cast_scan_results["hit_results"]:
+			pass
+			#if not result.is_empty():
+				#DebugShapes.place_a_blue_sphere(result["position"])
+		
+		
+		if second_cast_scan_results["shortest"].has("position"):
+			DebugShapes.place_the_red_sphere(second_cast_scan_results["shortest"]["position"])
+		else:
+			pass
+			#DebugShapes.hide_the_red_sphere()
+	
+	
+	# then do the *get edge fom collision point* on it and validate the point
 
-
-	return out
+	return {}
 
 func compare_float(float0: float, float1: float, epsilon: float) -> bool:
 	

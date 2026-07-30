@@ -199,7 +199,15 @@ func initialize_debug_shapes():
 	
 	
 	
+func hide_all():
 	
+	hide_blue_spheres()
+	hide_green_spheres()
+	hide_red_spheres()
+	
+	hide_the_blue_sphere()
+	hide_the_green_sphere()
+	hide_the_red_sphere()
 	
 	
 	

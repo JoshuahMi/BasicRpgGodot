@@ -140,6 +140,8 @@ func cast_star(node_this_was_called_from: Node3D, start: Vector3, normal: Vector
 ## The start of the rays will be above the normal that the *start point xz* is providing, by the *normal float* value.
 func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictionary, normal_float: float, direction_xz: Vector3, ray_length: float, minimum_y: float, maximum_y: float, number_of_rays: int) -> Dictionary:
 	
+	DebugShapes.hide_all()
+	
 	if start_point_xz.is_empty():
 		return {}
 	
@@ -186,7 +188,7 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 	
 	# ----------------- INTERPRETATION OF THE RESULTS --------------------------------
 	
-	# TODO: # If all results have the same xz, it's a flat surface
+	# If all results have the same xz, it's a flat surface
 	
 	var is_flat_surface = true
 	
@@ -199,7 +201,7 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 	for result in out_hit_results:
 		if not result.is_empty():
 			
-			DebugShapes.place_a_blue_sphere(result["position"])
+			#DebugShapes.place_a_blue_sphere(result["position"])
 			
 			# if a result has a different x or z than the starting point, the vertical row cast is obviously not scanning a perfectly flat surface.
 			
@@ -222,21 +224,35 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 	
 	if shortest_result.has("position"):
 		pass
-		DebugShapes.place_the_green_sphere(shortest_result["position"])
+		#DebugShapes.place_the_green_sphere(shortest_result["position"])
 	
 	
 	
-	# TODO: Then check where the "breakpoint" is in the hit results, i.e. the two hit results that are the highest shortest, and the one above it.
+	# Then check where the "breakpoint" is in the hit results, i.e. the two hit results that are the highest shortest, and the one above it.
+	# Used by the grappling hook edge detector to determine in which area the ledge approximately is.
 	# Obviously it can be valid if the result above the highest shortest is empty. Then it simply shot beyond the surface
 	
-	if shortest_result["position"].y == start_point_xz["position"].y + y_frame:
+	var breakpoint_in_hit_results: Dictionary = {"result" : {}, "y_frame" : y_interval}
+	
+	if shortest_result.has("position"):
 		
-		pass
+		var is_the_shortest_the_highest = are_these_floats_equal(shortest_result["position"].y, start_point_xz["position"].y + y_frame, 0.05)
+		
+		if !is_the_shortest_the_highest:
+			# If it's the highest, there is no breakpoint. 
+			# if not, make the shortest result the breakpoint
+			breakpoint_in_hit_results["result"] = shortest_result
+			#print("From RayCaster: The shortest highest is NOT the highest!!")
+			pass
+		else:
+			#print("From RayCaster: The shortest highest is also the highest of all.")
+			pass
+			
 	
 	
 	
-	
-	
+	out["breakpoint"] = breakpoint_in_hit_results
+	out["shortest"] = shortest_result
 	# What if the Highest shortest actually IS the highest?
 	# Then there is no ledge. I guess
 	# Make it so that it is possible to do a second vertical row cast easily from the format this specific output provides.

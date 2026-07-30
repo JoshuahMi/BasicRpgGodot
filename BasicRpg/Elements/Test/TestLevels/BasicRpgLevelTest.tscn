@@ -243,6 +243,13 @@ radius = 6.928711
 height = 23.59668
 sides = 21
 
+[node name="CSGPolygon3D" type="CSGPolygon3D" parent="CSGCombiner3D" unique_id=801713842]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100.802475, 1.8478413, 23.131435)
+polygon = PackedVector2Array(-0.06952667, -2.0937505, -0.0068969727, 1.7623374, 1, 1, 1, 0)
+mode = 1
+spin_degrees = 360.0
+spin_sides = 8
+
 [node name="TestBuilding0" parent="." unique_id=348293384 instance=ExtResource("3_xi4co")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 104.552284, -2.0695705, -4.4502645)
 
