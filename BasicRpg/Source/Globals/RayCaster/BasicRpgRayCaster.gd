@@ -1,5 +1,16 @@
-extends Node3D
+class_name BasicRpgRayCaster extends Node3D
 
+## The class of the surface the vertical row cast has scanned. Will be output and can be used by the Grappling Hook Edge Detector to decide which strategy it will use to detect edges
+enum SurfaceClass {
+	
+	FLAT,	## If the y value of all normals is equal to zero
+	HILLY,	## if there are y normals, but the overall y value is near zero
+	POINTING_DOWNWARD, ## if the sum of the y normals is clearly negative
+	POINTING_UPWARD, ## if the sum of the y normals is clearly positive
+	
+	
+	
+}
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -196,6 +207,8 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 	
 	var shortest_result: Dictionary = {"length": ray_length}
 	
+	# The sum of all y normals. Will be used to classify the surface this vertical row of casts has scanned.
+	var relative_y: float = 0.0
 	
 	
 	for result in out_hit_results:
@@ -205,10 +218,11 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 			
 			# if a result has a different x or z than the starting point, the vertical row cast is obviously not scanning a perfectly flat surface.
 			
-			var is_x_equal : bool = are_these_floats_equal(result["position"].x, start_point_xz["position"].x, 0.1)
-			var is_z_equal : bool = are_these_floats_equal(result["position"].z, start_point_xz["position"].z, 0.1)
+			var is_x_equal : bool = Math.equal_float(result["position"].x, start_point_xz["position"].x, 0.1)
+			var is_z_equal : bool = Math.equal_float(result["position"].z, start_point_xz["position"].z, 0.1)
 			
-			
+			# Add the results y component of it's normal to the total relative y normal to be able to determine the surface's structure
+			relative_y += result["normal"].y
 			
 			if !is_x_equal or !is_z_equal:
 				
@@ -236,8 +250,11 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 	
 	if shortest_result.has("position"):
 		
-		var is_the_shortest_the_highest = are_these_floats_equal(shortest_result["position"].y, start_point_xz["position"].y + y_frame, 0.05)
+		var is_the_shortest_the_highest = Math.equal_float(shortest_result["position"].y, start_point_xz["position"].y + y_frame, 0.05)
 		
+	# What if the Highest shortest actually IS the highest?
+	# Then there is no ledge. 
+	# Make it so that it is possible to do a second vertical row cast easily from the format this specific output provides.
 		if !is_the_shortest_the_highest:
 			# If it's the highest, there is no breakpoint. 
 			# if not, make the shortest result the breakpoint
@@ -249,22 +266,26 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 			pass
 			
 	
+	# Evaluate the relative y
 	
+	if Math.equal_float(relative_y, 0.0, 0.05):
+		
+		out["surface_structure"] = SurfaceClass.FLAT
+		#print("From Ray Caster: Flat surface")
 	
+	elif Math.equal_float(relative_y, 0.0, 0.2):
+		out["surface_structure"] = SurfaceClass.HILLY
+		#print("From Ray Caster: Hilly surface")
+	elif relative_y > 0.0:
+		out["surface_structure"] = SurfaceClass.POINTING_UPWARD
+		#print("From Ray Caster: Surface is pointing upwards")
+	else:
+		out["surface_structure"] = SurfaceClass.POINTING_DOWNWARD
+		#print("From Ray Caster: Surface is pointing downwards")
+		
 	out["breakpoint"] = breakpoint_in_hit_results
 	out["shortest"] = shortest_result
-	# What if the Highest shortest actually IS the highest?
-	# Then there is no ledge. I guess
-	# Make it so that it is possible to do a second vertical row cast easily from the format this specific output provides.
 	
-	#if is_flat_surface:
-		#print("From RayCaster: Is a flat surface!")
-	#else:
-		#print("From RayCaster: Is not a flat surface!")
+	
 	return out
-	
-func are_these_floats_equal(float_a: float, float_b: float, epsilon: float) -> bool:
-	
-	return abs(float_a - float_b) < epsilon
-	
 	
