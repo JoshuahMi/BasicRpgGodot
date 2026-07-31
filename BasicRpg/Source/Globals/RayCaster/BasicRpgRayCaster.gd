@@ -18,7 +18,12 @@ func cast_ray_down(node_this_was_called_from: Node3D, start: Vector3, distance: 
 ## casts a ray from a given point upwards (+y) by a given distance
 func cast_ray_up(node_this_was_called_from: Node3D, start: Vector3, distance: float, shall_hit_from_inside: bool) -> Dictionary:
 	
-	return cast_ray(node_this_was_called_from, start, start + Vector3.UP * distance, shall_hit_from_inside)
+	var result := cast_ray(node_this_was_called_from, start, start + Vector3.UP * distance, shall_hit_from_inside)
+	
+	#if not result.is_empty():
+		#DebugShapes.place_a_blue_sphere(result["position"])
+	
+	return result
 
 ## Here the node that the space state is taken from and the object that the ray is shot from is identical.
 ## Casts a ray from the node xz position that completely stays on the xz plane, so the targets y value gets discarded and the given y argument is used
@@ -139,44 +144,47 @@ func cast_incremental_upwards(node_this_was_called_from: Node3D, start_point_A_x
 	
 	DebugShapes.hide_blue_spheres()
 	
-	var out : Array[Dictionary] = []
+	var out_results : Array[Dictionary] = []
 	
-	var line_length = (start_point_A_xz - start_point_B_xz).length()
+	# Take the y value from point A for both
+	start_point_A_xz = Vector3(start_point_A_xz.x, start_point_A_xz.y, start_point_A_xz.z)
+	start_point_B_xz = Vector3(start_point_B_xz.x, start_point_A_xz.y, start_point_B_xz.z)
 	
-	var interval = line_length / float(number_of_rays)
+	var direction : Vector3 = start_point_B_xz - start_point_A_xz
+	
+	#direction = direction.rotated(Vector3.UP, 3.141)
 	
 	
-	var direction = start_point_A_xz - start_point_B_xz
+	var line_length : float = direction.length()
+	#print(line_length)
+	direction = direction.normalized()
+	#print(direction.length())
+	
+	var interval : float = line_length / float(number_of_rays)
+	
+	
 	
 	for i in range(0, number_of_rays, 1):
 		
+		# BUG I assume this line is the problem.
 		var result : Dictionary = cast_ray_up(node_this_was_called_from, start_point_A_xz + direction * interval * i, ray_length, false)
 		
 		if not result.is_empty():
 			DebugShapes.place_a_blue_sphere(result["position"])
+			#print("From Ray Caster: hit something!")
+			
 		
-		
+		out_results.append(result)
 		
 		
 		
 		pass
 	
 	
+	var out : Dictionary = {}
+	out["hit_results"] = out_results
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	return {}
+	return out
 
 
 

@@ -52,7 +52,7 @@ func _ready() -> void:
 func _physics_process(_delta: float) -> void:
 	
 	# test_cast_forward()
-	var detected_platform_point = test_detect_ledge()
+	var detected_platform_point = test_detect_ledge_1()
 	
 	if not detected_platform_point.is_empty():
 	
@@ -77,13 +77,19 @@ func test_detect_ledge_1() -> Dictionary:
 	if cast_0.is_empty():
 		return {}
 	
+	# Make it floating on the surface
+	cast_0["position"] = cast_0["position"] + cast_0["normal"] * 0.1
+	
 	# Now check the height of the place we're in
 	
-	var maximum_y := get_highest_y_value(cast_0)
+	var maximum_y_wall := get_highest_y_value_from_hit_result(cast_0)
+	var maximum_y_player := get_highest_y_value_from_point(camera.global_position)
 	
-	# now cast an incremental horizontal up cast (TODO)
 	
 	
+	# now cast an incremental horizontal up cast
+	if not maximum_y_wall.is_empty():
+		RayCaster.cast_incremental_upwards(self, cast_0["position"], cast_0["position"] + cast_0["normal"] * 10.0, maximum_y_wall["position"].y * 2.0, 8)
 	
 	
 	
@@ -116,7 +122,7 @@ func test_detect_ledge_0() -> Dictionary:
 		
 		if detected_platform_point.is_empty():
 			
-			var highest_y := get_highest_y_value(cast_0)
+			var highest_y := get_highest_y_value_from_hit_result(cast_0)
 			
 			var result = RayCaster.cast_ray_down(self, Vector3(cast_0["position"].x, highest_y["position"].y, cast_0["position"].z), highest_y["position"].y * 1.25, false)
 			
@@ -218,9 +224,22 @@ func detect_platform():
 	
 #region HELPER FUNCTIONS
 
+## This is to be called from the player position. Returns the highest hit result the ray cast can reach.
+## Can be used for other things as well, it's not that specialized. Will return a hit result though, except for when it doesn't hit something.
+## A reduced Dictionary is then returned, with its only key being *position*
+func get_highest_y_value_from_point(start: Vector3) -> Dictionary:
+	var result := RayCaster.cast_ray_up(self, start, 100.0, false)
+	
+	if result.is_empty():
+		return {"position" : Vector3(start.x, start.y + 100.0, start.z)}
+	else:
+		DebugShapes.place_the_green_sphere(result["position"])
+		return {"position" : result["position"]}
+
+
 ## This is to be called after an initial raycast to a wall, returning the highest possible y value a raycast from above could be cast from.
 ## This approach is very naive, obviously. To be used when nothing else works.
-func get_highest_y_value(start: Dictionary) -> Dictionary:
+func get_highest_y_value_from_hit_result(start: Dictionary) -> Dictionary:
 	
 	if start.is_empty():
 		return {}
@@ -231,13 +250,14 @@ func get_highest_y_value(start: Dictionary) -> Dictionary:
 		
 		return {}
 	
-	var starting_point_of_the_raycast = start["position"] + start["normal"]
+	var starting_point_of_the_raycast = start["position"]
 	
 	var result := RayCaster.cast_ray_up(self, starting_point_of_the_raycast, 100.0, false)
 	
 	if result.is_empty():
 		return {"position" : Vector3(start["position"].x, start["position"].y + 100.0, start["position"].z)}
 	else:
+		#DebugShapes.place_the_green_sphere(result["position"])
 		return {"position" : result["position"]}
 		
 
