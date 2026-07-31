@@ -8,20 +8,7 @@ enum SurfaceClass {
 	POINTING_DOWNWARD, ## if the sum of the y normals is clearly negative
 	POINTING_UPWARD, ## if the sum of the y normals is clearly positive
 	
-	
-	
 }
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	pass
-
-
 
 ## casts a ray from a given point downwards (-y) by a given distance
 func cast_ray_down(node_this_was_called_from: Node3D, start: Vector3, distance: float, shall_hit_from_inside: bool) -> Dictionary:
@@ -53,7 +40,7 @@ func cast_ray(node_this_was_called_from: Node3D, start: Vector3, target: Vector3
 	
 	var space_state = node_this_was_called_from.get_world_3d().direct_space_state
 	
-	# TODO: add a "length" 
+	# add a "length" 
 	
 	var result = space_state.intersect_ray(query)
 	
@@ -145,13 +132,67 @@ func cast_star(node_this_was_called_from: Node3D, start: Vector3, normal: Vector
 	return nearest_result
 
 
+## TODO: Will cast a series of upwards ray casts between the xz of two points in space.
+## Begins casting at *start point A xz* and proceeds to cast to *start point B xz*. I think.
+## Used in the Grappling Hook edge detector.
+func cast_incremental_upwards(node_this_was_called_from: Node3D, start_point_A_xz: Vector3, start_point_B_xz: Vector3, ray_length: float, number_of_rays: int) -> Dictionary:
+	
+	DebugShapes.hide_blue_spheres()
+	
+	var out : Array[Dictionary] = []
+	
+	var line_length = (start_point_A_xz - start_point_B_xz).length()
+	
+	var interval = line_length / float(number_of_rays)
+	
+	
+	var direction = start_point_A_xz - start_point_B_xz
+	
+	for i in range(0, number_of_rays, 1):
+		
+		var result : Dictionary = cast_ray_up(node_this_was_called_from, start_point_A_xz + direction * interval * i, ray_length, false)
+		
+		if not result.is_empty():
+			DebugShapes.place_a_blue_sphere(result["position"])
+		
+		
+		
+		
+		
+		pass
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	return {}
+
+
+
+## TODO: Will be the sister function of the vertical row. Probably not as useful.
+func cast_horizontal_row():
+	
+	pass
+
+
 ## Will cast a series of horizonzal rays in a specific direction between a minimum and a maximum height.
 ## The hit result array will be ordered by height from the lowest to the highest.
 ## Will take a hit result as *start point xz* input.
 ## The start of the rays will be above the normal that the *start point xz* is providing, by the *normal float* value.
 func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictionary, normal_float: float, direction_xz: Vector3, ray_length: float, minimum_y: float, maximum_y: float, number_of_rays: int) -> Dictionary:
 	
-	DebugShapes.hide_all()
+	#DebugShapes.hide_all()
 	
 	if start_point_xz.is_empty():
 		return {}
@@ -174,7 +215,7 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 	# Scale the direction vector to the ray length, so it can be used to determine the 
 	var direction_xz_scaled = Vector3(direction_xz.x, 0.0, direction_xz.z).normalized() * ray_length
 	
-	DebugShapes.hide_blue_spheres()
+	#DebugShapes.hide_blue_spheres()
 	
 	# Then cast the rays
 	for index in range(1, number_of_rays + 1):
@@ -199,10 +240,6 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 	
 	# ----------------- INTERPRETATION OF THE RESULTS --------------------------------
 	
-	# If all results have the same xz, it's a flat surface
-	
-	var is_flat_surface = true
-	
 	# Now check, which of the hit results is the shortest (and highest of the shortest, if 2 have the same length)
 	
 	var shortest_result: Dictionary = {"length": ray_length}
@@ -210,37 +247,14 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 	# The sum of all y normals. Will be used to classify the surface this vertical row of casts has scanned.
 	var relative_y: float = 0.0
 	
-	
 	for result in out_hit_results:
 		if not result.is_empty():
-			
-			#DebugShapes.place_a_blue_sphere(result["position"])
-			
-			# if a result has a different x or z than the starting point, the vertical row cast is obviously not scanning a perfectly flat surface.
-			
-			var is_x_equal : bool = Math.equal_float(result["position"].x, start_point_xz["position"].x, 0.1)
-			var is_z_equal : bool = Math.equal_float(result["position"].z, start_point_xz["position"].z, 0.1)
 			
 			# Add the results y component of it's normal to the total relative y normal to be able to determine the surface's structure
 			relative_y += result["normal"].y
 			
-			if !is_x_equal or !is_z_equal:
-				
-				is_flat_surface = false
-			
 			if result["length"] <= shortest_result["length"]:
 				shortest_result = result
-		# If one hit result is empty, it went beyond the surface, so not all hit results share the same xz
-		else:
-			# print("From RayCaster: Result is empty.")
-			is_flat_surface = false
-			
-	
-	if shortest_result.has("position"):
-		pass
-		#DebugShapes.place_the_green_sphere(shortest_result["position"])
-	
-	
 	
 	# Then check where the "breakpoint" is in the hit results, i.e. the two hit results that are the highest shortest, and the one above it.
 	# Used by the grappling hook edge detector to determine in which area the ledge approximately is.
@@ -259,33 +273,29 @@ func cast_vertical_row(node_this_was_called_from: Node3D, start_point_xz: Dictio
 			# If it's the highest, there is no breakpoint. 
 			# if not, make the shortest result the breakpoint
 			breakpoint_in_hit_results["result"] = shortest_result
-			#print("From RayCaster: The shortest highest is NOT the highest!!")
+			
 			pass
 		else:
-			#print("From RayCaster: The shortest highest is also the highest of all.")
+			
 			pass
 			
-	
 	# Evaluate the relative y
 	
 	if Math.equal_float(relative_y, 0.0, 0.05):
 		
 		out["surface_structure"] = SurfaceClass.FLAT
-		#print("From Ray Caster: Flat surface")
 	
 	elif Math.equal_float(relative_y, 0.0, 0.2):
 		out["surface_structure"] = SurfaceClass.HILLY
-		#print("From Ray Caster: Hilly surface")
+		
 	elif relative_y > 0.0:
 		out["surface_structure"] = SurfaceClass.POINTING_UPWARD
-		#print("From Ray Caster: Surface is pointing upwards")
+		
 	else:
 		out["surface_structure"] = SurfaceClass.POINTING_DOWNWARD
-		#print("From Ray Caster: Surface is pointing downwards")
 		
 	out["breakpoint"] = breakpoint_in_hit_results
 	out["shortest"] = shortest_result
-	
 	
 	return out
 	

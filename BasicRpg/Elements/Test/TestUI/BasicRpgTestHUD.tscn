@@ -58,6 +58,11 @@ size_flags_horizontal = 0
 [node name="Label" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer" unique_id=1695501140]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "FPS: "
+
+[node name="Label3" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer" unique_id=1743294199]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5d5wd")
 text = "Current State: "
 
 [node name="Label4" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer" unique_id=1506508379]
@@ -78,6 +83,13 @@ text = "Movement Speed Y: "
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer2/HBoxContainer" unique_id=644324027]
 layout_mode = 2
 size_flags_horizontal = 0
+
+[node name="FPSLabel" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer2" unique_id=902422915]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_5d5wd")
+text = "Bla!"
 
 [node name="CurrentMovementStateLabel" type="Label" parent="PanelContainer/MarginContainer2/HBoxContainer/VBoxContainer2" unique_id=1140895331]
 unique_name_in_owner = true

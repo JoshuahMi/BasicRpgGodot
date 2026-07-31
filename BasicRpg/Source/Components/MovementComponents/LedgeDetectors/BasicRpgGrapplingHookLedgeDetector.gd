@@ -52,7 +52,12 @@ func _ready() -> void:
 func _physics_process(_delta: float) -> void:
 	
 	# test_cast_forward()
-	test_detect_ledge()
+	var detected_platform_point = test_detect_ledge()
+	
+	if not detected_platform_point.is_empty():
+	
+		DebugShapes.place_the_red_sphere(detected_platform_point["position"])
+	
 	#var result := detect_ledge()
 	#
 	#if not result.is_empty():
@@ -63,6 +68,73 @@ func _physics_process(_delta: float) -> void:
 
 	
 #region MAIN FUNCTIONS
+
+## Another try.
+func test_detect_ledge_1() -> Dictionary:
+	
+	var cast_0 := RayCaster.cast_forward(self, camera, platform_detection_distance)
+	
+	if cast_0.is_empty():
+		return {}
+	
+	# Now check the height of the place we're in
+	
+	var maximum_y := get_highest_y_value(cast_0)
+	
+	# now cast an incremental horizontal up cast (TODO)
+	
+	
+	
+	
+	
+	return {}
+
+
+
+
+
+## This is bullshit. I couldn't make use of the star cast. Is it actually useful?
+func test_detect_ledge_0() -> Dictionary:
+	
+	var cast_0 := RayCaster.cast_forward(self, camera, platform_detection_distance)
+	
+	if cast_0.is_empty():
+		return {}
+		
+	var star_result = RayCaster.cast_star(self, cast_0["position"], cast_0["normal"], 1.0)
+	
+	# The star result will often times return points with invalid normals, pointing down- or upwards. 
+	# So: TODO: make a good normal and pass it to the *scan surface* function
+
+	if not star_result.is_empty():
+		
+		if Math.equal_float(star_result["normal"].y, -1.0, 0.05):
+			star_result["normal"] = star_result["position"].direction_to(camera.global_position)
+			star_result["normal"] = Vector3(star_result["normal"].x, 0.0, star_result["normal"].z).normalized()
+		
+		var detected_platform_point := scan_surface_from_perceived_point(star_result)
+		
+		if detected_platform_point.is_empty():
+			
+			var highest_y := get_highest_y_value(cast_0)
+			
+			var result = RayCaster.cast_ray_down(self, Vector3(cast_0["position"].x, highest_y["position"].y, cast_0["position"].z), highest_y["position"].y * 1.25, false)
+			
+			# TODO: validate the point
+			
+			return result
+			
+			
+		else:
+			
+			return detected_platform_point
+		
+	return {}
+	
+	
+	# Do a star cast, to check if there's a surface / possible ledge
+	
+	# scan the surface the original 
 
 func test_detect_ledge() -> Dictionary:
 	
@@ -146,7 +218,39 @@ func detect_platform():
 	
 #region HELPER FUNCTIONS
 
+## This is to be called after an initial raycast to a wall, returning the highest possible y value a raycast from above could be cast from.
+## This approach is very naive, obviously. To be used when nothing else works.
+func get_highest_y_value(start: Dictionary) -> Dictionary:
+	
+	if start.is_empty():
+		return {}
+	
+	
+	# if it's not a vertical surface the return value will be invalid
+	if not Math.equal_float(start["normal"].y, 0.0, 0.05):
+		
+		return {}
+	
+	var starting_point_of_the_raycast = start["position"] + start["normal"]
+	
+	var result := RayCaster.cast_ray_up(self, starting_point_of_the_raycast, 100.0, false)
+	
+	if result.is_empty():
+		return {"position" : Vector3(start["position"].x, start["position"].y + 100.0, start["position"].z)}
+	else:
+		return {"position" : result["position"]}
+		
+
+	
+	
+	
+
+## Scans a surface by using two vertical rows of raycasts, to approximate a possible ledge for the grappling hook to hang onto
 func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionary:
+	
+	if perceived_point.is_empty():
+		return {}
+	
 	
 	var source_position := perceived_point
 	var normal_float := 1.0
@@ -160,6 +264,7 @@ func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionar
 	
 	var number_of_rays: int = 16
 	
+	# THE ACTUAL RAYCASTS
 	var scan_results := RayCaster.cast_vertical_row(self, source_position, normal_float, direction, ray_length, minimum_y, maximum_y, number_of_rays )
 	
 	# Then evaluate the scan results.
@@ -180,33 +285,29 @@ func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionar
 		
 		
 		if second_cast_scan_results["shortest"].has("position"):
-			DebugShapes.place_the_red_sphere(second_cast_scan_results["shortest"]["position"])
+			# DebugShapes.place_the_red_sphere(second_cast_scan_results["shortest"]["position"])
+			return second_cast_scan_results["shortest"]
 		else:
-			pass
+			return {}
 			#DebugShapes.hide_the_red_sphere()
 	
-	
+	else:
+		return {}
 	# then do the *get edge fom collision point* on it and validate the point
 
-	return {}
-
-func compare_float(float0: float, float1: float, epsilon: float) -> bool:
-	
-	# We could do it like this:
-	is_equal_approx(float0, float1)
-	
-	return abs(float0 - float1) < epsilon
 	
 
 ## Checks if the given detected point is a valid edge point the player could hang on
 ## with the grappling hook.
-func validate_evaluated_as_valid_edge_point(result: Dictionary):
+func validate_evaluated_as_valid_edge_point(result: Dictionary) -> bool:
 	if result.is_empty():
 		is_detected_platform_point_valid = false
+		return false
 
-	var is_valid_edge_point = compare_float(result["normal"].y, 0.0, 0.1)
+	var is_valid_edge_point = Math.equal_float(result["normal"].y, 0.0, 0.1)
 	
 	is_detected_platform_point_valid = is_valid_edge_point
+	return is_valid_edge_point
 	
 ## TODO: Will take an edge point and check if something is between the player and the edge point, making it invalid.
 ## Used when in the current frame no new edge point is found, so it will validate the last.
@@ -240,7 +341,7 @@ func validate_evaluated_point(result: Dictionary):
 		is_detected_platform_point_valid = false
 		return false
 	
-	var is_valid_edge_point = compare_float(result["normal"].y, 0.0, 0.1)
+	var is_valid_edge_point = Math.equal_float(result["normal"].y, 0.0, 0.1)
 	
 	# first, check how far the distance between the evaluated point and the camera is.
 	
