@@ -52,9 +52,9 @@ func _ready() -> void:
 func _physics_process(_delta: float) -> void:
 	
 	# test_cast_forward()
-	var detected_platform_point = test_detect_ledge_1()
+	var detected_platform_point = test_detect_ledge_2()
 	
-	if not detected_platform_point.is_empty():
+	if detected_platform_point.has("position"):
 	
 		DebugShapes.place_the_red_sphere(detected_platform_point["position"])
 	
@@ -69,10 +69,112 @@ func _physics_process(_delta: float) -> void:
 	
 #region MAIN FUNCTIONS
 
+
+func test_detect_ledge_2() -> Dictionary:
+	
+	DebugShapes.hide_all()
+	
+	# First, and this is the new approach of this function, cast a row forward.
+	
+	var direction = Math.get_forward_vector_of_node(camera)
+	direction = Vector3(direction.x, 0.0, direction.z).normalized()
+	var initial_number_of_rays : int = 8
+	# TODO: If this vector gets to be zero because the player is looking up or down, don't cast.
+	
+	var results: Array[Dictionary] = RayCaster.cast_row(self, camera.global_position, camera.global_position + Vector3.UP * 5.0, direction, initial_number_of_rays, 100.0)
+	
+	#region Debug
+	#for result in results:
+		#if result.has("position"):
+			#DebugShapes.place_a_blue_sphere(result["position"])
+		#
+	#endregion Debug
+	
+	
+	# Now detect the breakpoint.
+	# The breakpoint is most likely the shortest ray cast.
+	# If two have same length, the one with the higher index "wins"
+	
+	var shortest: Dictionary = evaluate_shortest_from_row_hit_result(results)
+	
+	#region Debug
+	#if shortest.has("position"):
+		#DebugShapes.place_the_green_sphere(shortest["position"])
+	#endregion Debug
+	
+	# ...and scan the area around the breakpoint
+	
+	var interval: float = abs(camera.global_position.y - (camera.global_position + Vector3.UP * 5.0).y) / float(initial_number_of_rays)
+	
+	var scan_results: Array[Dictionary] = []
+	if shortest.has("position") and not shortest["index"] == initial_number_of_rays - 1:
+		scan_results = RayCaster.cast_row(self, shortest["position"] + shortest["normal"], shortest["position"] + shortest["normal"] + Vector3.UP * interval, shortest["normal"] * -1.0, 8, 2.0)
+	
+	
+	var shortest_of_scan: Dictionary = evaluate_shortest_from_row_hit_result(scan_results)
+	
+	#region Debug
+	#for result in scan_results:
+		#
+		#if result.has("position"):
+			#DebugShapes.place_a_green_sphere(result["position"])
+		#
+		#pass
+	#endregion Debug
+	
+	
+	# GET THE POINT
+	var point: Dictionary = {}
+	if shortest_of_scan.has("position"):
+		
+		DebugShapes.place_the_red_sphere(shortest_of_scan["position"])
+		
+		# BUG: In this line lies the problem.
+		point = get_edge_from_collistion_hit_result(shortest_of_scan, interval / 7.0)
+		
+		if point.has("position"):
+			print("From Ledge Detector: found a point!")
+			DebugShapes.place_the_blue_sphere(point["position"])
+		else:
+			print("From Ledge Detector: no point.")
+		
+		
+		
+	# Validate the point by checking if the player can reach it
+	var is_point_valid: bool = false
+	if point.has("position"):
+		
+		var length_between_player_and_point: float = (camera.global_position - point["position"]).length()
+		
+		
+		var cast_from_player_to_point: Dictionary = RayCaster.cast_ray_from_node(self, point["position"], false)
+		
+		if cast_from_player_to_point.has("length"):
+			
+			if cast_from_player_to_point["length"] >= length_between_player_and_point:
+				is_point_valid = true
+			
+			
+		
+		
+		
+		
+		
+	if is_point_valid == true:
+		return point
+	else:
+		return {}
+
+
+
+
 ## Another try.
+## This one seems to naively assume that we have an initial normal (*cast 0*) y value of 0, though I could see the upwards cast working when we look at faces pointing downwards too, with some slight adjustments.
 func test_detect_ledge_1() -> Dictionary:
 	
-	var cast_0 := RayCaster.cast_forward(self, camera, platform_detection_distance)
+	DebugShapes.hide_red_spheres()
+	
+	var cast_0 : Dictionary = RayCaster.cast_forward(self, camera, platform_detection_distance)
 	
 	if cast_0.is_empty():
 		return {}
@@ -85,66 +187,70 @@ func test_detect_ledge_1() -> Dictionary:
 	var maximum_y_wall := get_highest_y_value_from_hit_result(cast_0)
 	var maximum_y_player := get_highest_y_value_from_point(camera.global_position)
 	
-	
-	
+	var up_raycasts: Dictionary = {}
+	var breakpoint_of_the_up_raycasts: Dictionary = {}
 	# now cast an incremental horizontal up cast
 	if not maximum_y_wall.is_empty():
-		RayCaster.cast_incremental_upwards(self, cast_0["position"], cast_0["position"] + cast_0["normal"] * 10.0, maximum_y_wall["position"].y * 2.0, 8)
-	
-	
-	
-	return {}
-
-
-
-
-
-## This is bullshit. I couldn't make use of the star cast. Is it actually useful?
-func test_detect_ledge_0() -> Dictionary:
-	
-	var cast_0 := RayCaster.cast_forward(self, camera, platform_detection_distance)
-	
-	if cast_0.is_empty():
-		return {}
 		
-	var star_result = RayCaster.cast_star(self, cast_0["position"], cast_0["normal"], 1.0)
+		up_raycasts = RayCaster.cast_row_upwards(self, cast_0["position"], camera.global_position, maximum_y_wall["position"].y * 2.0, 8)
+		
+		if up_raycasts.has("breakpoint"):
+			breakpoint_of_the_up_raycasts = up_raycasts["breakpoint"]
 	
-	# The star result will often times return points with invalid normals, pointing down- or upwards. 
-	# So: TODO: make a good normal and pass it to the *scan surface* function
-
-	if not star_result.is_empty():
+	# Check where the breakpoint is. Then we know from the height of the second hit from the breakpoint where we can shoot the vertical row ( between this hit results y position and the players y position)
+	
+	if not breakpoint_of_the_up_raycasts.is_empty():
 		
-		if Math.equal_float(star_result["normal"].y, -1.0, 0.05):
-			star_result["normal"] = star_result["position"].direction_to(camera.global_position)
-			star_result["normal"] = Vector3(star_result["normal"].x, 0.0, star_result["normal"].z).normalized()
+		# TODO: Here we have the breakpoint. Do a "scan surface" here, then we got an approximate edge point!
+		# Or not. Doesn't work as reliable as it should be.
 		
-		var detected_platform_point := scan_surface_from_perceived_point(star_result)
+		#DebugShapes.place_a_red_sphere(breakpoint_of_the_up_raycasts["result"]["position"])
+		#DebugShapes.place_a_red_sphere(breakpoint_of_the_up_raycasts["next_point"])
 		
-		if detected_platform_point.is_empty():
+		var cast_1: Dictionary = RayCaster.cast_ray(self, breakpoint_of_the_up_raycasts["next_point"], breakpoint_of_the_up_raycasts["result"]["position"], false)
+		var end_result: Dictionary = {}
+		# This is the edge UNDER the ledge.
+		if not cast_1.is_empty():
+			DebugShapes.place_the_green_sphere(cast_1["position"])
 			
-			var highest_y := get_highest_y_value_from_hit_result(cast_0)
+			cast_1["position"] = cast_1["position"] + cast_1["normal"] * 0.1
+			cast_1["position"] = Vector3(cast_1["position"].x, cast_1["position"].y + 0.05, cast_1["position"].z,)
 			
-			var result = RayCaster.cast_ray_down(self, Vector3(cast_0["position"].x, highest_y["position"].y, cast_0["position"].z), highest_y["position"].y * 1.25, false)
-			
-			# TODO: validate the point
-			
-			return result
-			
-			
+			end_result = scan_surface_from_perceived_point(cast_1)
+		
+		if not end_result.is_empty():
+			pass
+			#DebugShapes.place_the_red_sphere(end_result["position"])
 		else:
-			
-			return detected_platform_point
+			DebugShapes.hide_all()
 		
+		
+		#scan_surface_from_perceived_point()
+		
+		
+		
+		
+		
+		
+		
+		
+	else:
+		DebugShapes.hide_all()
+		
+		pass
+	
+	
+	
+	
+	
+	
 	return {}
-	
-	
-	# Do a star cast, to check if there's a surface / possible ledge
-	
-	# scan the surface the original 
 
+
+## Interestingly this one works best.
 func test_detect_ledge() -> Dictionary:
 	
-	var cast_0 := RayCaster.cast_forward(self, camera, platform_detection_distance)
+	var cast_0 : Dictionary = RayCaster.cast_forward(self, camera, platform_detection_distance)
 	
 	#if not cast_0.is_empty():
 		#DebugShapes.place_the_blue_sphere(cast_0["position"])
@@ -159,9 +265,7 @@ func test_detect_ledge() -> Dictionary:
 func detect_ledge() -> Dictionary:
 	
 	# first, get the wall collision position. 
-	# if the normals absolute y value is above a certain value, the ledge position isn't valid.
-	# TODO: search for a better wall collision point then.
-	var cast_0 := RayCaster.cast_forward(self, camera, platform_detection_distance)
+	var cast_0 : Dictionary = RayCaster.cast_forward(self, camera, platform_detection_distance)
 	
 	# then check if around the collision point is a ledge.
 	# use the normal of the wall to float above the wall and cast rays left and right, as well as up and down.
@@ -203,7 +307,7 @@ func detect_ledge() -> Dictionary:
 func detect_platform():
 	
 	# First, let the player cast a ray to a world object:
-	var cast_0 := RayCaster.cast_forward(self, camera, platform_detection_distance)
+	var cast_0 : Dictionary = RayCaster.cast_forward(self, camera, platform_detection_distance)
 	
 	if cast_0.is_empty():
 		return
@@ -224,11 +328,37 @@ func detect_platform():
 	
 #region HELPER FUNCTIONS
 
+func evaluate_shortest_from_row_hit_result(results: Array[Dictionary]) -> Dictionary:
+	
+	var shortest: Dictionary = {"length" : 1000.0, "index" : -1}
+	for result in results:
+		
+		if result.has("length") and shortest.has("length") and result.has("index") and shortest.has("index"):
+			
+			if Math.equal_float(result["length"], shortest["length"], 0.05):
+				
+				if result["index"] > shortest["index"]:
+					shortest = result
+				
+			elif result["length"] < shortest["length"]:
+				shortest = result
+		
+	if shortest.has("position"):
+		return shortest
+	else:
+		return {}
+
+
+
+
+
+
+
 ## This is to be called from the player position. Returns the highest hit result the ray cast can reach.
 ## Can be used for other things as well, it's not that specialized. Will return a hit result though, except for when it doesn't hit something.
 ## A reduced Dictionary is then returned, with its only key being *position*
 func get_highest_y_value_from_point(start: Vector3) -> Dictionary:
-	var result := RayCaster.cast_ray_up(self, start, 100.0, false)
+	var result : Dictionary = RayCaster.cast_ray_up(self, start, 100.0, false)
 	
 	if result.is_empty():
 		return {"position" : Vector3(start.x, start.y + 100.0, start.z)}
@@ -252,7 +382,7 @@ func get_highest_y_value_from_hit_result(start: Dictionary) -> Dictionary:
 	
 	var starting_point_of_the_raycast = start["position"]
 	
-	var result := RayCaster.cast_ray_up(self, starting_point_of_the_raycast, 100.0, false)
+	var result : Dictionary = RayCaster.cast_ray_up(self, starting_point_of_the_raycast, 100.0, false)
 	
 	if result.is_empty():
 		return {"position" : Vector3(start["position"].x, start["position"].y + 100.0, start["position"].z)}
@@ -264,7 +394,7 @@ func get_highest_y_value_from_hit_result(start: Dictionary) -> Dictionary:
 	
 	
 	
-
+## This is unreliable. No clue why.
 ## Scans a surface by using two vertical rows of raycasts, to approximate a possible ledge for the grappling hook to hang onto
 func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionary:
 	
@@ -285,12 +415,18 @@ func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionar
 	var number_of_rays: int = 16
 	
 	# THE ACTUAL RAYCASTS
-	var scan_results := RayCaster.cast_vertical_row(self, source_position, normal_float, direction, ray_length, minimum_y, maximum_y, number_of_rays )
+	var scan_results : Dictionary = RayCaster.cast_vertical_row(self, source_position, normal_float, direction, ray_length, minimum_y, maximum_y, number_of_rays )
+	
+	#DebugShapes.place_the_blue_sphere(scan_results["shortest"]["position"])
+	
+	
 	
 	# Then evaluate the scan results.
 	
 	#DebugShapes.hide_green_spheres()
 	
+	
+	# Do a second vertical row inside the y coordinates of the *breakpoint*
 	if not scan_results["breakpoint"]["result"].is_empty():
 		
 		var second_cast_y_frame: float = scan_results["breakpoint"]["y_frame"]
@@ -298,14 +434,13 @@ func scan_surface_from_perceived_point(perceived_point: Dictionary) -> Dictionar
 		
 		var second_cast_scan_results: Dictionary = RayCaster.cast_vertical_row(self, second_cast_start_point, 0.5, second_cast_start_point["normal"] * -1.0, 1.0, second_cast_start_point["position"].y, second_cast_start_point["position"].y + second_cast_y_frame, 8)
 		
-		for result in second_cast_scan_results["hit_results"]:
-			pass
+		#for result in second_cast_scan_results["hit_results"]:
 			#if not result.is_empty():
-				#DebugShapes.place_a_blue_sphere(result["position"])
+				#DebugShapes.place_a_green_sphere(result["position"])
 		
 		
 		if second_cast_scan_results["shortest"].has("position"):
-			# DebugShapes.place_the_red_sphere(second_cast_scan_results["shortest"]["position"])
+			DebugShapes.place_the_red_sphere(second_cast_scan_results["shortest"]["position"])
 			return second_cast_scan_results["shortest"]
 		else:
 			return {}
@@ -339,7 +474,7 @@ func validate_evaluated_as_from_player(result: Vector3):
 	
 	# Then check if something is between the player and the edge
 	
-	var result_between := RayCaster.cast_ray(self, camera.global_position, result, false)
+	var result_between : Dictionary = RayCaster.cast_ray(self, camera.global_position, result, false)
 	
 	if result_between.is_empty():
 		is_detected_platform_point_valid = true
@@ -369,7 +504,7 @@ func validate_evaluated_point(result: Dictionary):
 	
 	# Then check if something is between the player and the edge
 	
-	var result_between := RayCaster.cast_ray(self, camera.global_position, result["position"], false)
+	var result_between : Dictionary = RayCaster.cast_ray(self, camera.global_position, result["position"], false)
 	
 	
 	# if it didn't hit anything then it outreached
@@ -416,7 +551,7 @@ func get_ledge_from_star_cast(star_cast_hit_result: Dictionary) -> Dictionary:
 			
 			
 			# first, get the height of the ledge
-			var roof := RayCaster.cast_ray(self, star_cast_hit_result["position"] + Vector3(0.0, 0.01, 0.0), star_cast_hit_result["position"] + Vector3.UP * 10.0, false)
+			var roof : Dictionary = RayCaster.cast_ray(self, star_cast_hit_result["position"] + Vector3(0.0, 0.01, 0.0), star_cast_hit_result["position"] + Vector3.UP * 10.0, false)
 			
 			if roof.is_empty():
 				
@@ -450,44 +585,50 @@ func get_ledge_from_star_cast(star_cast_hit_result: Dictionary) -> Dictionary:
 		
 	else:
 		return {}
-	
 
+## UNRELIABLE. Only works when looking from a specific direction.
+func get_edge_from_collistion_hit_result(collision_point: Dictionary, y_tolerance: float) -> Dictionary:
+	
+	
+	if not collision_point.has("position") and not collision_point.has("normal"):
+		return {}
+		
+	# First get the total height of the object that was collided with.
+	# BUG: Here lies the problem. looking from a specific direction, no roof can be found. It just goes past the point
+	
+	# Jeez, even after moving the point along the normal towards the building, it's only from one side again
+	var corrected_collision_point: Vector3 = collision_point["position"] + collision_point["normal"] * -0.1
+	
+	
+	var platform_roof : Dictionary = RayCaster.cast_ray_down(self, Vector3(corrected_collision_point.x, corrected_collision_point.y + y_tolerance, corrected_collision_point.z), y_tolerance + 1.0, false)
+	
+	if platform_roof.is_empty():
+		print("From Ledge Detector: Didn't find a roof.")
+		return {}
+	else:
+		DebugShapes.place_a_blue_sphere(platform_roof["position"])
+		
+	var platform_edge : Dictionary = RayCaster.cast_ray(self, platform_roof["position"] + collision_point["normal"] * 0.1, platform_roof["position"], false)
+	
+	return platform_edge
+	
+	
+	
+	
+## UNRELIABLE somehow. I don't know why. Only works when looking from a specific side
 ## Most basic function that will return the ledge that is within the y tolerance above the given point. 
 func get_edge_from_collision_point(collision_point: Vector3, y_tolerance: float) -> Dictionary:
 	
 	
 	# First get the total height of the object that was collided with.
-	var platform_roof := RayCaster.cast_ray_down(self, Vector3(collision_point.x, collision_point.y + y_tolerance, collision_point.z), y_tolerance + 0.1, false)
+	var platform_roof : Dictionary = RayCaster.cast_ray_down(self, Vector3(collision_point.x, collision_point.y + y_tolerance, collision_point.z), y_tolerance + 1.0, false)
 	
 	if platform_roof.is_empty():
 		return {}
 	
 	# Then cast a ray from the players xz position to the roof point. It will hit the edge.
-	var platform_edge := RayCaster.cast_ray(self, Vector3(camera.global_position.x, platform_roof["position"].y, camera.global_position.z ), platform_roof["position"], false)
+	var platform_edge : Dictionary = RayCaster.cast_ray(self, Vector3(camera.global_position.x, platform_roof["position"].y, camera.global_position.z ), platform_roof["position"], false)
 	
 	return platform_edge
 
 #endregion HELPER FUNCTIONS
-
-#region TEST FUNCTIONS
-
-func test_cast_forward():
-	
-	var result := RayCaster.cast_forward(self, camera, 10.0)
-	
-	if not result.is_empty():
-		DebugShapes.place_the_blue_sphere(result["position"])
-	else:
-		DebugShapes.hide_the_blue_sphere()
-	
-	
-	
-	
-	
-	
-	
-	
-	pass
-
-
-#endregion TEST FUNCTIONS

@@ -10,6 +10,25 @@ enum SurfaceClass {
 	
 }
 
+
+## Casts a ray based on this nodes 3D world and returns the result
+func cast_ray(node_this_was_called_from: Node3D, start: Vector3, target: Vector3, shall_hit_from_inside: bool) -> Dictionary:
+	
+	var query := PhysicsRayQueryParameters3D.create(start, target)
+	
+	query.hit_from_inside = shall_hit_from_inside
+	
+	var space_state = node_this_was_called_from.get_world_3d().direct_space_state
+	
+	# add a "length" 
+	
+	var result = space_state.intersect_ray(query)
+	
+	if not result.is_empty():
+		result["length"] = (result["position"] - start).length()
+	
+	return result
+	
 ## casts a ray from a given point downwards (-y) by a given distance
 func cast_ray_down(node_this_was_called_from: Node3D, start: Vector3, distance: float, shall_hit_from_inside: bool) -> Dictionary:
 	
@@ -35,24 +54,6 @@ func cast_ray_from_node_xz(node_this_was_called_from: Node3D, y: float, target: 
 func cast_ray_from_node(node_this_was_called_from: Node3D, target: Vector3, shall_hit_from_inside: bool) -> Dictionary:
 	
 	return cast_ray(node_this_was_called_from, node_this_was_called_from.global_position, target, shall_hit_from_inside)
-
-## Casts a ray based on this nodes 3D world and returns the result
-func cast_ray(node_this_was_called_from: Node3D, start: Vector3, target: Vector3, shall_hit_from_inside: bool) -> Dictionary:
-	
-	var query := PhysicsRayQueryParameters3D.create(start, target)
-	
-	query.hit_from_inside = shall_hit_from_inside
-	
-	var space_state = node_this_was_called_from.get_world_3d().direct_space_state
-	
-	# add a "length" 
-	
-	var result = space_state.intersect_ray(query)
-	
-	if not result.is_empty():
-		result["length"] = (result["position"] - start).length()
-	
-	return result
 	
 ## Will cast a ray forward, from the given *object*, taking its rotation into account. Will cast a ray as long as *cast distance*
 func cast_forward(node_this_was_called_from: Node3D, object: Node3D, cast_distance: float) -> Dictionary:
@@ -137,13 +138,21 @@ func cast_star(node_this_was_called_from: Node3D, start: Vector3, normal: Vector
 	return nearest_result
 
 
-## TODO: Will cast a series of upwards ray casts between the xz of two points in space.
+
+
+
+
+
+
+
+## Will cast a series of upwards ray casts between the xz of two points in space.
 ## Begins casting at *start point A xz* and proceeds to cast to *start point B xz*. I think.
 ## Used in the Grappling Hook edge detector.
-func cast_incremental_upwards(node_this_was_called_from: Node3D, start_point_A_xz: Vector3, start_point_B_xz: Vector3, ray_length: float, number_of_rays: int) -> Dictionary:
+func cast_row_upwards(node_this_was_called_from: Node3D, start_point_A_xz: Vector3, start_point_B_xz: Vector3, ray_length: float, number_of_rays: int) -> Dictionary:
+	var out : Dictionary = {}
 	
-	DebugShapes.hide_blue_spheres()
-	
+	#DebugShapes.hide_blue_spheres()
+	#DebugShapes.hide_the_green_sphere()
 	var out_results : Array[Dictionary] = []
 	
 	# Take the y value from point A for both
@@ -152,13 +161,11 @@ func cast_incremental_upwards(node_this_was_called_from: Node3D, start_point_A_x
 	
 	var direction : Vector3 = start_point_B_xz - start_point_A_xz
 	
-	#direction = direction.rotated(Vector3.UP, 3.141)
-	
 	
 	var line_length : float = direction.length()
-	#print(line_length)
+
 	direction = direction.normalized()
-	#print(direction.length())
+
 	
 	var interval : float = line_length / float(number_of_rays)
 	
@@ -166,22 +173,27 @@ func cast_incremental_upwards(node_this_was_called_from: Node3D, start_point_A_x
 	
 	for i in range(0, number_of_rays, 1):
 		
-		# BUG I assume this line is the problem.
+		# The actual cast.
 		var result : Dictionary = cast_ray_up(node_this_was_called_from, start_point_A_xz + direction * interval * i, ray_length, false)
 		
 		if not result.is_empty():
-			DebugShapes.place_a_blue_sphere(result["position"])
-			#print("From Ray Caster: hit something!")
+			pass
+			#DebugShapes.place_a_blue_sphere(result["position"])
 			
+		else:
+			# set the last index as breakpoint, if the hit result is empty
+			if (out_results.size() >= i and out_results.size() != 0 )and not out.has("breakpoint") and not i == number_of_rays - 1:
+				if not out_results[i - 1].is_empty():
+					
+					# Somehow the y value needs to be corrected. No clue why.
+					var next_point: Vector3 = Vector3(start_point_A_xz.x, out_results[i - 1]["position"].y, start_point_A_xz.z) + direction * interval * i
+					# This was what caused a problem: start_point_A_xz + direction * interval * i
+					out["breakpoint"] = {"result" : out_results[i - 1], "next_point" : next_point}
+					#DebugShapes.place_the_green_sphere(out_results[i - 1]["position"])
+			pass	
 		
 		out_results.append(result)
-		
-		
-		
-		pass
 	
-	
-	var out : Dictionary = {}
 	out["hit_results"] = out_results
 	
 	return out
@@ -194,6 +206,33 @@ func cast_horizontal_row():
 	pass
 
 
+## General purpose function.
+## Will cast a row of rays between a starting point and an end point.
+func cast_row(node_this_was_called_from: Node3D, start_point: Vector3, end_point: Vector3, direction: Vector3, number_of_rays: int, ray_length: float) -> Array[Dictionary]:
+	
+	var out: Array[Dictionary] = []
+	
+	var start_point_direction: Vector3 = start_point.direction_to(end_point)
+	var interval: float = (start_point - end_point).length() / float(number_of_rays)
+
+	# *i* will have the values 0 to *number of rays* - 1
+	# Maybe I should change this to 1 - 8, so that the end point is casting a ray too, and the starting point isn't?
+	for i in number_of_rays:
+		
+		var cast_start: Vector3 = start_point + start_point_direction * i * interval
+		var cast_end: Vector3 = cast_start + direction * ray_length
+		var result: Dictionary = cast_ray(node_this_was_called_from, cast_start, cast_end, false)
+		result["index"] = i
+	
+		out.append(result)
+	
+	
+	return out
+
+
+
+
+## Specialized function meant to be called after hitting a surface.
 ## Will cast a series of horizonzal rays in a specific direction between a minimum and a maximum height.
 ## The hit result array will be ordered by height from the lowest to the highest.
 ## Will take a hit result as *start point xz* input.
