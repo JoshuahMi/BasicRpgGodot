@@ -317,4 +317,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96.70803, -1.1486521, -24.456
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.053665, -1.1486521, -24.456558)
 
 [node name="Test" parent="." unique_id=1324270921 instance=ExtResource("5_o4wng")]
-transform = Transform3D(8, 0, 0, 0, 8, 0, 0, 0, 8, 67.46795, -0.41955936, 32.367165)
+transform = Transform3D(8, 0, 0, 0, 8, 0, 0, 0, 8, 67.46795, -0.41955936, -131.63654)

@@ -244,7 +244,7 @@ func cast_row(node_this_was_called_from: Node3D, start_point: Vector3, end_point
 		
 		var cast_start: Vector3 = start_point + start_point_direction * i * interval
 		var cast_end: Vector3 = cast_start + direction * ray_length
-		var result: BasicRpgHitResult = cast_ray(node_this_was_called_from, cast_start, cast_end, false)
+		var result: BasicRpgHitResult = cast_ray(node_this_was_called_from, cast_start, cast_end, true)
 	
 		out.append(result)
 	
@@ -253,7 +253,7 @@ func cast_row(node_this_was_called_from: Node3D, start_point: Vector3, end_point
 		
 		var cast_start: Vector3 = end_point
 		var cast_end: Vector3 = end_point + direction * ray_length
-		var result: BasicRpgHitResult = cast_ray(node_this_was_called_from, cast_start, cast_end, false)
+		var result: BasicRpgHitResult = cast_ray(node_this_was_called_from, cast_start, cast_end, true)
 		
 		out.append(result)
 		
