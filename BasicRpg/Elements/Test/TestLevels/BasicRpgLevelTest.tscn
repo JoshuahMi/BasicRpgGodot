@@ -4,7 +4,8 @@
 [ext_resource type="PackedScene" uid="uid://c60jl8tnjl12" path="res://BasicRpg/Elements/Test/TestPlayer/BasicRpgTestPlayer0.tscn" id="2_xi4co"]
 [ext_resource type="PackedScene" uid="uid://dmgy4n8xqbl61" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/TestBuilding_0.tscn" id="3_xi4co"]
 [ext_resource type="PackedScene" uid="uid://c2nrohv4jicp2" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/TestBuilding_1.tscn" id="4_ll54g"]
-[ext_resource type="PackedScene" uid="uid://bntt7hevl0jd0" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/Test.fbx" id="5_o4wng"]
+[ext_resource type="ArrayMesh" uid="uid://cerhlxnn3h3n3" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/Test.obj" id="5_o4wng"]
+[ext_resource type="ArrayMesh" uid="uid://si6examkdmgo" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/Test2.obj" id="6_cakl3"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_q1ege"]
 
@@ -316,5 +317,29 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96.70803, -1.1486521, -24.456
 [node name="TestBuilding5" parent="." unique_id=1708403297 instance=ExtResource("4_ll54g")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.053665, -1.1486521, -24.456558)
 
-[node name="Test" parent="." unique_id=1324270921 instance=ExtResource("5_o4wng")]
-transform = Transform3D(8, 0, 0, 0, 8, 0, 0, 0, 8, 67.46795, -0.41955936, -131.63654)
+[node name="CSGCombiner3D2" type="CSGCombiner3D" parent="." unique_id=1541362698]
+use_collision = true
+
+[node name="CSGPolygon3D" type="CSGPolygon3D" parent="CSGCombiner3D2" unique_id=433631443]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79.72192, 6.306437, -148.54233)
+polygon = PackedVector2Array(-9.701134, -0.05350542, 67, 10, 43, -3, 22.806984, -20.061186)
+material = SubResource("StandardMaterial3D_xi4co")
+
+[node name="CSGMesh3D" type="CSGMesh3D" parent="CSGCombiner3D2" unique_id=1121186958]
+transform = Transform3D(3.275, 0, 0, 0, 3.275, 0, 0, 0, 3.275, 0, 1, -133)
+mesh = ExtResource("5_o4wng")
+material = SubResource("StandardMaterial3D_xi4co")
+
+[node name="CSGMesh3D2" type="CSGMesh3D" parent="CSGCombiner3D2" unique_id=694226540]
+transform = Transform3D(2.34, 0, 0, 0, 2.34, 0, 0, 0, 2.34, 0, 0, -127)
+mesh = ExtResource("6_cakl3")
+
+[node name="CSGMesh3D3" type="CSGMesh3D" parent="CSGCombiner3D2" unique_id=92092649]
+transform = Transform3D(2.34, 0, 0, 0, -1.02284645e-07, -2.34, 0, 2.34, -1.02284645e-07, -10, 4, -132)
+mesh = ExtResource("6_cakl3")
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="CSGCombiner3D2" unique_id=1811293847]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 5.125, -139)
+radius = 2.0
+height = 0.25
+cone = true

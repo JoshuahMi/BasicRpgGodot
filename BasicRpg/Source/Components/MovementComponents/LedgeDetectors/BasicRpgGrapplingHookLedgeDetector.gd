@@ -72,15 +72,13 @@ func test_detect_ledge() -> BasicRpgHitResult:
 	
 	
 	
+	#region DEBUG
 	
+	#endregion DEBUG
 	
 	# detect the breakpoint
 	var y_interval = y_tolerance / number_of_rays
 	var ledge: BasicRpgLedge = get_breakpoint_from_vertical_row(row_cast_0, y_interval)
-	
-	
-	ledge.validate()
-	
 	
 	if ledge.valid:
 		ledge = approximate_ledge_further(ledge, 8)

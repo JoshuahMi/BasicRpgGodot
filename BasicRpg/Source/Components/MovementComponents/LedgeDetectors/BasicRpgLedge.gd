@@ -4,6 +4,11 @@ class_name BasicRpgLedge extends RefCounted
 ## Represented by two hit results, the one under the ledge and the one above it.
 ## Can further approximate itself 
 
+
+
+
+
+
 ## If this is a valid ledge
 var valid: bool = false
 
@@ -20,6 +25,25 @@ var above: BasicRpgHitResult
 
 ## How small the y window is in which this ledge was approximated
 var y_tolerance
+
+
+## Returns validity of the ledge by checking its distance to interval ratio
+## Only makes sense when the ledge is on an angular surface
+func validate_by_distance_ratio() -> bool:
+	
+	if above.valid:
+		if under.length > above.length:
+			return false
+	
+	var distance_y_ratio = distance_xz_between() / y_tolerance
+	
+	print(distance_y_ratio)
+	
+	if distance_y_ratio > 1.0:
+		return true
+	else:
+		return false
+		
 
 
 ## Checks if the "under" point has a normal that points either upwards or has no y, so is horizontal
@@ -47,8 +71,6 @@ func validate():
 		if (under.position - above.position).length() > 0.1:
 			
 			
-			
-			
 			valid = true
 			return
 			
@@ -61,8 +83,8 @@ func validate():
 	
 	else:
 		
-		if under.normal.y > 0.7 and distance_between() > 1.0:
-			print("From Ledge: VALID with strongly up pointing normal")
+		if under.normal.y > 0.5 and validate_by_distance_ratio():
+			
 			valid = true
 			return
 		else:
@@ -70,11 +92,24 @@ func validate():
 			return
 		
 	
+	
+func distance_xz_between() -> float:
+	
+	if above.valid: 
+		
+		var position_above: Vector3 = Vector3(above.position.x, 0.0, above.position.z)
+		var position_under: Vector3 = Vector3(under.position.x, 0.0, under.position.z)
+		
+		return (position_under - position_above).length()
+	else:
+		return -1.0
+	
+	
 func distance_between() -> float:
 	if above.valid: 
 		return (under.position - above.position).length()
 	else:
-		return 10.0	
+		return -1.0
 		
 		
 		
