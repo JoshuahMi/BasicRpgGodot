@@ -56,7 +56,7 @@ func validate():
 	
 	if not above.valid:
 		
-		print("From Ledge: Above invalid, so under automatically valid!")
+		#print("From Ledge: Above invalid, so under automatically valid!")
 		
 		valid = true
 		return
@@ -67,7 +67,7 @@ func validate():
 	
 	# If the normal is horizontal
 	if Math.equal_float(under.normal.y, 0.0, 0.01):
-		print("From Ledge: normal horizontal!")
+		#print("From Ledge: normal horizontal!")
 		if (under.position - above.position).length() > 0.1:
 			
 			
@@ -75,7 +75,7 @@ func validate():
 			return
 			
 	elif under.normal.y < 0.0:
-		print("From Ledge: Normal pointing downwards! ")
+		#print("From Ledge: Normal pointing downwards! ")
 		valid = false
 		return
 	
