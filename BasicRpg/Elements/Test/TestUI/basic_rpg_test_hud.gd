@@ -4,6 +4,9 @@ extends Control
 
 var state_machine: BasicRpgMovementStateMachine
 var input_component: BasicRpgInputComponent
+var camera_component: BasicRpgCameraComponent
+var edge_detector: BasicRpgGrapplingHookEdgeDetector
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -163,5 +166,20 @@ func update_state_label(state: BasicRpgMovementStateMachine.States):
 			%CurrentMovementStateLabel.text = "Dive"
 
 	
+	
+	pass
+
+
+func hide_grappling_hook_edge_indicator():
+	
+	%GrapplingHookEdgeIndicator.visible = false
+	
+	pass
+
+func place_grappling_hook_edge_indicator(world_coordinates: Vector3):
+	
+	var new_position: Vector2 = camera_component.camera.unproject_position(world_coordinates)
+	
+	%GrapplingHookEdgeIndicator.set_position(new_position)
 	
 	pass

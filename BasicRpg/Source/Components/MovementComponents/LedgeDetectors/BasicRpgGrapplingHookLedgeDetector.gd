@@ -6,7 +6,7 @@ class_name BasicRpgGrapplingHookEdgeDetector extends Node3D
 
 @export var camera: Node3D
 
-@export var debug: bool = true
+@export var debug: bool = false
 
 @export var platform_detection_distance: float = 100.0
 
@@ -30,16 +30,10 @@ func _physics_process(_delta: float) -> void:
 	var detected_point: BasicRpgHitResult = detect_ledge_0()
 	
 	if detected_point.valid:
-		#print("From Ledge Detector: detected point VALID!")
+		
 		detected_platform_point = detected_point.position
-	else:
-		pass
-		#print("From Ledge Detector: detected point invalid!")
-	
-	
-	#if detected_platform_point.valid:
-	#
-		#DebugShapes.place_the_red_sphere(detected_platform_point["position"])
+
+		
 	
 #region MAIN FUNCTIONS
 
@@ -70,17 +64,9 @@ func test_detect_ledge() -> BasicRpgHitResult:
 	
 	if not cast_0.valid:
 		
-		# TODO: If nothing was hit, then cast a generic vertical row forward.
+		# If nothing was hit, then cast a generic vertical row forward.
 		var row: Array[BasicRpgHitResult] = RayCaster.cast_row(self, camera.global_position, camera.global_position + Vector3.UP * 5.0, Math.get_forward_vector_of_node(camera), 16, 100.0, true)
 		
-		#region Debug
-		
-		for result in row:
-			
-			if result.valid:
-				DebugShapes.place_a_blue_sphere(result.position)
-		
-		#endregion Debug
 		
 		# Get the breakpoint from the row hit result
 		
@@ -88,9 +74,6 @@ func test_detect_ledge() -> BasicRpgHitResult:
 		
 		if not brkpnt.valid:
 			return brkpnt
-		
-		else:
-			DebugShapes.place_the_green_sphere(brkpnt.position)
 		
 		# BUG somehow this doesn't work as a base point.
 		# To be more precise, this 
@@ -112,17 +95,6 @@ func test_detect_ledge() -> BasicRpgHitResult:
 		var row_number_of_rays = 7
 		
 		var up_row: Array[BasicRpgHitResult] = RayCaster.cast_row(self, start_row_cast, end_row_cast, row_direction, row_number_of_rays, 10.0, true)
-		
-		#region Debug
-		
-		#for result in up_row:
-			#if result.valid:
-				#
-				#DebugShapes.place_a_green_sphere(result.position)
-		
-		
-		
-		#endregion Debug
 		
 		
 		# Now check the breakpoint
@@ -160,16 +132,6 @@ func test_detect_ledge() -> BasicRpgHitResult:
 		
 			var up_row: Array[BasicRpgHitResult] = RayCaster.cast_row(self, start_row_cast, end_row_cast, row_direction, row_number_of_rays, 10.0, true)
 		
-			#region Debug
-			
-			#for result in up_row:
-				#if result.valid:
-					#
-					#DebugShapes.place_a_green_sphere(result.position)
-			
-			
-			
-			#endregion Debug
 		
 		
 			# Now check the breakpoint
@@ -227,44 +189,7 @@ func test_detect_ledge() -> BasicRpgHitResult:
 	var number_of_rays: int = 7
 	
 	var row_cast_0: Array[BasicRpgHitResult] = RayCaster.cast_row(self, row_cast_0_begin, row_cast_0_end, base_point.normal * -1.0, 7, 5.0, true)
-	
-	
-	#region Debug
-	
-	# Okay, so when the base point is from a generic row because the player didn't look directly at a surface but into nothingness,
-	# the vertical row doesn't hit anything.
-	
-	#DebugShapes.hide_all()
-	
-	DebugShapes.place_a_red_sphere(row_cast_0_begin)
-	DebugShapes.place_a_red_sphere(row_cast_0_end)
-	#print(row_cast_0_begin)
-	#print(row_cast_0_end)
-	
-	
-	if row_cast_0.size() == 0:
-		pass
-		#print("From Ledge Detector: Row didn't happen.")
-	
-	var is_at_least_one_valid = false
-	
-	for result in row_cast_0:
-		if result.valid:
-			is_at_least_one_valid = true
-	
-	if is_at_least_one_valid:
-		pass
-		#print("From Ledge Detector: One is valid!")
-	
-	
-	#DebugShapes.hide_all()
-	
-	#for result in row_cast_0:
-		#if result.valid:
-			#DebugShapes.place_a_green_sphere(result.position)
-	
-	
-	#endregion Debug
+
 	
 	
 	
@@ -278,9 +203,6 @@ func test_detect_ledge() -> BasicRpgHitResult:
 	
 	ledge.validate()
 	
-	#if row_cast_0_breakpoint.valid:
-		#
-		#DebugShapes.place_the_blue_sphere(row_cast_0_breakpoint.under.position)
 	
 	if ledge.valid:
 		return ledge.under
@@ -422,8 +344,7 @@ func get_base_point() -> BasicRpgHitResult:
 		if not brkpnt.valid:
 			return brkpnt
 		
-		else:
-			DebugShapes.place_the_green_sphere(brkpnt.position)
+		
 		
 		base_point = brkpnt
 		return base_point
