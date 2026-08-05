@@ -3,8 +3,6 @@ class_name BasicRpgGrapplingHookEdgeDetector extends Node3D
 ## A helper class for detecting valid points for the grappling hook to hang on to.
 
 # TODO: Keeping the last known valid edge point AND validating it in the sense of checking if something is between the player and the point.
-# TODO: Add more debug functionality
-# TODO: Add "Abtasten" function in a reasonable way
 
 @export var camera: Node3D
 
@@ -29,7 +27,7 @@ func _physics_process(_delta: float) -> void:
 	
 	# test_cast_forward()
 	
-	var detected_point: BasicRpgHitResult = test_detect_ledge()
+	var detected_point: BasicRpgHitResult = detect_ledge_0()
 	
 	if detected_point.valid:
 		#print("From Ledge Detector: detected point VALID!")
@@ -45,6 +43,21 @@ func _physics_process(_delta: float) -> void:
 	
 #region MAIN FUNCTIONS
 
+func detect_ledge_0() -> BasicRpgHitResult:
+	
+	var base_point: BasicRpgHitResult = get_base_point() 
+	
+	var ledge: BasicRpgLedge = get_ledge_from_base_point(base_point)
+	
+	if ledge.valid:
+		return ledge.under
+	else:
+		
+		var out: BasicRpgHitResult = BasicRpgHitResult.new()
+		out.valid = false
+		
+		return out
+
 func test_detect_ledge() -> BasicRpgHitResult:
 	
 	# This point we will actually use in the 2nd part of the function.
@@ -53,7 +66,7 @@ func test_detect_ledge() -> BasicRpgHitResult:
 	# first, get the wall collision position. 
 	var cast_0 : BasicRpgHitResult = RayCaster.cast_forward(self, camera, platform_detection_distance)
 	
-	# TODO: Get a better wall collision.
+	# Now Get a better base point.
 	
 	if not cast_0.valid:
 		
@@ -230,7 +243,8 @@ func test_detect_ledge() -> BasicRpgHitResult:
 	
 	
 	if row_cast_0.size() == 0:
-		print("From Ledge Detector: Row didn't happen.")
+		pass
+		#print("From Ledge Detector: Row didn't happen.")
 	
 	var is_at_least_one_valid = false
 	
@@ -239,7 +253,8 @@ func test_detect_ledge() -> BasicRpgHitResult:
 			is_at_least_one_valid = true
 	
 	if is_at_least_one_valid:
-		print("From Ledge Detector: One is valid!")
+		pass
+		#print("From Ledge Detector: One is valid!")
 	
 	
 	#DebugShapes.hide_all()
@@ -382,31 +397,150 @@ func approximate_ledge_further(ledge: BasicRpgLedge, number_of_rays: int) -> Bas
 	
 	return get_breakpoint_from_vertical_row(row, ledge.y_tolerance / number_of_rays)
 
+	
+	
+func get_base_point() -> BasicRpgHitResult:
+	
+	# This point we will return
+	var base_point: BasicRpgHitResult
+	
+	# first, get the wall collision position. 
+	var cast_0 : BasicRpgHitResult = RayCaster.cast_forward(self, camera, platform_detection_distance)
+	
+	# Now Get a better base point.
+	
+	# If the cast went into nothingness, i.e. nothing was hit, then cast a vertical row forward instead
+	if not cast_0.valid:
+		
+		# If nothing was hit, then cast a generic vertical row forward.
+		var row: Array[BasicRpgHitResult] = RayCaster.cast_row(self, camera.global_position, camera.global_position + Vector3.UP * 5.0, Math.get_forward_vector_of_node(camera), 16, 100.0, true)
+		
+		# Get the breakpoint from the row hit result
+		
+		var brkpnt: BasicRpgHitResult = get_breakpoint_from_row(row)[0]
+		
+		if not brkpnt.valid:
+			return brkpnt
+		
+		else:
+			DebugShapes.place_the_green_sphere(brkpnt.position)
+		
+		base_point = brkpnt
+		return base_point
+	
+	# If we look at a surface that is pointing downwards, do the up row cast.
+	if cast_0.normal.y < 0.0 and cast_0.valid:
+		
+		var start_row_cast = cast_0.position
+		var end_row_cast = Vector3(camera.global_position.x, cast_0.position.y, camera.global_position.z)
+		var row_direction = Vector3.UP
+		var row_number_of_rays = 7
+		
+		var up_row: Array[BasicRpgHitResult] = RayCaster.cast_row(self, start_row_cast, end_row_cast, row_direction, row_number_of_rays, 10.0, true)
+		
+		
+		# Now check the breakpoint
+		
+		var brkpnt: Array[BasicRpgHitResult] = get_breakpoint_from_row(up_row)
+		
+		# Then make an artificial hit result with the normal pointing towards the player
+		base_point = BasicRpgHitResult.new()
+		base_point.position = brkpnt[0].position
+		
+		var normal = brkpnt[0].position.direction_to(camera.global_position)
+		normal = Vector3(normal.x, 0.0, normal.z).normalized()
+		
+		base_point.normal = normal
+		
+		return base_point
+	
+	# If the normal is horizontal, 
+	# make a single up cast, to check if there is a roof.
+	# 	IF so, cast an up row cast.
+	# 	if NOT, take the *cast 0* as base point
+	
+	elif Math.equal_float(cast_0.normal.y, 0.0, 0.01) and cast_0.valid:
+		
+		var roof: BasicRpgHitResult = RayCaster.cast_ray_up(self, cast_0.position + cast_0.normal, 100.0, false)
+		
+		if roof.valid:
+			# then do an up row ray cast
+			# TODO: REFACTOR THIS into a function.
+			var start_row_cast = cast_0.position
+			var end_row_cast = Vector3(camera.global_position.x, cast_0.position.y, camera.global_position.z)
+			var row_direction = Vector3.UP
+			var row_number_of_rays = 7
+		
+			var up_row: Array[BasicRpgHitResult] = RayCaster.cast_row(self, start_row_cast, end_row_cast, row_direction, row_number_of_rays, 10.0, true)
+		
+			# Now check the breakpoint
+			
+			var brkpnt: Array[BasicRpgHitResult] = get_breakpoint_from_row(up_row)
+			
+			# Then make an artificial hit result with the normal pointing towards the player
+			base_point = BasicRpgHitResult.new()
+			base_point.position = brkpnt[0].position
+			
+			var normal = brkpnt[0].position.direction_to(camera.global_position)
+			normal = Vector3(normal.x, 0.0, normal.z).normalized()
+			
+			base_point.normal = normal
+			
+			return base_point
+			
+			pass
+		else:
+			base_point = cast_0
+			return base_point
+	
+	# If the normal is pointing upwards.
+	elif cast_0.normal.y > 0.0 and cast_0.valid:
+		
+		# if it's a surface that is pointing upwards, simply return an invalid hit result
+		var out: BasicRpgHitResult = BasicRpgHitResult.new()
+		out.valid = false
+		
+		return out
 
-#func get_shortest_from_row_cast(row: Array[BasicRpgHitResult]) -> BasicRpgHitResult:
-	#
-	#var shortest: BasicRpgHitResult = BasicRpgHitResult.new()
-	#shortest.valid = false
-	#
-	#shortest.length = 100.0
-	#
-	#
-	#if row.size() < 1:
-		#shortest.valid = false
-		#return shortest
-	#
-	#elif row.size() == 1:
-		#shortest = row[0]
-		#return shortest
-		#
-	#for result in row:
 	
 	
+	var out: BasicRpgHitResult = BasicRpgHitResult.new()
+	out.valid = false
 	
-	
+	return out
 	
 	
 
-
+func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
+	
+	if base_point == null:
+		var out: BasicRpgLedge = BasicRpgLedge.new()
+		out.valid = false
+		
+		return out
+	
+	# Then cast a row on the wall
+	
+	var y_tolerance: float = 2.0
+	
+	if base_point.normal == Vector3.ZERO:
+		print("From Ledge Detector: normal ZERO!")
+	
+	var row_cast_0_begin: Vector3 = base_point.position + base_point.normal 
+	var row_cast_0_end: Vector3 = row_cast_0_begin + Vector3.UP * y_tolerance
+	var number_of_rays: int = 7
+	
+	var row_cast_0: Array[BasicRpgHitResult] = RayCaster.cast_row(self, row_cast_0_begin, row_cast_0_end, base_point.normal * -1.0, 7, 5.0, true)
+	
+	# detect the breakpoint
+	var y_interval = y_tolerance / number_of_rays
+	var ledge: BasicRpgLedge = get_breakpoint_from_vertical_row(row_cast_0, y_interval)
+	
+	if ledge.valid:
+		ledge = approximate_ledge_further(ledge, 8)
+	
+	ledge.validate()
+	
+	return ledge
 
 #endregion HELPER FUNCTIONS
