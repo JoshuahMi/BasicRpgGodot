@@ -43,6 +43,12 @@ func _physics_process(delta: float) -> void:
 	
 	hud.place_grappling_hook_edge_indicator(grappling_hook_edge_detector.detected_platform_point)
 	
+	print("From Test Player: Is position behind camera: " + str(camera_component.camera.is_position_behind(grappling_hook_edge_detector.detected_platform_point)))
+	
+	#if camera_component.camera.is_position_behind(grappling_hook_edge_detector.detected_platform_point):
+		#hud.place_grappling_hook_edge_indicator(grappling_hook_edge_detector.detected_platform_point)
+	#else:
+		#hud.hide_grappling_hook_edge_indicator()
 	
 	
 func _on_state_changed(_new_state):

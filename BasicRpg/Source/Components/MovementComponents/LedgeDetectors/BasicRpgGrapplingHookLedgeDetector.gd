@@ -29,6 +29,8 @@ func _physics_process(_delta: float) -> void:
 	
 	var detected_point: BasicRpgHitResult = detect_ledge_0()
 	
+	detected_point.valid = validate_point_as_from_player(detected_point.position)
+	
 	if detected_point.valid:
 		
 		detected_platform_point = detected_point.position
@@ -75,14 +77,8 @@ func test_detect_ledge() -> BasicRpgHitResult:
 		if not brkpnt.valid:
 			return brkpnt
 		
-		# BUG somehow this doesn't work as a base point.
-		# To be more precise, this 
-		
-		
 		
 		base_point = brkpnt
-		#print(base_point.normal)
-		#print(base_point.position)
 		
 	if cast_0.normal.y < 0.0 and cast_0.valid:
 		
@@ -156,7 +152,7 @@ func test_detect_ledge() -> BasicRpgHitResult:
 		
 		
 		# if it's a surface that is pointing upwards, simply return an invalid hit result
-		print("From Ledge Detector: Surface is pointing upwards")
+	
 		var out: BasicRpgHitResult = BasicRpgHitResult.new()
 		out.valid = false
 		
@@ -168,8 +164,8 @@ func test_detect_ledge() -> BasicRpgHitResult:
 	# ----------------------------------------------------------------------------------------------------------------------------
 	
 	if base_point == null:
-		print("From Ledge Detector: base point is null!")
-		#print("From Ledge Detector: Base point is null!")
+		
+		
 		var out: BasicRpgHitResult = BasicRpgHitResult.new()
 		out.valid = false
 		
@@ -180,10 +176,8 @@ func test_detect_ledge() -> BasicRpgHitResult:
 	var y_tolerance: float = 2.0
 	
 	
-	# BUG The beginning and end points are invalid when the base point comes from a generic vertical row.
-	print("From Ledge detector: 2nd Part of the function")
-	#print(base_point.normal)
-	print(base_point.position)
+	
+	
 	var row_cast_0_begin: Vector3 = base_point.position + base_point.normal 
 	var row_cast_0_end: Vector3 = row_cast_0_begin + Vector3.UP * y_tolerance
 	var number_of_rays: int = 7
@@ -444,9 +438,6 @@ func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 	
 	var y_tolerance: float = 2.0
 	
-	if base_point.normal == Vector3.ZERO:
-		print("From Ledge Detector: normal ZERO!")
-	
 	var row_cast_0_begin: Vector3 = base_point.position + base_point.normal 
 	var row_cast_0_end: Vector3 = row_cast_0_begin + Vector3.UP * y_tolerance
 	var number_of_rays: int = 7
@@ -463,5 +454,38 @@ func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 	ledge.validate()
 	
 	return ledge
+
+
+## This function is purely to check if something is between the player and the point.
+## Returns true if nothing is between the player and the point.
+func validate_point_as_from_player(point: Vector3) -> bool:
+	
+	var actual_distance = (camera.global_position - point).length()
+	
+	var cast = RayCaster.cast_ray(self, camera.global_position, point, false)
+	
+	if not cast.valid:
+		return true
+		
+	if cast.length < actual_distance:
+		return false
+	
+	else:
+		return true
+	
+	
+	
+	
+	
+	
+	return false
+	
+	
+	
+	
+	
+	
+	
+	pass
 
 #endregion HELPER FUNCTIONS
