@@ -30,7 +30,7 @@ var y_tolerance
 ## Returns validity of the ledge by checking its distance to interval ratio
 ## Only makes sense when the ledge is on an angular surface
 func validate_by_distance_ratio() -> bool:
-	
+
 	if above.valid:
 		if under.length > above.length:
 			return false
@@ -61,12 +61,8 @@ func validate():
 		valid = true
 		return
 	
-	
-	
-	
-	
 	# If the normal is horizontal
-	if Math.equal_float(under.normal.y, 0.0, 0.01):
+	if Math.equal_float(under.normal.y, 0.0, 0.1):
 		#print("From Ledge: normal horizontal!")
 		if (under.position - above.position).length() > 0.1:
 			

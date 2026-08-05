@@ -24,10 +24,13 @@ func cast_ray(node_this_was_called_from: Node3D, start: Vector3, target: Vector3
 	
 	if result.has("position") and result.has("normal"):
 		out.valid = true
-		out.length = (result["position"] - start).length()
+		out.length = result["position"].distance_to(start)
+		#out.length = (result["position"] - start).length()
 		out.position = result["position"]
 		out.normal = result["normal"]
 	else:
+		
+		out.length = 100.0
 		out.valid = false
 	
 	return out
@@ -260,10 +263,14 @@ func cast_row(node_this_was_called_from: Node3D, start_point: Vector3, end_point
 	
 	#region DEBUG
 	
+	#for i in out.size():
+		#if not i == out.size() - 1:
+			#if not out[i].position.y < out[i + 1].position.y:
+				#print("From Ray Caster: Mistake in Order!!!")
+	#
 	#for result in out:
-		#
 		#if result.valid:
-			#DebugShapes.place_a_blue_sphere(result.position)
+			#print(result.position.y)
 		
 		
 	

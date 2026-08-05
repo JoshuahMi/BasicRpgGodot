@@ -9,6 +9,10 @@ class_name BasicRpgGrapplingHookEdgeDetector extends Node3D
 @export var debug: bool = false
 
 @export var platform_detection_distance: float = 100.0
+@export var vertical_row_y_tolerance: float = 2.0
+@export var vertical_row_number_of_rays: int = 7
+@export var approximation_row_resolution: int = 5
+@export var approximate: bool = true
 
 ## This is the point that is detected by this detector. The most important variable,
 ## since the edge detector exists to detect this point.
@@ -25,11 +29,14 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	
+	DebugShapes.hide_all()
+	
 	# test_cast_forward()
 	
 	var detected_point: BasicRpgHitResult = detect_ledge_0()
 	
-	detected_point.valid = validate_point_as_from_player(detected_point.position)
+	# BUG This causes problems.
+	#detected_point.valid = validate_point_as_from_player(detected_point.position)
 	
 	if detected_point.valid:
 		
@@ -42,6 +49,13 @@ func _physics_process(_delta: float) -> void:
 func detect_ledge_0() -> BasicRpgHitResult:
 	
 	var base_point: BasicRpgHitResult = get_base_point() 
+	
+	#region Debug
+	
+	if debug and base_point.valid:
+		DebugShapes.place_the_green_sphere(base_point.position + Vector3.UP * 0.1)
+	
+	#endregion Debug
 	
 	var ledge: BasicRpgLedge = get_ledge_from_base_point(base_point)
 	
@@ -220,7 +234,7 @@ func get_breakpoint_from_row(row: Array[BasicRpgHitResult]) -> Array[BasicRpgHit
 	hit_result_before.valid = false
 	
 	if row.size() <= 1:
-		
+		#print("From Edge Detector breakpoint function: Row doesn't have any members!")
 		var out: Array[BasicRpgHitResult]
 		out = []
 		
@@ -230,21 +244,25 @@ func get_breakpoint_from_row(row: Array[BasicRpgHitResult]) -> Array[BasicRpgHit
 		if not index == row.size() - 1:
 			
 			if row[index].valid:
-				
-				var is_this_hit_result_shorter_than_its_successor: bool 
+			
 				var length_difference: float
-				if row[index + 1].valid:
-					is_this_hit_result_shorter_than_its_successor = row[index].length < row[index + 1].length
-					length_difference = abs(row[index].length - row[index + 1].length)
-				else:
-					is_this_hit_result_shorter_than_its_successor = true
-					length_difference = 1.0
 				
-				if is_this_hit_result_shorter_than_its_successor and length_difference > 0.1:
+				if row[index + 1].valid:
+					pass
+				length_difference = (row[index].length - row[index + 1].length) 
+				#else:
+					#
+					#length_difference = -100.0
+				
+				if length_difference < 0.0:
+					#print("From Ledge Detector Breakpoint Function: BREAKPOINT!")
 					# THIS is the breakpoint
 					hit_result_that_is_longer = row[index + 1]
 					hit_result_before = row[index]
+				
 	
+	#if not hit_result_before.valid:
+		#print("From Ledge Detector Breakpoint Function: no breakpoint...")
 	
 	return [hit_result_before, hit_result_that_is_longer]
 	
@@ -254,45 +272,21 @@ func get_breakpoint_from_row(row: Array[BasicRpgHitResult]) -> Array[BasicRpgHit
 
 func get_breakpoint_from_vertical_row(row: Array[BasicRpgHitResult], row_y_interval: float) -> BasicRpgLedge:
 	
+	var out: BasicRpgLedge = BasicRpgLedge.new()
 	
-	var hit_result_that_is_longer: BasicRpgHitResult = BasicRpgHitResult.new()
-	hit_result_that_is_longer.valid = false
-	
-	var Hit_result_before: BasicRpgHitResult = BasicRpgHitResult.new()
-	Hit_result_before.valid = false
 	
 	# early return if the input row is invalid because it has only 1 or zero elements
 	if row.size() <= 1:
 		
-		var out: BasicRpgLedge = BasicRpgLedge.new()
+		out = BasicRpgLedge.new()
 		out.valid = false
 		
 		return out
 	
-	for index in row.size():
-		if not index == row.size() - 1:
-			
-			if row[index].valid:
-				
-				var is_this_hit_result_shorter_than_its_successor: bool 
-				var length_difference: float
-				if row[index + 1].valid:
-					is_this_hit_result_shorter_than_its_successor = row[index].length < row[index + 1].length
-					length_difference = abs(row[index].length - row[index + 1].length)
-				else:
-					is_this_hit_result_shorter_than_its_successor = true
-					length_difference = 1.0
-				
-				if is_this_hit_result_shorter_than_its_successor and length_difference > 0.1:
-					# THIS is the breakpoint
-					hit_result_that_is_longer = row[index + 1]
-					Hit_result_before = row[index]
+	var two_results_that_display_breakpoint: Array[BasicRpgHitResult] = get_breakpoint_from_row(row)
 	
-	
-	var out: BasicRpgLedge = BasicRpgLedge.new()
-	
-	out.under = Hit_result_before
-	out.above = hit_result_that_is_longer
+	out.under = two_results_that_display_breakpoint[0]
+	out.above = two_results_that_display_breakpoint[1]
 	out.y_tolerance = row_y_interval
 	
 	if out.under:
@@ -306,8 +300,7 @@ func approximate_ledge_further(ledge: BasicRpgLedge, number_of_rays: int) -> Bas
 	
 	var start_of_row = ledge.under.position + ledge.under.normal
 	
-	var end_of_row = start_of_row + Vector3.UP * ledge.y_tolerance
-	
+	var end_of_row = start_of_row + Vector3.UP * ledge.y_tolerance 
 	
 	var row: Array[BasicRpgHitResult] = RayCaster.cast_row(self, start_of_row, end_of_row, ledge.under.normal * -1.0, number_of_rays, 5.0, true)
 	
@@ -323,6 +316,12 @@ func get_base_point() -> BasicRpgHitResult:
 	# first, get the wall collision position. 
 	var cast_0 : BasicRpgHitResult = RayCaster.cast_forward(self, camera, platform_detection_distance)
 	
+	#region Debug
+	
+	if debug and cast_0.valid:
+		DebugShapes.place_the_blue_sphere(cast_0.position)
+	
+	#endregion Debug
 	# Now Get a better base point.
 	
 	# If the cast went into nothingness, i.e. nothing was hit, then cast a vertical row forward instead
@@ -353,6 +352,17 @@ func get_base_point() -> BasicRpgHitResult:
 		
 		var up_row: Array[BasicRpgHitResult] = RayCaster.cast_row(self, start_row_cast, end_row_cast, row_direction, row_number_of_rays, 10.0, true)
 		
+		
+		#region Debug
+		
+		if debug:
+			for result in up_row:
+				if result.valid:
+					DebugShapes.place_a_green_sphere(result.position)
+		
+		
+		
+		#endregion Debug
 		
 		# Now check the breakpoint
 		
@@ -428,7 +438,7 @@ func get_base_point() -> BasicRpgHitResult:
 
 func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 	
-	if base_point == null:
+	if base_point == null or not base_point.valid:
 		var out: BasicRpgLedge = BasicRpgLedge.new()
 		out.valid = false
 		
@@ -436,22 +446,54 @@ func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 	
 	# Then cast a row on the wall
 	
-	var y_tolerance: float = 2.0
+	#var y_tolerance: float = 2.0
 	
 	var row_cast_0_begin: Vector3 = base_point.position + base_point.normal 
-	var row_cast_0_end: Vector3 = row_cast_0_begin + Vector3.UP * y_tolerance
-	var number_of_rays: int = 7
+	var row_cast_0_end: Vector3 = row_cast_0_begin + Vector3.UP * vertical_row_y_tolerance
+	# var number_of_rays: int = 7
 	
-	var row_cast_0: Array[BasicRpgHitResult] = RayCaster.cast_row(self, row_cast_0_begin, row_cast_0_end, base_point.normal * -1.0, 7, 5.0, true)
+	
+	
+	
+	
+	var row_cast_0: Array[BasicRpgHitResult] = RayCaster.cast_row(self, row_cast_0_begin, row_cast_0_end, base_point.normal * -1.0, vertical_row_number_of_rays, 5.0, true)
+	
+	#region Debug
+	
+	DebugShapes.place_a_red_sphere(row_cast_0_begin)
+	DebugShapes.place_a_red_sphere(row_cast_0_end)
+	
+	if debug:
+		for result in row_cast_0:
+			
+			if result.valid:
+				DebugShapes.place_a_blue_sphere(result.position)
+	
+	#endregion Debug
+	
 	
 	# detect the breakpoint
-	var y_interval = y_tolerance / number_of_rays
+	var y_interval = vertical_row_y_tolerance / vertical_row_number_of_rays
 	var ledge: BasicRpgLedge = get_breakpoint_from_vertical_row(row_cast_0, y_interval)
 	
-	if ledge.valid:
-		ledge = approximate_ledge_further(ledge, 8)
+		
+		
 	
-	ledge.validate()
+	if approximate:
+		if ledge.valid:
+			ledge = approximate_ledge_further(ledge, approximation_row_resolution)
+	
+	#region Debug
+	
+	if debug and ledge.valid:
+		DebugShapes.place_the_green_sphere(ledge.under.position)
+		
+	#endregion Debug
+	#ledge.validate()
+	
+	
+	
+	
 	
 	return ledge
 
@@ -467,7 +509,7 @@ func validate_point_as_from_player(point: Vector3) -> bool:
 	if not cast.valid:
 		return true
 		
-	if cast.length < actual_distance:
+	if cast.length < actual_distance + 0.1:
 		return false
 	
 	else:

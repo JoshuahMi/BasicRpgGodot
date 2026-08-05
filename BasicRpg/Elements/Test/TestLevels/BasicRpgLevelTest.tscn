@@ -312,7 +312,7 @@ material = SubResource("StandardMaterial3D_xi4co")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 106.63684, -1.1486521, -24.456558)
 
 [node name="TestBuilding4" parent="." unique_id=750902898 instance=ExtResource("4_ll54g")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96.70803, -1.1486521, -24.456558)
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 96.70803, -1.1486521, -24.456558)
 
 [node name="TestBuilding5" parent="." unique_id=1708403297 instance=ExtResource("4_ll54g")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.053665, -1.1486521, -24.456558)
