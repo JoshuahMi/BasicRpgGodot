@@ -6,6 +6,12 @@ class_name BasicRpgGrapplingHookEdgeDetector extends Node3D
 
 @export var camera: Node3D
 
+
+## DEBUG:
+## Two little red spheres: The beginning and end of the vertical row cast
+## Blue spheres: The hit results of the vertical row cast.
+## Purple sphere: Base point for the vertical row to be cast to.
+## Green spheres: Up row cast to determine how far towards the player the platform goes
 @export var debug: bool = false
 
 @export var platform_detection_distance: float = 100.0
@@ -48,13 +54,19 @@ func _physics_process(_delta: float) -> void:
 
 func detect_ledge_0() -> BasicRpgHitResult:
 	
+	if debug:
+		DebugShapes.hide_all()
+	
+	
 	var base_point: BasicRpgHitResult = get_base_point() 
 	
 	#region Debug
 	
 	if debug and base_point.valid:
-		DebugShapes.place_the_green_sphere(base_point.position + Vector3.UP * 0.1)
-	
+		DebugShapes.place_the_purple_sphere(base_point.position)
+	elif not base_point.valid:
+		pass
+		
 	#endregion Debug
 	
 	var ledge: BasicRpgLedge = get_ledge_from_base_point(base_point)
@@ -247,23 +259,16 @@ func get_breakpoint_from_row(row: Array[BasicRpgHitResult]) -> Array[BasicRpgHit
 			
 				var length_difference: float
 				
-				if row[index + 1].valid:
-					pass
-				length_difference = (row[index].length - row[index + 1].length) 
-				#else:
-					#
-					#length_difference = -100.0
+				# This works because invalid Hit Results get a length of 100
+				# Don't change that in the Ray Caster, or we're fucked.
 				
-				if length_difference < 0.0:
-					#print("From Ledge Detector Breakpoint Function: BREAKPOINT!")
+				length_difference = (row[index].length - row[index + 1].length) 
+				
+				if length_difference < -0.1:
 					# THIS is the breakpoint
 					hit_result_that_is_longer = row[index + 1]
 					hit_result_before = row[index]
-				
-	
-	#if not hit_result_before.valid:
-		#print("From Ledge Detector Breakpoint Function: no breakpoint...")
-	
+
 	return [hit_result_before, hit_result_that_is_longer]
 	
 
@@ -332,6 +337,16 @@ func get_base_point() -> BasicRpgHitResult:
 		
 		# Get the breakpoint from the row hit result
 		
+		#region Debug
+		
+		if debug:
+			for result in row:
+				if result.valid:
+					DebugShapes.place_a_blue_sphere(result.position)
+		
+		#endregion Debug		
+		
+		
 		var brkpnt: BasicRpgHitResult = get_breakpoint_from_row(row)[0]
 		
 		if not brkpnt.valid:
@@ -348,25 +363,18 @@ func get_base_point() -> BasicRpgHitResult:
 		var start_row_cast = cast_0.position
 		var end_row_cast = Vector3(camera.global_position.x, cast_0.position.y, camera.global_position.z)
 		var row_direction = Vector3.UP
-		var row_number_of_rays = 7
+		var row_number_of_rays = 16
 		
 		var up_row: Array[BasicRpgHitResult] = RayCaster.cast_row(self, start_row_cast, end_row_cast, row_direction, row_number_of_rays, 10.0, true)
 		
 		
-		#region Debug
-		
-		if debug:
-			for result in up_row:
-				if result.valid:
-					DebugShapes.place_a_green_sphere(result.position)
-		
-		
-		
-		#endregion Debug
 		
 		# Now check the breakpoint
 		
 		var brkpnt: Array[BasicRpgHitResult] = get_breakpoint_from_row(up_row)
+		
+		
+		
 		
 		# Then make an artificial hit result with the normal pointing towards the player
 		base_point = BasicRpgHitResult.new()
@@ -376,6 +384,21 @@ func get_base_point() -> BasicRpgHitResult:
 		normal = Vector3(normal.x, 0.0, normal.z).normalized()
 		
 		base_point.normal = normal
+		base_point.valid = true
+		
+		#region Debug
+		
+		if debug:
+			for result in up_row:
+				if result.valid:
+					DebugShapes.place_a_green_sphere(result.position)
+		
+			if base_point.valid:
+				DebugShapes.place_the_green_sphere(base_point.position)
+			else:
+				print("From Ledge Detector: Base point invalid!")
+		
+		#endregion Debug
 		
 		return base_point
 	
@@ -394,7 +417,7 @@ func get_base_point() -> BasicRpgHitResult:
 			var start_row_cast = cast_0.position
 			var end_row_cast = Vector3(camera.global_position.x, cast_0.position.y, camera.global_position.z)
 			var row_direction = Vector3.UP
-			var row_number_of_rays = 7
+			var row_number_of_rays = 16
 		
 			var up_row: Array[BasicRpgHitResult] = RayCaster.cast_row(self, start_row_cast, end_row_cast, row_direction, row_number_of_rays, 10.0, true)
 		
@@ -410,6 +433,8 @@ func get_base_point() -> BasicRpgHitResult:
 			normal = Vector3(normal.x, 0.0, normal.z).normalized()
 			
 			base_point.normal = normal
+			
+			base_point.valid = true
 			
 			return base_point
 			
@@ -438,6 +463,12 @@ func get_base_point() -> BasicRpgHitResult:
 
 func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 	
+	# TODO: If there is a base point, but NOTHING is found, it's probably because the platform is too thin.
+	# Do a down cast then to detect the platform
+	
+	# TODO: If it's a flat surface, do another vertical row cast that is way bigger, then do the vertical row + approximation on the breakpoint of the 
+	# Big vertical row cast.
+	
 	if base_point == null or not base_point.valid:
 		var out: BasicRpgLedge = BasicRpgLedge.new()
 		out.valid = false
@@ -446,38 +477,86 @@ func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 	
 	# Then cast a row on the wall
 	
-	#var y_tolerance: float = 2.0
-	
 	var row_cast_0_begin: Vector3 = base_point.position + base_point.normal 
 	var row_cast_0_end: Vector3 = row_cast_0_begin + Vector3.UP * vertical_row_y_tolerance
-	# var number_of_rays: int = 7
-	
-	
-	
-	
 	
 	var row_cast_0: Array[BasicRpgHitResult] = RayCaster.cast_row(self, row_cast_0_begin, row_cast_0_end, base_point.normal * -1.0, vertical_row_number_of_rays, 5.0, true)
 	
-	#region Debug
 	
-	DebugShapes.place_a_red_sphere(row_cast_0_begin)
-	DebugShapes.place_a_red_sphere(row_cast_0_end)
+	# Check if it's a flat surface
 	
-	if debug:
-		for result in row_cast_0:
+	var is_flat_surface: bool = true
+	for index in row_cast_0.size():
+		
+		
+		
+		if not index == row_cast_0.size() - 1:
+			if row_cast_0[index].valid and row_cast_0[index + 1].valid:
+				var position_x_equal = Math.equal_float(row_cast_0[index].position.x, row_cast_0[index + 1].position.x, 0.01)
+				var position_z_equal = Math.equal_float(row_cast_0[index].position.z, row_cast_0[index + 1].position.z, 0.01)
+				
+				if not (position_x_equal and position_z_equal):
+					is_flat_surface = false
+			else:
+				is_flat_surface = false
+	#print(is_flat_surface)
+	
+	# If it's a flat surface, do a big vertical row raycast.
+	
+	# First, check how high we can cast by a Up ray cast
+	
+	if is_flat_surface:
+	
+		var row_cast_big_begin: Vector3 = base_point.position + base_point.normal 
+		var row_cast_big_end: Vector3 = row_cast_0_begin + Vector3.UP * platform_detection_distance
+		
+		var y_limit: BasicRpgHitResult = RayCaster.cast_ray_up(self, row_cast_big_begin, platform_detection_distance, false)
+		
+		if y_limit.valid:
+			row_cast_big_end = y_limit.position * 0.9
 			
-			if result.valid:
-				DebugShapes.place_a_blue_sphere(result.position)
+		var row_cast_big = RayCaster.cast_row(self, row_cast_big_begin, row_cast_big_end, base_point.normal * -1.0, vertical_row_number_of_rays, 2.0, true)
+		
+		var big_y_interval: float = abs(row_cast_big_begin.y - row_cast_big_end.y) / vertical_row_number_of_rays
+		var big_ledge: BasicRpgLedge = get_breakpoint_from_vertical_row(row_cast_big, big_y_interval)
 	
-	#endregion Debug
+		# then do the normal vertical row on the ledge 
+		# we use the approximation funtion here, because it's easier.
+		
+		if big_ledge.valid:
+		
+			big_ledge = approximate_ledge_further(big_ledge, vertical_row_number_of_rays)
+		
+		# and if it shall approximate, then approximate
+		if approximate:
+			if big_ledge.valid:
+				big_ledge = approximate_ledge_further(big_ledge, approximation_row_resolution)
+		
+		#region Debug
+	
+		if debug:
+			DebugShapes.place_a_red_sphere(row_cast_big_begin)
+			DebugShapes.place_a_red_sphere(row_cast_big_end)
+			for result in row_cast_big:
+				
+				if result.valid:
+					DebugShapes.place_a_blue_sphere(result.position)
+					
+		if debug and big_ledge.valid:
+			DebugShapes.place_the_green_sphere(big_ledge.under.position)
+		
+		#endregion Debug
+	
+		return big_ledge
+	
+	
+	
+	
 	
 	
 	# detect the breakpoint
-	var y_interval = vertical_row_y_tolerance / vertical_row_number_of_rays
+	var y_interval: float = vertical_row_y_tolerance / vertical_row_number_of_rays
 	var ledge: BasicRpgLedge = get_breakpoint_from_vertical_row(row_cast_0, y_interval)
-	
-		
-		
 	
 	if approximate:
 		if ledge.valid:
@@ -485,15 +564,18 @@ func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 	
 	#region Debug
 	
+	if debug:
+		DebugShapes.place_a_red_sphere(row_cast_0_begin)
+		DebugShapes.place_a_red_sphere(row_cast_0_end)
+		for result in row_cast_0:
+			
+			if result.valid:
+				DebugShapes.place_a_blue_sphere(result.position)
 	if debug and ledge.valid:
 		DebugShapes.place_the_green_sphere(ledge.under.position)
 		
 	#endregion Debug
-	#ledge.validate()
-	
-	
-	
-	
+
 	
 	return ledge
 

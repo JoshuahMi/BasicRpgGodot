@@ -35,6 +35,19 @@ var blue_spheres_state = 0
 
 @onready var sphere_blue: MeshInstance3D
 
+# ---------------------------------------------------------
+
+## An array of 32 purple spheres. 
+@onready var purple_spheres: Array[MeshInstance3D]
+
+## can have values between 0 and 7, indicating the indices of the *purple spheres* array.
+## The "place a purple sphere" function will place the state's index of the *purple spheres* array to the given point
+## and advances the state.
+var purple_spheres_state = 0
+
+@onready var sphere_purple: MeshInstance3D
+
+
 # -----------------------------------------------------------------------------------
 
 # Called when the node enters the scene tree for the first time.
@@ -86,12 +99,22 @@ func place_the_blue_sphere(point: Vector3):
 func hide_the_blue_sphere():
 	sphere_blue.visible = false
 	pass
+	
+func place_the_purple_sphere(point: Vector3):
+	
+	sphere_purple.global_position = point
+	sphere_purple.visible = true
+	
+	pass
+	
+func hide_the_purple_sphere():
+	sphere_purple.visible = false
+	pass
 
 ## Places a red sphere from the array of the red spheres. There are only 8 red spheres!
 ## If you want to place the single red sphere, use *place THE red sphere*
 func place_a_red_sphere(point: Vector3):
 	
-	# BUG: Invalid access of index '0' on a base object of type 'Array[MeshInstance3D]'
 	red_spheres[red_spheres_state].global_position = point
 	
 	red_spheres[red_spheres_state].visible = true
@@ -158,6 +181,38 @@ func hide_blue_spheres():
 	pass
 
 
+func place_a_purple_sphere(point: Vector3):
+	
+	purple_spheres[purple_spheres_state].global_position = point
+	
+	purple_spheres[purple_spheres_state].visible = true
+	
+	purple_spheres_state += 1
+	if purple_spheres_state > 7:
+		purple_spheres_state = 0
+	
+	if purple_spheres_state < 0:
+		purple_spheres_state = 0
+	
+	pass
+
+func hide_purple_spheres():
+	
+	for sphere in purple_spheres:
+		sphere.visible = false
+	
+	pass
+
+
+
+
+
+
+
+
+
+
+
 func initialize_shape(size: float, colour: Color) -> MeshInstance3D:
 	
 	var mesh_instance = MeshInstance3D.new()
@@ -183,12 +238,14 @@ func initialize_debug_shapes():
 	sphere_red = initialize_shape(0.15, Color.RED)
 	sphere_green = initialize_shape(0.15, Color.GREEN)
 	sphere_blue = initialize_shape(0.15, Color.BLUE)
+	sphere_purple = initialize_shape(0.15, Color.PURPLE)
 	
 	for index in range(0, 8):
 		
 		red_spheres.append(initialize_shape(0.1, Color.RED))
 		green_spheres.append(initialize_shape(0.1, Color.GREEN))
 		blue_spheres.append(initialize_shape(0.1, Color.BLUE))
+		purple_spheres.append(initialize_shape(0.1, Color.PURPLE))
 		
 		pass
 	
@@ -204,11 +261,12 @@ func hide_all():
 	hide_blue_spheres()
 	hide_green_spheres()
 	hide_red_spheres()
+	hide_purple_spheres()
 	
 	hide_the_blue_sphere()
 	hide_the_green_sphere()
 	hide_the_red_sphere()
-	
+	hide_the_purple_sphere()
 	
 	
 	

@@ -43,4 +43,6 @@ metadata/_custom_type_script = "uid://c1gs4wtogha26"
 script = ExtResource("5_yaa8f")
 camera = NodePath("../BasicRpgCameraComponent")
 debug = true
+vertical_row_y_tolerance = 3.0
+vertical_row_number_of_rays = 16
 metadata/_custom_type_script = "uid://c3umlb014vkms"
