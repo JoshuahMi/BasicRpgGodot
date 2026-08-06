@@ -349,11 +349,6 @@ func get_base_point() -> BasicRpgHitResult:
 		
 		var brkpnt: BasicRpgHitResult = get_breakpoint_from_row(row)[0]
 		
-		if not brkpnt.valid:
-			return brkpnt
-		
-		
-		
 		base_point = brkpnt
 		return base_point
 	
@@ -499,17 +494,30 @@ func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 					is_flat_surface = false
 			else:
 				is_flat_surface = false
-	#print(is_flat_surface)
 	
 	# If it's a flat surface, do a big vertical row raycast.
 	
-	# First, check how high we can cast by a Up ray cast
+	# and check if nothing was hit
+	
+	var is_none_valid: bool = true
+	
+	for result in row_cast_0:
+		if result.valid:
+			is_none_valid = false
+	
+	
+	
+	
+	
+	
+	
 	
 	if is_flat_surface:
 	
 		var row_cast_big_begin: Vector3 = base_point.position + base_point.normal 
 		var row_cast_big_end: Vector3 = row_cast_0_begin + Vector3.UP * platform_detection_distance
 		
+		# First, check how high we can cast by a Up ray cast
 		var y_limit: BasicRpgHitResult = RayCaster.cast_ray_up(self, row_cast_big_begin, platform_detection_distance, false)
 		
 		if y_limit.valid:
@@ -549,9 +557,41 @@ func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 	
 		return big_ledge
 	
-	
-	
-	
+	# if nothing was valid in the whole row cast, and obviously the base point is valid, otherwise the function would have had an early return,
+	# then do a down cast from the end point, to determine the height of the platform.
+	# The platform is too thin then.
+	if is_none_valid:
+		
+		var down_cast_distance: float = vertical_row_y_tolerance * 1.5
+		var down_cast_begin: Vector3 = row_cast_0_end + base_point.normal * -1.035
+		
+		var down_cast: BasicRpgHitResult = RayCaster.cast_ray_down(self, down_cast_begin, down_cast_distance, false)
+		
+		if not down_cast.valid:
+			
+			var out: BasicRpgLedge = BasicRpgLedge.new()
+			out.valid = false
+			return out
+		
+		# Now that we know the height of the platform, do a vertical row cast again.
+		var row_cast_small_number_of_rays: int = vertical_row_number_of_rays / 2
+		
+		var row_cast_small_y_tolerance = abs(row_cast_0_begin.y - down_cast.position.y)
+		var row_cast_small_y_interval = row_cast_small_y_tolerance / float(row_cast_small_number_of_rays)
+		
+		
+		var row_cast_small_begin: Vector3 = row_cast_0_begin
+		var row_cast_small_end: Vector3 = row_cast_small_begin + Vector3.UP * row_cast_small_y_tolerance
+		var row_cast_small_distance: float = 1.0
+		
+		var row_cast_small: Array[BasicRpgHitResult] = RayCaster.cast_row(self, row_cast_small_begin, row_cast_small_end, base_point.normal * -1.0, row_cast_small_number_of_rays, row_cast_small_distance, false)
+		
+		var small_ledge: BasicRpgLedge = get_breakpoint_from_vertical_row(row_cast_small, row_cast_small_y_interval)
+		print("From Ledge Detector: Made a small ledge!")
+		return small_ledge
+		
+		
+		pass
 	
 	
 	# detect the breakpoint
