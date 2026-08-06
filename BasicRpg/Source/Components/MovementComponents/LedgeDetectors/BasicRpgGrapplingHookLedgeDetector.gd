@@ -390,8 +390,6 @@ func get_base_point() -> BasicRpgHitResult:
 		
 			if base_point.valid:
 				DebugShapes.place_the_green_sphere(base_point.position)
-			else:
-				print("From Ledge Detector: Base point invalid!")
 		
 		#endregion Debug
 		
@@ -435,6 +433,9 @@ func get_base_point() -> BasicRpgHitResult:
 			
 			pass
 		else:
+			
+			print("From Ledge Detector: Base Point SOMEHOW")
+			
 			base_point = cast_0
 			return base_point
 	
