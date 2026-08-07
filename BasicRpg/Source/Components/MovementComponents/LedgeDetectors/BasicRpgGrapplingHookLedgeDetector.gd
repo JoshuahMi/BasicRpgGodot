@@ -70,7 +70,7 @@ func detect_ledge() -> BasicRpgHitResult:
 		DebugShapes.hide_all()
 	
 	
-	var base_point: BasicRpgHitResult = get_base_point() 
+	var base_point: BasicRpgHitResult = get_base_point_0() 
 	
 	#region Debug
 	
@@ -102,6 +102,39 @@ func detect_ledge() -> BasicRpgHitResult:
 #endregion MAIN FUNCTIONS
 	
 #region HELPER FUNCTIONS
+
+func get_base_point_0() -> BasicRpgHitResult:
+	
+	var forward_row_cast: Array[BasicRpgHitResult] = RayCaster.cast_row(self, camera.global_position, camera.global_position + Vector3.UP * 2.0, Math.get_forward_vector_of_node(camera), vertical_row_number_of_rays, platform_detection_distance, true)
+		
+	var breakpnt: BasicRpgHitResult = get_breakpoint_from_row(forward_row_cast)[0]
+	
+	if breakpnt.valid:
+		
+		#region Debug
+		if debug:
+			DebugShapes.place_the_green_sphere(breakpnt.position)
+			
+			for result in forward_row_cast:
+				if result.valid:
+					DebugShapes.place_a_blue_sphere(result.position)
+		
+		#endregion Debug
+		
+		
+		return breakpnt
+		
+	else:
+		
+		# If there's no breakpoint, then we are either looking at a flat surface or into nothingness.
+		# TODO: Determine, which situation we're in.
+		
+		# But for now, simply use the OTHER function if we don't get a good base point with this one.
+		# Sooo here we go:
+		
+		return get_base_point()
+	
+
 
 func get_base_point() -> BasicRpgHitResult:
 	
@@ -240,7 +273,9 @@ func get_base_point() -> BasicRpgHitResult:
 		out.valid = false
 		
 		return out
-
+	
+	# If all the cases weren't the case, simply return an invalid hit result.
+	
 	var out: BasicRpgHitResult = BasicRpgHitResult.new()
 	out.valid = false
 	
@@ -253,6 +288,8 @@ func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 		out.valid = false
 		
 		return out
+	
+	#base_point.normal = Vector3(base_point.normal.x, 0.0, base_point.normal.z).normalized()
 	
 	# Then cast a row on the wall
 	
@@ -324,9 +361,6 @@ func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 		#endregion Debug
 	
 		return big_ledge
-	
-	
-	
 	
 	# and check if nothing was hit
 	
