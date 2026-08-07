@@ -50,7 +50,7 @@ func _physics_process(_delta: float) -> void:
 	
 	DebugShapes.hide_all()
 	
-	var detected_point: BasicRpgHitResult = detect_ledge_0()
+	var detected_point: BasicRpgHitResult = detect_ledge()
 	
 	if detected_point.valid:
 		
@@ -58,13 +58,13 @@ func _physics_process(_delta: float) -> void:
 		
 	else:
 		
-		is_detected_point_valid = validate_point_as_from_player(detected_platform_point)
+		is_detected_point_valid = validate_point(detected_platform_point)
 		
 	
 	
 #region MAIN FUNCTIONS
 
-func detect_ledge_0() -> BasicRpgHitResult:
+func detect_ledge() -> BasicRpgHitResult:
 	
 	if debug:
 		DebugShapes.hide_all()
@@ -76,8 +76,6 @@ func detect_ledge_0() -> BasicRpgHitResult:
 	
 	if debug and base_point.valid:
 		DebugShapes.place_the_purple_sphere(base_point.position)
-	elif not base_point.valid:
-		pass
 		
 	#endregion Debug
 	
@@ -85,7 +83,7 @@ func detect_ledge_0() -> BasicRpgHitResult:
 	
 	if ledge.valid:
 		
-		if validate_point_as_from_player(ledge.under.position):
+		if validate_point(ledge.under.position):
 		
 			return ledge.under
 			
@@ -93,95 +91,17 @@ func detect_ledge_0() -> BasicRpgHitResult:
 			
 			var out: BasicRpgHitResult = BasicRpgHitResult.new()
 			out.valid = false
-		
 			return out
 			
 	else:
 		
 		var out: BasicRpgHitResult = BasicRpgHitResult.new()
 		out.valid = false
-		
 		return out
 
 #endregion MAIN FUNCTIONS
 	
 #region HELPER FUNCTIONS
-
-## General purpose function. Returns the breakpoint of a row cast, the latest place where a hit result is significantly shorter than its successor
-func get_breakpoint_from_row(row: Array[BasicRpgHitResult]) -> Array[BasicRpgHitResult]:
-	
-	var hit_result_that_is_longer: BasicRpgHitResult = BasicRpgHitResult.new()
-	hit_result_that_is_longer.valid = false
-	
-	var hit_result_before: BasicRpgHitResult = BasicRpgHitResult.new()
-	hit_result_before.valid = false
-	
-	if row.size() <= 1:
-		
-		var out: Array[BasicRpgHitResult]
-		out = []
-		
-		return out
-	
-	for index in row.size():
-		if not index == row.size() - 1:
-			
-			if row[index].valid:
-			
-				var length_difference: float
-				
-				# This works because invalid Hit Results get a length of 100
-				# Don't change that in the Ray Caster, or we're fucked.
-				
-				length_difference = (row[index].length - row[index + 1].length) 
-				
-				if length_difference < -0.1:
-					# THIS is the breakpoint
-					hit_result_that_is_longer = row[index + 1]
-					hit_result_before = row[index]
-
-	return [hit_result_before, hit_result_that_is_longer]
-
-func get_breakpoint_from_vertical_row(row: Array[BasicRpgHitResult], row_y_interval: float) -> BasicRpgLedge:
-	
-	var out: BasicRpgLedge = BasicRpgLedge.new()
-	
-	# early return if the input row is invalid because it has only 1 or zero elements
-	if row.size() <= 1:
-		
-		out = BasicRpgLedge.new()
-		out.valid = false
-		
-		return out
-	
-	var two_results_that_represent_breakpoint: Array[BasicRpgHitResult] = get_breakpoint_from_row(row)
-	
-	out.under = two_results_that_represent_breakpoint[0]
-	out.above = two_results_that_represent_breakpoint[1]
-	out.y_tolerance = row_y_interval
-	
-	if out.under:
-		out.valid = true
-	else:
-		out.valid = false
-	
-	return out
-
-func approximate_ledge_further(ledge: BasicRpgLedge, number_of_rays: int) -> BasicRpgLedge:
-	
-	var start_of_row = ledge.under.position + ledge.under.normal
-	
-	var end_of_row = start_of_row + Vector3.UP * ledge.y_tolerance 
-	
-	var row: Array[BasicRpgHitResult] = RayCaster.cast_row(self, start_of_row, end_of_row, ledge.under.normal * -1.0, number_of_rays, 5.0, true)
-	
-	if debug:
-		for result in row:
-			
-			if result.valid:
-				DebugShapes.place_a_purple_sphere(result.position)
-	
-	return get_breakpoint_from_vertical_row(row, ledge.y_tolerance / number_of_rays)
 
 func get_base_point() -> BasicRpgHitResult:
 	
@@ -326,7 +246,6 @@ func get_base_point() -> BasicRpgHitResult:
 	
 	return out
 	
-
 func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 	
 	if base_point == null or not base_point.valid:
@@ -477,9 +396,93 @@ func get_ledge_from_base_point(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 	return ledge
 
 
-## This function is purely to check if something is between the player and the point.
-## Returns true if nothing is between the player and the point.
-func validate_point_as_from_player(point: Vector3) -> bool:
+## General purpose function. Returns the breakpoint of a row cast, the latest place where a hit result is significantly shorter than its successor
+func get_breakpoint_from_row(row: Array[BasicRpgHitResult]) -> Array[BasicRpgHitResult]:
+	
+	var hit_result_that_is_longer: BasicRpgHitResult = BasicRpgHitResult.new()
+	hit_result_that_is_longer.valid = false
+	
+	var hit_result_before: BasicRpgHitResult = BasicRpgHitResult.new()
+	hit_result_before.valid = false
+	
+	if row.size() <= 1:
+		
+		var out: Array[BasicRpgHitResult]
+		out = []
+		
+		return out
+	
+	for index in row.size():
+		if not index == row.size() - 1:
+			
+			if row[index].valid:
+			
+				var length_difference: float
+				
+				# This works because invalid Hit Results get a length of 100
+				# Don't change that in the Ray Caster, or we're fucked.
+				
+				length_difference = (row[index].length - row[index + 1].length) 
+				
+				if length_difference < -0.1:
+					# THIS is the breakpoint
+					hit_result_that_is_longer = row[index + 1]
+					hit_result_before = row[index]
+
+	return [hit_result_before, hit_result_that_is_longer]
+
+func get_breakpoint_from_vertical_row(row: Array[BasicRpgHitResult], row_y_interval: float) -> BasicRpgLedge:
+	
+	var out: BasicRpgLedge = BasicRpgLedge.new()
+	
+	# early return if the input row is invalid because it has only 1 or zero elements
+	if row.size() <= 1:
+		
+		out = BasicRpgLedge.new()
+		out.valid = false
+		
+		return out
+	
+	var two_results_that_represent_breakpoint: Array[BasicRpgHitResult] = get_breakpoint_from_row(row)
+	
+	out.under = two_results_that_represent_breakpoint[0]
+	out.above = two_results_that_represent_breakpoint[1]
+	out.y_tolerance = row_y_interval
+	
+	if out.under:
+		out.valid = true
+	else:
+		out.valid = false
+	
+	return out
+
+func approximate_ledge_further(ledge: BasicRpgLedge, number_of_rays: int) -> BasicRpgLedge:
+	
+	var start_of_row = ledge.under.position + ledge.under.normal
+	
+	var end_of_row = start_of_row + Vector3.UP * ledge.y_tolerance 
+	
+	var row: Array[BasicRpgHitResult] = RayCaster.cast_row(self, start_of_row, end_of_row, ledge.under.normal * -1.0, number_of_rays, 5.0, true)
+	
+	if debug:
+		for result in row:
+			
+			if result.valid:
+				DebugShapes.place_a_purple_sphere(result.position)
+	
+	return get_breakpoint_from_vertical_row(row, ledge.y_tolerance / number_of_rays)
+
+
+## This function is to check if something is between the player and the point.
+## And to check if the point is still within the *platform detection distance*
+## And to check if the point is above the player.
+## Returns true if nothing is between the player and the point AND if it's still within the detection distance AND if it's above the player.
+func validate_point(point: Vector3) -> bool:
+	
+	var is_something_between_player_and_point: bool = false
+	
+	var is_point_still_within_detection_range: bool = false
+	
 	
 	var actual_distance = (camera.global_position - point).length()
 	
@@ -488,13 +491,25 @@ func validate_point_as_from_player(point: Vector3) -> bool:
 	# print("From Edge detector: Cast length: " + str(cast.length) + " Actual distance: " + str(actual_distance))
 	
 	if not cast.valid:
-		return true
+		
+		is_something_between_player_and_point = false
 		
 	elif Math.equal_float(actual_distance, cast.length, 0.01):
-		return true
+		
+		is_something_between_player_and_point = false
 	
 	else:
-		return false
+		
+		is_something_between_player_and_point = true
+	
+	
+	if actual_distance < platform_detection_distance:
+		is_point_still_within_detection_range = true
+	else:
+		is_point_still_within_detection_range = false
+	
+	
+	return is_point_still_within_detection_range and not is_something_between_player_and_point and point.y > camera.global_position.y
 
 
 #endregion HELPER FUNCTIONS
