@@ -31,10 +31,11 @@ func _process(_delta: float) -> void:
 	
 	%FPSLabel.text = str(Engine.get_frames_per_second())
 	
+	if edge_detector.is_detected_point_valid:
+		place_grappling_hook_edge_indicator(edge_detector.detected_platform_point)
+	else:
+		hide_grappling_hook_edge_indicator()
 	
-	# %WRCheeseCooldownLabel.text = str(state_machine.current_wall_run_cheese_cooldown)
-	
-	pass
 
 func update_wants_to_jump_label(in_value: bool):
 	%WantsToJumpLabel.text = str(in_value)
@@ -177,7 +178,7 @@ func hide_grappling_hook_edge_indicator():
 	pass
 
 func place_grappling_hook_edge_indicator(world_coordinates: Vector3):
-	
+	%GrapplingHookEdgeIndicator.visible = true
 	var new_position: Vector2 = camera_component.camera.unproject_position(world_coordinates)
 	
 	%GrapplingHookEdgeIndicator.set_position(new_position)

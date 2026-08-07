@@ -51,8 +51,8 @@ func _physics_process(delta: float) -> void:
 		#hud.hide_grappling_hook_edge_indicator()
 	
 func _process(delta: float) -> void:
-	
-	hud.place_grappling_hook_edge_indicator(grappling_hook_edge_detector.detected_platform_point)
+	pass
+	#hud.place_grappling_hook_edge_indicator(grappling_hook_edge_detector.detected_platform_point)
 	
 func _on_state_changed(_new_state):
 	

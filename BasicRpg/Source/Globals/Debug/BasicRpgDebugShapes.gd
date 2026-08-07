@@ -1,9 +1,19 @@
 extends Node3D
 
-## An array of 8 red spheres. 
+## A class for being an autoload. Is for placing debug spheres where they are needed.
+## There is always "the" (color) sphere, which is unique, and "a" (color) sphere, which is one of *each array sphere count* spheres in an array.
+## If you place "the" (color) sphere somewhere, it moves from the position it was at before.
+## If you place "a" (color) sphere, it will place one of the spheres of the (color) spheres array, 
+## until no more are left in the array. It will place the first sphere in the array then if you place one more, and so on.
+
+@onready var each_array_sphere_count: int = 32
+
+# ----------------------------------------------------------
+
+## An array of *each array sphere count* red spheres. 
 @onready var red_spheres: Array[MeshInstance3D]
 
-## can have values between 0 and 7, indicating the indices of the *red spheres* array.
+## can have values between 0 and *each array sphere count* - 1, indicating the indices of the *red spheres* array.
 ## The "place a red sphere" function will place the state's index of the *red spheres* array to the given point
 ## and advances the state.
 var red_spheres_state = 0
@@ -13,10 +23,10 @@ var red_spheres_state = 0
 
 # --------------------------------------------------------
 
-## An array of 8 green spheres. 
+## An array of *each array sphere count* green spheres. 
 @onready var green_spheres: Array[MeshInstance3D]
 
-## can have values between 0 and 7, indicating the indices of the *green spheres* array.
+## can have values between 0 and *each array sphere count* - 1, indicating the indices of the *green spheres* array.
 ## The "place a green sphere" function will place the state's index of the *green spheres* array to the given point
 ## and advances the state.
 var green_spheres_state = 0
@@ -25,10 +35,10 @@ var green_spheres_state = 0
 
 # ---------------------------------------------------------
 
-## An array of 8 blue spheres. 
+## An array of *each array sphere count* blue spheres. 
 @onready var blue_spheres: Array[MeshInstance3D]
 
-## can have values between 0 and 7, indicating the indices of the *blue spheres* array.
+## can have values between 0 and *each array sphere count* - 1, indicating the indices of the *blue spheres* array.
 ## The "place a blue sphere" function will place the state's index of the *blue spheres* array to the given point
 ## and advances the state.
 var blue_spheres_state = 0
@@ -37,10 +47,10 @@ var blue_spheres_state = 0
 
 # ---------------------------------------------------------
 
-## An array of 32 purple spheres. 
+## An array of *each array sphere count* purple spheres. 
 @onready var purple_spheres: Array[MeshInstance3D]
 
-## can have values between 0 and 7, indicating the indices of the *purple spheres* array.
+## can have values between 0 and *each array sphere count* - 1, indicating the indices of the *purple spheres* array.
 ## The "place a purple sphere" function will place the state's index of the *purple spheres* array to the given point
 ## and advances the state.
 var purple_spheres_state = 0
@@ -120,7 +130,7 @@ func place_a_red_sphere(point: Vector3):
 	red_spheres[red_spheres_state].visible = true
 	
 	red_spheres_state += 1
-	if red_spheres_state > 7:
+	if red_spheres_state > (each_array_sphere_count - 1):
 		red_spheres_state = 0
 	
 	if red_spheres_state < 0:
@@ -142,7 +152,7 @@ func place_a_green_sphere(point: Vector3):
 	green_spheres[green_spheres_state].visible = true
 	
 	green_spheres_state += 1
-	if green_spheres_state > 7:
+	if green_spheres_state > (each_array_sphere_count - 1):
 		green_spheres_state = 0
 	
 	if green_spheres_state < 0:
@@ -165,7 +175,7 @@ func place_a_blue_sphere(point: Vector3):
 	blue_spheres[blue_spheres_state].visible = true
 	
 	blue_spheres_state += 1
-	if blue_spheres_state > 7:
+	if blue_spheres_state > (each_array_sphere_count - 1):
 		blue_spheres_state = 0
 	
 	if blue_spheres_state < 0:
@@ -188,7 +198,7 @@ func place_a_purple_sphere(point: Vector3):
 	purple_spheres[purple_spheres_state].visible = true
 	
 	purple_spheres_state += 1
-	if purple_spheres_state > 7:
+	if purple_spheres_state > (each_array_sphere_count - 1):
 		purple_spheres_state = 0
 	
 	if purple_spheres_state < 0:
@@ -201,17 +211,6 @@ func hide_purple_spheres():
 	for sphere in purple_spheres:
 		sphere.visible = false
 	
-	pass
-
-
-
-
-
-
-
-
-
-
 
 func initialize_shape(size: float, colour: Color) -> MeshInstance3D:
 	
@@ -240,21 +239,13 @@ func initialize_debug_shapes():
 	sphere_blue = initialize_shape(0.15, Color.BLUE)
 	sphere_purple = initialize_shape(0.15, Color.PURPLE)
 	
-	for index in range(0, 8):
+	for index in range(0, each_array_sphere_count):
 		
 		red_spheres.append(initialize_shape(0.1, Color.RED))
 		green_spheres.append(initialize_shape(0.1, Color.GREEN))
 		blue_spheres.append(initialize_shape(0.1, Color.BLUE))
 		purple_spheres.append(initialize_shape(0.1, Color.PURPLE))
-		
-		pass
-	
-	
-	
-	var _star_color = Color.CHARTREUSE
-	
-	
-	
+
 	
 func hide_all():
 	
@@ -267,10 +258,4 @@ func hide_all():
 	hide_the_green_sphere()
 	hide_the_red_sphere()
 	hide_the_purple_sphere()
-	
-	
-	
-	
-	
-	
 	

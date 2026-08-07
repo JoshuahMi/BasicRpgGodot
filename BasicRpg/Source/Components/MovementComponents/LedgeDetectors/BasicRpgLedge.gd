@@ -2,12 +2,6 @@ class_name BasicRpgLedge extends RefCounted
 
 ## A representation of a ledge the grappling hook can hang onto.
 ## Represented by two hit results, the one under the ledge and the one above it.
-## Can further approximate itself 
-
-
-
-
-
 
 ## If this is a valid ledge
 var valid: bool = false
