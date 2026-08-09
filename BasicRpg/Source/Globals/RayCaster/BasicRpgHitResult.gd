@@ -11,3 +11,11 @@ var position: Vector3
 
 ## The normal of the face that was hit by the ray
 var normal: Vector3
+
+
+# ---------- INFORMATION ABOUT THE ORIGINAL RAY ------------------
+
+var original_ray_begin: Vector3
+var original_ray_target: Vector3
+var original_ray_direction: Vector3
+var original_ray_length: float

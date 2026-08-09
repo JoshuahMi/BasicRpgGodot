@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://c2nrohv4jicp2" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/TestBuilding_1.tscn" id="4_ll54g"]
 [ext_resource type="ArrayMesh" uid="uid://cerhlxnn3h3n3" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/Test.obj" id="5_o4wng"]
 [ext_resource type="ArrayMesh" uid="uid://si6examkdmgo" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/Test2.obj" id="6_cakl3"]
+[ext_resource type="ArrayMesh" uid="uid://dc1y2q07fpkym" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/Test3.obj" id="7_oxyr5"]
+[ext_resource type="ArrayMesh" uid="uid://5l8r5d81ygfh" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/Test5.obj" id="8_gkyuj"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_q1ege"]
 
@@ -251,6 +253,13 @@ mode = 1
 spin_degrees = 360.0
 spin_sides = 8
 
+[node name="CSGSphere3D" type="CSGSphere3D" parent="CSGCombiner3D" unique_id=179581772]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.789859, -100.71521)
+radius = 4.8960743
+radial_segments = 28
+rings = 16
+material = SubResource("StandardMaterial3D_xi4co")
+
 [node name="TestBuilding0" parent="." unique_id=348293384 instance=ExtResource("3_xi4co")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 104.552284, -2.0695705, -4.4502645)
 
@@ -300,6 +309,12 @@ material = SubResource("StandardMaterial3D_xi4co")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.18365, 6.1609955, -103.18426)
 use_collision = true
 size = Vector3(9.11499, 1, 9.94043)
+material = SubResource("StandardMaterial3D_xi4co")
+
+[node name="CSGBox3D10" type="CSGBox3D" parent="." unique_id=1471477697]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.942638, 10.492189, -103.18426)
+use_collision = true
+size = Vector3(9.11499, 4.7041626, 9.94043)
 material = SubResource("StandardMaterial3D_xi4co")
 
 [node name="CSGBox3D9" type="CSGBox3D" parent="." unique_id=1037357956]
@@ -390,4 +405,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69.022675, 8.679191, -45.1012
 radius = 3.0
 height = 0.27978516
 sides = 15
+material = SubResource("StandardMaterial3D_xi4co")
+
+[node name="CSGMesh3D4" type="CSGMesh3D" parent="CSGCombiner3D2" unique_id=1902251899]
+transform = Transform3D(2.09, 0, 0, 0, 2.09, 0, 0, 0, 2.09, 18.473381, 0, -26.67376)
+mesh = ExtResource("7_oxyr5")
+material = SubResource("StandardMaterial3D_xi4co")
+
+[node name="CSGMesh3D5" type="CSGMesh3D" parent="CSGCombiner3D2" unique_id=672652144]
+transform = Transform3D(1.815, 0, 0, 0, 1.815, 0, 0, 0, 1.815, 0, 4.9273586, -81.22514)
+mesh = ExtResource("8_gkyuj")
 material = SubResource("StandardMaterial3D_xi4co")

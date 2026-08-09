@@ -4,6 +4,11 @@ func cast_ray(node_this_was_called_from: Node3D, start: Vector3, target: Vector3
 	
 	var out: BasicRpgHitResult = BasicRpgHitResult.new()
 	
+	out.original_ray_begin = start
+	out.original_ray_target = target
+	out.original_ray_direction = (target - start).normalized()
+	out.original_ray_length = (start - target).length()
+	
 	var query := PhysicsRayQueryParameters3D.create(start, target)
 	
 	query.hit_from_inside = shall_hit_from_inside

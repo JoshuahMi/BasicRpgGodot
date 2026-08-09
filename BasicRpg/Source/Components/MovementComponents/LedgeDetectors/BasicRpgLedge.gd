@@ -3,8 +3,20 @@ class_name BasicRpgLedge extends RefCounted
 ## A representation of a ledge the grappling hook can hang onto.
 ## Represented by two hit results, the one under the ledge and the one above it.
 
+enum Validity {
+	
+	INVALID,
+	INSECURE,
+	VALID
+	
+	
+}
+
 ## If this is a valid ledge
 var valid: bool = false
+
+## If this is a valid ledge!
+var validity: Validity = Validity.INVALID
 
 ## The hit result UNDER the ledge. Can't be invalid
 var under: BasicRpgHitResult:
@@ -21,6 +33,8 @@ var above: BasicRpgHitResult
 var y_tolerance
 
 
+
+
 ## Returns validity of the ledge by checking its distance to interval ratio
 ## Only makes sense when the ledge is on an angular surface
 func validate_by_distance_ratio() -> bool:
@@ -31,7 +45,7 @@ func validate_by_distance_ratio() -> bool:
 	
 	var distance_y_ratio = distance_xz_between() / y_tolerance
 	
-	print(distance_y_ratio)
+	#print(distance_y_ratio)
 	
 	if distance_y_ratio > 1.0:
 		return true
@@ -82,7 +96,47 @@ func validate():
 			return
 		
 	
+
+
+func determine_validity():
 	
+	if not under.valid:
+		validity = Validity.INVALID
+		return
+	
+	# If we hit one time and it's normal points sideways, it's a legitimate ledge.
+	if Math.equal_float(under.normal.y, 0.0, 0.01) and not above.valid:
+		validity = Validity.VALID
+		return
+	
+	# If we hit one time and the under normal is pointing upwards, it's invalid.
+	elif under.normal.y > 0.3 and not above.valid:
+		validity = Validity.INVALID
+		return
+	
+	
+	if under.valid and above.valid:
+	
+		# If both are pointing sideways, and the distance between both is larger than a specific threshold, then it's valid.
+		if Math.equal_float(under.normal.y, 0.0, 0.01) and Math.equal_float(above.normal.y, 0.0, 0.01) and distance_xz_between() > 0.1:
+			validity = Validity.VALID
+			return
+	
+	## If we come from below and only hit one time
+	if not above.valid and under.original_ray_direction.y > 0.0:
+
+		validity = Validity.INSECURE
+		
+		
+	else:
+		
+		validity = Validity.INSECURE
+		
+	
+	
+	
+	pass
+
 func distance_xz_between() -> float:
 	
 	if above.valid: 
