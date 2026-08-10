@@ -109,10 +109,10 @@ func determine_validity():
 	if not above.valid:
 		
 		# If we look at it too strong from the side, it's invalid.
-		
-		if under.normal.dot(under.original_ray_direction) > -0.5:
-			validity = Validity.INVALID
-			return
+		# Or not
+		#if under.normal.dot(under.original_ray_direction) > -0.5:
+			#validity = Validity.INVALID
+			#return
 		
 		
 		

@@ -68,34 +68,17 @@ func _physics_process(_delta: float) -> void:
 
 func detect_ledge_exp() -> BasicRpgHitResult:
 	
-	#var lower_point: BasicRpgHitResult = make_invalid_hit_result()
-	#
-	#var small_forward_scan_0: BasicRpgVerticalRowScanResult = cast_row_forward(2.0)
-	#
-	#if debug:
-		#for result in small_forward_scan_0.results:
-			#if result.valid:
-				#DebugShapes.place_a_blue_sphere(result.position)
-	#
-	#var small_ledge_0 = small_forward_scan_0.breakpoint_as_ledge
-	#
-	#small_ledge_0.determine_validity()
-	#
-	#if small_ledge_0.validity == BasicRpgLedge.Validity.VALID:
-		#lower_point = small_forward_scan_0.breakpoint_as_ledge.under
-		#return lower_point
-	
 	# If the small row cast didn't find a ledge, do a bigger one.
 	
 	var max_y_tolerance: float = check_max_y_tolerance()
-	for i in 8:
+	for i in 12:
 		var point: BasicRpgHitResult
 		
-		var y_tolerance = 2.0 * i
-		if y_tolerance > max_y_tolerance:
-			y_tolerance = max_y_tolerance
+		var yy_tolerance = 2.0 * i
+		if yy_tolerance > max_y_tolerance:
+			yy_tolerance = max_y_tolerance
 		
-		var forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(y_tolerance)
+		var forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(yy_tolerance)
 		
 		var ledge: BasicRpgLedge = forward_scan.breakpoint_as_ledge
 		
@@ -107,65 +90,21 @@ func detect_ledge_exp() -> BasicRpgHitResult:
 		
 		if ledge.validity == BasicRpgLedge.Validity.VALID:
 			
+			if approximate:
+				ledge = approximate_ledge(ledge, approximation_row_resolution)
+				
+				ledge.determine_validity()
+				
+				if ledge.validity == BasicRpgLedge.Validity.VALID:
+					#print("From Edge Detector: Ledge approximated!")
+					return ledge.under
+				
+				
 			point = ledge.under
 			
 			return point
 	
 	
-	
-	return make_invalid_hit_result()
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	# -----------------------------------------
-	
-	# do a big row cast and a small one
-	
-	
-	var y_tolerance: float = check_max_y_tolerance()
-	
-	if y_tolerance > 10.0:
-		y_tolerance = 10.0
-	
-	var big_forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(y_tolerance)
-	
-	var small_forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(1.0)
-	
-	#for result in small_forward_scan.results:
-		#if result.valid:
-			#DebugShapes.place_a_blue_sphere(result.position)
-	
-	if big_forward_scan.breakpoint_as_ledge.under.valid:
-		
-		big_forward_scan. breakpoint_as_ledge = approximate_ledge_further(big_forward_scan.breakpoint_as_ledge, vertical_row_number_of_rays)
-		
-		
-	if small_forward_scan.breakpoint_as_ledge.under.valid:
-		small_forward_scan.breakpoint_as_ledge = approximate_ledge_further(big_forward_scan.breakpoint_as_ledge, vertical_row_number_of_rays)
-	
-		
-		
-		
-	if small_forward_scan.breakpoint_as_ledge.under.valid:
-		return small_forward_scan.breakpoint_as_ledge.under
-	elif big_forward_scan.breakpoint_as_ledge.under.valid:
-		return big_forward_scan.breakpoint_as_ledge.under
-	else:
-		return make_invalid_hit_result()
-		
-		
-		return big_forward_scan.breakpoint_as_ledge.under
 	
 	return make_invalid_hit_result()
 
@@ -875,6 +814,22 @@ func get_breakpoint_from_vertical_row(row: Array[BasicRpgHitResult], row_y_inter
 		out.valid = false
 	
 	return out
+
+
+func approximate_ledge(ledge: BasicRpgLedge, number_of_rays: int) -> BasicRpgLedge:
+	
+	# First determine the beginning and end of the row.
+	
+	var row_begin: Vector3 = ledge.under.original_ray_begin
+	
+	var row_end: Vector3 = ledge.above.original_ray_begin
+	
+	var row_direction: Vector3 = ledge.under.original_ray_direction
+	
+	var hit_results : Array[BasicRpgHitResult] = RayCaster.cast_row(self, row_begin, row_end, row_direction, number_of_rays, ledge.under.original_ray_length, true)
+	
+	return make_ledge(get_breakpoint_from_row(hit_results))
+
 
 func approximate_ledge_further(ledge: BasicRpgLedge, number_of_rays: int) -> BasicRpgLedge:
 	

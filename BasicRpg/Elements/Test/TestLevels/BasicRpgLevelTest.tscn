@@ -191,6 +191,12 @@ use_collision = true
 size = Vector3(323.7461, 1, 322.82617)
 material = SubResource("StandardMaterial3D_reusg")
 
+[node name="CSGBox3D20" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1293921467]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 65.33448, 0)
+use_collision = true
+size = Vector3(323.7461, 1, 322.82617)
+material = SubResource("StandardMaterial3D_reusg")
+
 [node name="CSGBox3D2" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1104802978]
 transform = Transform3D(0.7957667, 0, -0.6056033, 0, 1, 0, 0.6056033, 0, 0.7957667, 0.30249786, 15.572559, 0)
 use_collision = true
