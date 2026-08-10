@@ -104,6 +104,58 @@ func determine_validity():
 		validity = Validity.INVALID
 		return
 	
+	
+	
+	if not above.valid:
+		
+		# If we look at it too strong from the side, it's invalid.
+		
+		if under.normal.dot(under.original_ray_direction) > -0.5:
+			validity = Validity.INVALID
+			return
+		
+		
+		
+		
+		
+		if under.normal.y > 0.1:
+			
+			validity = Validity.INVALID
+			return
+		else:
+			validity = Validity.VALID
+			return
+			
+		
+	# If we hit something with both:	
+	else:
+		
+		if under.normal.y < 0.1:
+			
+			if above.normal.y < 0.01:
+				validity = Validity.VALID
+				return
+		
+		
+		
+		
+		pass
+	
+	
+	
+	validity = Validity.INVALID
+	return
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	# If we hit one time and it's normal points sideways, it's a legitimate ledge.
 	if Math.equal_float(under.normal.y, 0.0, 0.01) and not above.valid:
 		validity = Validity.VALID
@@ -125,12 +177,7 @@ func determine_validity():
 	## If we come from below and only hit one time
 	if not above.valid and under.original_ray_direction.y > 0.0:
 
-		validity = Validity.INSECURE
-		
-		
-	else:
-		
-		validity = Validity.INSECURE
+		validity = Validity.INVALID
 		
 	
 	
