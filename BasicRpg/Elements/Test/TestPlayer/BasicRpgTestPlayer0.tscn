@@ -42,4 +42,5 @@ metadata/_custom_type_script = "uid://c1gs4wtogha26"
 [node name="BasicRpgGrapplingHookEdgeDetector" type="Node3D" parent="." unique_id=1015193079 node_paths=PackedStringArray("camera")]
 script = ExtResource("5_yaa8f")
 camera = NodePath("../BasicRpgCameraComponent")
+approximation_row_resolution = 16
 metadata/_custom_type_script = "uid://c3umlb014vkms"

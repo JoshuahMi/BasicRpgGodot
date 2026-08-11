@@ -31,7 +31,7 @@ func _process(_delta: float) -> void:
 	
 	%FPSLabel.text = str(Engine.get_frames_per_second())
 	
-	if edge_detector.is_detected_point_valid:
+	if edge_detector.is_detected_point_valid and edge_detector.detected_platform_point_representator.is_on_screen:
 		place_grappling_hook_edge_indicator(edge_detector.detected_platform_point)
 	else:
 		hide_grappling_hook_edge_indicator()

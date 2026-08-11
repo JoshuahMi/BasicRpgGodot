@@ -100,6 +100,9 @@ func validate():
 
 func determine_validity():
 	
+	if under == null or above == null:
+		return
+	
 	if not under.valid:
 		validity = Validity.INVALID
 		return
@@ -109,8 +112,10 @@ func determine_validity():
 	if not above.valid:
 		
 		# If we look at it too strong from the side, it's invalid.
-		# Or not
-		#if under.normal.dot(under.original_ray_direction) > -0.5:
+		# COMMENTED OUT
+		#Math.equal_float(under.normal.dot(under.original_ray_direction), 0.0, 0.1)
+		#if Math.equal_float(under.normal.dot(under.original_ray_direction), 0.0, 0.5):
+			##print("From Ledge: Invalid because dot product is zero!")
 			#validity = Validity.INVALID
 			#return
 		

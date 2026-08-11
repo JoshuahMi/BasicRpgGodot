@@ -28,14 +28,18 @@ class_name BasicRpgGrapplingHookEdgeDetector extends Node3D
 ## The resolution of the approximation row of ray casts, i.e. how many rays it will cast in the y position interval the ledge that is to be approximated will be.
 @export var approximation_row_resolution: int = 5
 
+
+
+
+var detected_platform_point_representator: BasicRpgLedgeRepresentator = BasicRpgLedgeRepresentator.new()
+
 ## This is the point that is detected by this detector. The most important variable,
 ## since the edge detector exists to detect this point.
 var detected_platform_point: Vector3 = Vector3.ZERO:
 	set(new_value):
 		detected_platform_point = new_value
 		
-		# In the moment it gets detected, it's valid
-		#is_detected_point_valid = true
+		detected_platform_point_representator.set_point(new_value)
 		
 		if debug:
 			DebugShapes.place_the_red_sphere(new_value)
@@ -43,6 +47,9 @@ var detected_platform_point: Vector3 = Vector3.ZERO:
 var is_detected_point_valid = false
 
 func _ready() -> void:
+	
+	add_child(detected_platform_point_representator)
+	
 	pass
 
 
@@ -66,15 +73,42 @@ func _physics_process(_delta: float) -> void:
 	
 #region MAIN FUNCTIONS
 
+func detect_ledge_exp_0() -> BasicRpgHitResult:
+	
+	var max_y_tolerance: float = check_max_y_tolerance()
+	
+	if max_y_tolerance > 25.0:
+		max_y_tolerance = 25.0
+	
+	var point: BasicRpgHitResult = make_invalid_hit_result()
+	
+	
+	var forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(max_y_tolerance)
+	
+	var ledge: BasicRpgLedge = forward_scan.breakpoint_as_ledge
+	
+	ledge.determine_validity()
+	
+	
+	if ledge.validity == BasicRpgLedge.Validity.VALID:
+		return ledge.under
+	else:
+		return make_invalid_hit_result()
+
+## THE STANDARD - it uses the forward row cast approach
 func detect_ledge_exp() -> BasicRpgHitResult:
 	
 	# If the small row cast didn't find a ledge, do a bigger one.
 	
 	var max_y_tolerance: float = check_max_y_tolerance()
-	for i in 12:
-		var point: BasicRpgHitResult
+	
+	var point: BasicRpgHitResult = make_invalid_hit_result()
+	
+	for i in 4:
 		
-		var yy_tolerance = 2.0 * i
+		var index = i + 1
+		var yy_tolerance = 2.0 * index
+		
 		if yy_tolerance > max_y_tolerance:
 			yy_tolerance = max_y_tolerance
 		
@@ -82,11 +116,12 @@ func detect_ledge_exp() -> BasicRpgHitResult:
 		
 		var ledge: BasicRpgLedge = forward_scan.breakpoint_as_ledge
 		
+		ledge.determine_validity()
+		
 		if debug:
 			if ledge.under.valid:
 				DebugShapes.place_the_purple_sphere(ledge.under.position)
 		
-		ledge.determine_validity()
 		
 		if ledge.validity == BasicRpgLedge.Validity.VALID:
 			
@@ -96,19 +131,39 @@ func detect_ledge_exp() -> BasicRpgHitResult:
 				ledge.determine_validity()
 				
 				if ledge.validity == BasicRpgLedge.Validity.VALID:
-					#print("From Edge Detector: Ledge approximated!")
+					
 					return ledge.under
+				else:
+					return make_invalid_hit_result()
 				
 				
 			point = ledge.under
 			
 			return point
+			
 	
+	var forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(max_y_tolerance)
+		
+	var ledge: BasicRpgLedge = forward_scan.breakpoint_as_ledge
+	
+	ledge.determine_validity()
+	
+	if ledge.validity == BasicRpgLedge.Validity.VALID:
+		
+		ledge = approximate_ledge(ledge, vertical_row_number_of_rays)
+		
+		if approximate:
+			ledge = approximate_ledge(ledge, approximation_row_resolution)
+			
+		if ledge.valid:
+			return ledge.under
+		else:
+			return make_invalid_hit_result()
 	
 	
 	return make_invalid_hit_result()
 
-## THE STANDARD
+## THE OLD STANDARD
 func detect_ledge() -> BasicRpgHitResult:
 	
 	if debug:
@@ -144,7 +199,8 @@ func detect_ledge() -> BasicRpgHitResult:
 #endregion MAIN FUNCTIONS
 
 
-#region experimental functions
+#region HELPER FUNCTIONS
+
 
 func make_invalid_ledge() -> BasicRpgLedge:
 	var out: BasicRpgLedge = BasicRpgLedge.new()
@@ -294,11 +350,11 @@ func scan_upwards(begin: BasicRpgHitResult, end: Vector3) -> BasicRpgHitResult:
 
 
 
-#endregion experimental functions
+
 
 #region REFACTOR
 
-
+## THE OLD STANDARD
 func get_base_point_refactored() -> BasicRpgHitResult:
 	
 	
@@ -325,7 +381,7 @@ func get_base_point_refactored() -> BasicRpgHitResult:
 		return base_point_1
 	
 
-	
+## THE OLD STANDARD
 func get_ledge_from_base_point_refactored(base_point: BasicRpgHitResult) -> BasicRpgLedge:
 	
 	if base_point == null or not base_point.valid:
@@ -370,7 +426,6 @@ func get_ledge_from_base_point_refactored(base_point: BasicRpgHitResult) -> Basi
 
 #endregion REFACTOR
 
-#region HELPER FUNCTIONS
 
 func check_max_y_tolerance() -> float:
 	
@@ -783,7 +838,21 @@ func get_breakpoint_from_row(row: Array[BasicRpgHitResult]) -> Array[BasicRpgHit
 					hit_result_that_is_longer = row[index + 1]
 					hit_result_before = row[index]
 					break
-					
+	
+	
+	
+	# TODO: If we could add an additional row here which checks if 
+	# Any two results in this additional row in the breakpoint have a significantly higher length difference
+	# Than the EXPECTED AVERAGE length difference they should have, it's at least a... hm
+	# On a spherical surface the last should have a longer, the first have a shorter length - 
+	# we're searching for a significant, unexpected change. WAIT
+	
+	# IF we set the length difference of the two rays BEFORE the current one as reference, and check if 
+	# it's, let's say, more than 1,25 times longer, then it should be significant!
+	
+	# But how do we treat invalid ones with a length of 100.0? If the normal changes slowly 
+	# towards the dot product of zero between it's direction and the normal... well. What do we do with low resolution spheres?
+	
 	return [hit_result_before, hit_result_that_is_longer]
 
 func get_breakpoint_from_vertical_row(row: Array[BasicRpgHitResult], row_y_interval: float) -> BasicRpgLedge:
@@ -818,7 +887,11 @@ func get_breakpoint_from_vertical_row(row: Array[BasicRpgHitResult], row_y_inter
 
 func approximate_ledge(ledge: BasicRpgLedge, number_of_rays: int) -> BasicRpgLedge:
 	
-	# First determine the beginning and end of the row.
+	if ledge == null:
+		return make_invalid_ledge()
+		
+	if not ledge.valid:
+		return ledge
 	
 	var row_begin: Vector3 = ledge.under.original_ray_begin
 	
@@ -828,8 +901,57 @@ func approximate_ledge(ledge: BasicRpgLedge, number_of_rays: int) -> BasicRpgLed
 	
 	var hit_results : Array[BasicRpgHitResult] = RayCaster.cast_row(self, row_begin, row_end, row_direction, number_of_rays, ledge.under.original_ray_length, true)
 	
+	
+	# ------------------------------------------------------------------------
+	
+	var is_ledge_valid: bool = true
+	
+	# First, strip the hit results off the invalid ones
+	
+	var important_hit_results : Array[BasicRpgHitResult] = []
+	
+	for result in hit_results:
+		if result.valid:
+			important_hit_results.append(result)
+			
+	
+	if important_hit_results.size() < 2:
+		return make_ledge(get_breakpoint_from_row(hit_results))
+	
+	
+	# Then analyze them. The dot product of the normal and the direction as well as the length difference between it and the next one.
+	
+	# true is good, false is bad.
+	var important_hit_results_normal_dot: Array[bool] = []
+	
+	for result in important_hit_results:
+		
+		var is_good: bool = not Math.equal_float(result.normal.dot(result.original_ray_direction.normalized()), 0.0, 0.1)
+		important_hit_results_normal_dot.append(is_good)
+	
+	
+	
+	
+	
+	
+	# Evaluate the results
+	
+	var good_count = important_hit_results_normal_dot.count(true)
+	
+	is_ledge_valid = good_count >= important_hit_results.size() / 2
+	
+	
+	if is_ledge_valid:
+		return make_ledge(get_breakpoint_from_row(hit_results))
+	else:
+		return make_invalid_ledge()
+	
+	# ------------------------------------------------------------------------
+	
+	
+	
 	return make_ledge(get_breakpoint_from_row(hit_results))
-
+	
 
 func approximate_ledge_further(ledge: BasicRpgLedge, number_of_rays: int) -> BasicRpgLedge:
 	
