@@ -32,6 +32,7 @@ var is_normal_movement_possible: bool = true
 
 #region JUMP
 
+## The curve that is for determining if we still are moving into the jump momentum direction while jumping
 const BASIC_RPG_JUMPING_MOVEMENT = preload("uid://dhy3gqot658rg")
 
 @export_category("Jump")
@@ -165,6 +166,17 @@ var mouse_sensitivity: float = 0.5
 
 #endregion INPUT
 
+
+#region GRAPPLING HOOK
+
+var edge_detector: BasicRpgGrapplingHookEdgeDetector = BasicRpgGrapplingHookEdgeDetector.new()
+
+
+
+#endregion GRAPPLING HOOK
+
+
+
 signal state_changed(new_state: States)
 
 
@@ -184,6 +196,8 @@ enum States {
 	SLIDE,
 	
 	CROUCH,
+	
+	GRAPPLING_HOOK,
 	
 	CLIMB,
 	LEDGE_GRAB,
@@ -212,6 +226,13 @@ func _ready() -> void:
 		return 
 	
 	await body.ready
+	
+	edge_detector.camera = camera
+	add_child(edge_detector)
+	
+	
+	
+	
 	
 	# Initializing the states
 	
@@ -268,6 +289,12 @@ func _ready() -> void:
 	states[States.CROUCH].camera = camera
 	states[States.CROUCH].state_machine = self
 	states[States.CROUCH].transitioned.connect(_on_state_transitioned)
+	
+	states[States.GRAPPLING_HOOK] = BasicRpgMovementStateGrapplingHook.new()
+	states[States.GRAPPLING_HOOK].body = body
+	states[States.GRAPPLING_HOOK].camera = camera
+	states[States.GRAPPLING_HOOK].state_machine = self
+	states[States.GRAPPLING_HOOK].transitioned.connect(_on_state_transitioned)
 	
 	states[States.CLIMB] = BasicRpgMovementStateClimb.new()
 	states[States.CLIMB].body = body

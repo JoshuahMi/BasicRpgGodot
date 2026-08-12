@@ -57,8 +57,10 @@ func physics_update(delta: float):
 
 func apply_gravity(delta: float):
 	
-	body.velocity.y += body.get_gravity().y * delta * state_machine.jump_gravity_multiplier
-	
+	if body.velocity.y >= 0.0:
+		body.velocity += body.get_gravity() * delta * state_machine.jump_gravity_multiplier
+	else:
+		body.velocity += body.get_gravity() * delta * state_machine.fall_gravity_multiplier
 	pass
 
 ## Handles things that happen, e.g. that the y velocity goes under a certain

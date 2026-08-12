@@ -13,9 +13,6 @@ func enter():
 		transition()
 		return
 	
-	# if it's the same wall you came from, transition
-	#state_machine.current_wall_run_cheese_cooldown = state_machine.wall_run_cheese_cooldown
-	
 	var collision: KinematicCollision3D = body.get_last_slide_collision()
 	if collision != null:
 		
@@ -24,12 +21,6 @@ func enter():
 			transition()
 			return
 			
-	#else:
-		#if state_machine.current_wall_run_cheese_cooldown > 0.0 and state_machine.wall_normal == body.get_wall_normal() and state_machine.has_wall_run_before:
-#
-			#transition()
-			#return
-		
 	
 	state_machine.wall_touch_position = Vector3(body.position.x, 0.0, body.position.z)
 	
@@ -41,15 +32,13 @@ func enter():
 		
 	body.velocity.y *= 0.2
 		
-	#state_machine.wall_run_momentum = body.velocity
-	
-	
 
 func exit():
 	# Adds this state to the history, so that the next state can look up
 	# where it came from.
 	state_machine.history.add_state(BasicRpgMovementStateMachine.States.WALL)
-
+	
+	
 
 func update(delta: float):
 	pass
@@ -114,7 +103,7 @@ func happening_management():
 	
 	if not body.is_on_wall_only():
 		transitioned.emit(BasicRpgMovementStateMachine.States.WALL, BasicRpgMovementStateMachine.States.AIR)
-	
+		state_machine.jump_charges = 0
 	
 	if body.is_on_floor() and state_machine.movement_direction.length_squared() > 0.01:
 		transitioned.emit(BasicRpgMovementStateMachine.States.WALL, BasicRpgMovementStateMachine.States.GO)

@@ -4,12 +4,7 @@ class_name BasicRpgGrapplingHookEdgeDetector extends Node3D
 
 @export var camera: Node3D
 
-## DEBUG:
-## Two little red spheres: The beginning and end of the vertical row cast
-## Blue spheres: The hit results of the vertical row cast.
-## Purple sphere: Base point for the vertical row to be cast to. 
-## Purple little spheres: Hit results of approximation function. Also used for the vertical row in specific situations
-## Green spheres: Up row cast to determine how far towards the player the platform goes
+
 @export var debug: bool = false
 
 ## How long the initial ray cast from the camera will be.
@@ -26,7 +21,7 @@ class_name BasicRpgGrapplingHookEdgeDetector extends Node3D
 @export var approximate: bool = true
 
 ## The resolution of the approximation row of ray casts, i.e. how many rays it will cast in the y position interval the ledge that is to be approximated will be.
-@export var approximation_row_resolution: int = 5
+@export var approximation_row_resolution: int = 16
 
 ## The representator that is telling the HUD if the point is currently on screen.
 var detected_platform_point_representator: BasicRpgLedgeRepresentator = BasicRpgLedgeRepresentator.new()
