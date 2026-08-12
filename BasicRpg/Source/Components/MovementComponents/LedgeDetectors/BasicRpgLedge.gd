@@ -104,7 +104,11 @@ func determine_validity():
 		return
 	
 	if not under.valid:
+		
+		#print("From Ledge: Under was invalid!")
+		
 		validity = Validity.INVALID
+		valid = false
 		return
 	
 	
@@ -113,22 +117,32 @@ func determine_validity():
 		
 		# If we look at it too strong from the side, it's invalid.
 		# COMMENTED OUT
-		#Math.equal_float(under.normal.dot(under.original_ray_direction), 0.0, 0.1)
-		#if Math.equal_float(under.normal.dot(under.original_ray_direction), 0.0, 0.5):
-			##print("From Ledge: Invalid because dot product is zero!")
-			#validity = Validity.INVALID
-			#return
 		
+		if not above.valid:
+			if Math.equal_float(under.normal.dot(under.original_ray_direction.normalized()), 0.0, 0.3):
+				
+				#print("From Ledge: Invalid because dot product is zero!")
+				validity = Validity.INVALID
+				valid = false
+				return
 		
+		else:
+			if Math.equal_float(under.normal.dot(under.original_ray_direction.normalized()), 0.0, 0.3) and Math.equal_float(above.normal.dot(above.original_ray_direction.normalized()), 0.0, 0.3):
+				#print("From Ledge: Invalid because dot product is zero!")
+				validity = Validity.INVALID
+				valid = false
+				return
 		
 		
 		
 		if under.normal.y > 0.1:
-			
+			#print("From Ledge: Under is pointing upwards! ")
 			validity = Validity.INVALID
+			valid = false
 			return
 		else:
 			validity = Validity.VALID
+			valid = true
 			return
 			
 		
@@ -139,6 +153,7 @@ func determine_validity():
 			
 			if above.normal.y < 0.01:
 				validity = Validity.VALID
+				valid = true
 				return
 		
 		
@@ -147,47 +162,12 @@ func determine_validity():
 		pass
 	
 	
-	
+	#print("From Ledge: None of the cases were true!")
 	validity = Validity.INVALID
+	valid = false
 	return
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	# If we hit one time and it's normal points sideways, it's a legitimate ledge.
-	if Math.equal_float(under.normal.y, 0.0, 0.01) and not above.valid:
-		validity = Validity.VALID
-		return
-	
-	# If we hit one time and the under normal is pointing upwards, it's invalid.
-	elif under.normal.y > 0.3 and not above.valid:
-		validity = Validity.INVALID
-		return
-	
-	
-	if under.valid and above.valid:
-	
-		# If both are pointing sideways, and the distance between both is larger than a specific threshold, then it's valid.
-		if Math.equal_float(under.normal.y, 0.0, 0.01) and Math.equal_float(above.normal.y, 0.0, 0.01) and distance_xz_between() > 0.1:
-			validity = Validity.VALID
-			return
-	
-	## If we come from below and only hit one time
-	if not above.valid and under.original_ray_direction.y > 0.0:
 
-		validity = Validity.INVALID
-		
-	
-	
-	
-	pass
 
 func distance_xz_between() -> float:
 	
