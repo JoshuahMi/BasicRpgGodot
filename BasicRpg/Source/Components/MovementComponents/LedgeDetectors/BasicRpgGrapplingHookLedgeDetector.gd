@@ -122,6 +122,14 @@ func detect_ledge_exp() -> BasicRpgHitResult:
 			if ledge.under.valid:
 				DebugShapes.place_the_purple_sphere(ledge.under.position)
 		
+			for result in forward_scan.results:
+				
+				if result.valid:
+					
+					DebugShapes.place_a_blue_sphere(result.position)
+		
+		
+		
 		
 		if ledge.validity == BasicRpgLedge.Validity.VALID:
 			
@@ -430,7 +438,14 @@ func get_ledge_from_base_point_refactored(base_point: BasicRpgHitResult) -> Basi
 func check_max_y_tolerance() -> float:
 	
 	var up_hit: BasicRpgHitResult = RayCaster.cast_ray_up(self, camera.global_position, platform_detection_distance, false)
-
+	
+	if up_hit.valid:
+		return up_hit.length
+	else:
+		return platform_detection_distance
+	
+	
+	
 	return up_hit.length
 
 
@@ -928,11 +943,6 @@ func approximate_ledge(ledge: BasicRpgLedge, number_of_rays: int) -> BasicRpgLed
 		
 		var is_good: bool = not Math.equal_float(result.normal.dot(result.original_ray_direction.normalized()), 0.0, 0.1)
 		important_hit_results_normal_dot.append(is_good)
-	
-	
-	
-	
-	
 	
 	# Evaluate the results
 	

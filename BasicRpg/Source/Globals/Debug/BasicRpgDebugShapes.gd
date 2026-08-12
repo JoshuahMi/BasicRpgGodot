@@ -6,7 +6,7 @@ extends Node3D
 ## If you place "a" (color) sphere, it will place one of the spheres of the (color) spheres array, 
 ## until no more are left in the array. It will place the first sphere in the array then if you place one more, and so on.
 
-@onready var each_array_sphere_count: int = 32
+@onready var each_array_sphere_count: int = 128
 
 # ----------------------------------------------------------
 
