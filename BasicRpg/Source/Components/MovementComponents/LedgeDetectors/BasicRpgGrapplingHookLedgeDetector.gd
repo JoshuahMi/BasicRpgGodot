@@ -1,14 +1,22 @@
 class_name BasicRpgGrapplingHookEdgeDetector extends Node3D
 
-## A helper class for detecting valid points for the grappling hook to hang on to.
+## A helper class for detecting valid points for the grappling hook or the spell Grabbelkliff to hang on to.
 
 @export var camera: Node3D
 
 
 @export var debug: bool = false
 
-## How long the initial ray cast from the camera will be.
-@export var platform_detection_distance: float = 100.0
+
+
+## If the Edge Detector shall search for a point. Is basically the on/off switch of 
+## The edge detector. If the player doesn't have a grappling hook or Grabbelkliff, it's pointless 
+## to search for points. Pun intended.
+var is_currently_searching: bool = true
+
+## How far the detector will reach detecting points. An already detected point
+## going out of this distance will become invalid.
+@export var platform_detection_distance: float = 40.0
 
 ## How high the vertical row cast will be that will detect the ledge.
 @export var vertical_row_y_tolerance: float = 3.0
@@ -33,9 +41,9 @@ var detected_platform_point: Vector3 = Vector3.ZERO:
 		detected_platform_point = new_value
 		
 		detected_platform_point_representator.set_point(new_value)
-		
 		if debug:
 			DebugShapes.place_the_red_sphere(new_value)
+			
 
 var is_detected_point_valid = false
 
@@ -48,11 +56,14 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	
+	if not is_currently_searching:
+		return
+	
 	if debug:
 		DebugShapes.hide_all()
 	
 	
-	var detected_point: BasicRpgHitResult = detect_ledge()
+	var detected_point: BasicRpgHitResult = detect_ledge_all()
 	
 	if detected_point.valid:
 		is_detected_point_valid = validate_point(detected_platform_point)
@@ -66,9 +77,66 @@ func _physics_process(_delta: float) -> void:
 	
 #region MAIN FUNCTIONS
 
+func detect_ledge_all() -> BasicRpgHitResult:
+	
+	var first_attempt: BasicRpgHitResult = detect_ledge()
+	
+	if first_attempt.valid:
+		return first_attempt
+	else:
+		return detect_ledge_big()
+
+
+func detect_ledge_big():
+	
+	
+	
+	var max_y_tolerance: float = check_max_y_tolerance()
+	
+	if max_y_tolerance > 30.0:
+		max_y_tolerance = 30.0
+	
+	var big_row: BasicRpgVerticalRowScanResult = cast_row_forward(max_y_tolerance, vertical_row_number_of_rays * 10)
+	
+	if debug:
+		for result in big_row.results:
+			if result.valid:
+				if result.original_ray_direction.y > 0.0:
+					DebugShapes.place_a_blue_sphere(result.position)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	#if big_row.breakpoint_as_ledge.under.valid:
+		#DebugShapes.place_the_red_sphere(big_row.breakpoint_as_ledge.under.position)
+	
+	
+	
+	var small_row: BasicRpgLedge = approximate_ledge(big_row.breakpoint_as_ledge, vertical_row_number_of_rays)
+	
+	if approximate:
+		small_row = approximate_ledge(small_row, approximation_row_resolution)
+	
+	small_row.determine_validity()
+	
+	if small_row.valid:
+		return small_row.under
+	else:
+		return RayCaster.make_invalid_hit_result()
+	
+	
+
+
+
 func detect_ledge() -> BasicRpgHitResult:
 	
-	var point: BasicRpgHitResult = make_invalid_hit_result()
+	var point: BasicRpgHitResult = RayCaster.make_invalid_hit_result()
 	
 	var max_y_tolerance: float = check_max_y_tolerance()
 	
@@ -76,7 +144,7 @@ func detect_ledge() -> BasicRpgHitResult:
 		max_y_tolerance = 20.0
 	
 	
-	var small_forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(2.0)
+	var small_forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(2.0, vertical_row_number_of_rays)
 	
 	if debug:
 		for result in small_forward_scan.results:
@@ -91,7 +159,7 @@ func detect_ledge() -> BasicRpgHitResult:
 		small_ledge = approximate_ledge(small_ledge, approximation_row_resolution)
 		
 	
-	var big_forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(max_y_tolerance - 0.5)
+	var big_forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(max_y_tolerance - 0.5, vertical_row_number_of_rays)
 	
 	if debug:
 		for result in big_forward_scan.results:
@@ -102,7 +170,6 @@ func detect_ledge() -> BasicRpgHitResult:
 				DebugShapes.place_the_red_sphere(big_forward_scan.breakpoint_as_ledge.under.position)
 				
 	
-	
 	var additional_forward_scan: BasicRpgLedge = approximate_ledge(big_forward_scan.breakpoint_as_ledge, vertical_row_number_of_rays)
 	
 	additional_forward_scan.determine_validity()
@@ -110,9 +177,6 @@ func detect_ledge() -> BasicRpgHitResult:
 	if approximate:
 		additional_forward_scan = approximate_ledge(additional_forward_scan, approximation_row_resolution)
 		additional_forward_scan.determine_validity()
-	
-	
-
 	
 	if small_ledge.valid:
 		
@@ -125,9 +189,9 @@ func detect_ledge() -> BasicRpgHitResult:
 			return additional_forward_scan.under
 		else:
 			
-			return make_invalid_hit_result()
+			return RayCaster.make_invalid_hit_result()
 			
-	return make_invalid_hit_result()
+	return RayCaster.make_invalid_hit_result()
 
 ## THE STANDARD - it uses the forward row cast approach
 func detect_ledge_exp() -> BasicRpgHitResult:
@@ -136,7 +200,7 @@ func detect_ledge_exp() -> BasicRpgHitResult:
 	
 	var max_y_tolerance: float = check_max_y_tolerance()
 	
-	var point: BasicRpgHitResult = make_invalid_hit_result()
+	var point: BasicRpgHitResult = RayCaster.make_invalid_hit_result()
 	
 	for i in 4:
 		
@@ -146,7 +210,7 @@ func detect_ledge_exp() -> BasicRpgHitResult:
 		if yy_tolerance > max_y_tolerance:
 			yy_tolerance = max_y_tolerance
 		
-		var forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(yy_tolerance)
+		var forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(yy_tolerance, vertical_row_number_of_rays)
 		
 		var ledge: BasicRpgLedge = forward_scan.breakpoint_as_ledge
 		
@@ -176,7 +240,7 @@ func detect_ledge_exp() -> BasicRpgHitResult:
 					
 					return ledge.under
 				else:
-					return make_invalid_hit_result()
+					return RayCaster.make_invalid_hit_result()
 				
 				
 			point = ledge.under
@@ -184,7 +248,7 @@ func detect_ledge_exp() -> BasicRpgHitResult:
 			return point
 			
 	
-	var forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(max_y_tolerance)
+	var forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(max_y_tolerance, vertical_row_number_of_rays)
 		
 	var ledge: BasicRpgLedge = forward_scan.breakpoint_as_ledge
 	
@@ -200,29 +264,15 @@ func detect_ledge_exp() -> BasicRpgHitResult:
 		if ledge.valid:
 			return ledge.under
 		else:
-			return make_invalid_hit_result()
+			return RayCaster.make_invalid_hit_result()
 	
 	
-	return make_invalid_hit_result()
+	return RayCaster.make_invalid_hit_result()
 
 #endregion MAIN FUNCTIONS
 
 
 #region HELPER FUNCTIONS
-
-
-func make_invalid_ledge() -> BasicRpgLedge:
-	var out: BasicRpgLedge = BasicRpgLedge.new()
-	out.valid = false
-	return out
-
-func make_invalid_hit_result() -> BasicRpgHitResult:
-	
-	var out: BasicRpgHitResult = BasicRpgHitResult.new()
-	out.valid = false
-	out.length = 100.0
-	
-	return out
 
 func make_ledge(breakpnt: Array[BasicRpgHitResult]) -> BasicRpgLedge:
 	
@@ -237,11 +287,17 @@ func make_ledge(breakpnt: Array[BasicRpgHitResult]) -> BasicRpgLedge:
 	
 	return out
 	
-func cast_row_forward(y_tolerance: float) -> BasicRpgVerticalRowScanResult :
+func cast_row_forward(y_tolerance: float, number_of_rays: int) -> BasicRpgVerticalRowScanResult :
 	
-	var forward_row_cast: Array[BasicRpgHitResult] = RayCaster.cast_row(self, camera.global_position, camera.global_position + Vector3.UP * y_tolerance, Math.get_forward_vector_of_node(camera), vertical_row_number_of_rays, platform_detection_distance, true)
+	var forward_direction: Vector3 = Math.get_forward_vector_of_node(camera)
+	
+	# Correct the y direction, so that all the rays are going upwards
+	if forward_direction.y < 0.1:
+		forward_direction = Vector3(forward_direction.x, 0.1, forward_direction.z).normalized()
+	
+	var forward_row_cast: Array[BasicRpgHitResult] = RayCaster.cast_row(self, camera.global_position, camera.global_position + Vector3.UP * y_tolerance, forward_direction, number_of_rays, platform_detection_distance, true)
 		
-	var breakpnt: Array[BasicRpgHitResult] = get_breakpoint_from_row(forward_row_cast)
+	var breakpnt: Array[BasicRpgHitResult] = RayCaster.get_breakpoint_from_row(forward_row_cast)
 	
 	var out: BasicRpgVerticalRowScanResult = BasicRpgVerticalRowScanResult.new()
 	
@@ -249,9 +305,9 @@ func cast_row_forward(y_tolerance: float) -> BasicRpgVerticalRowScanResult :
 	
 	out.breakpoint_as_ledge = make_ledge(breakpnt)
 	
-	out.is_flat_surface = is_flat_surface(forward_row_cast)
+	out.is_flat_surface = RayCaster.row_cast_is_flat_surface(forward_row_cast)
 	
-	out.is_completely_invalid = is_none_valid(forward_row_cast)
+	out.is_completely_invalid = RayCaster.row_cast_is_none_valid(forward_row_cast)
 	
 	return out
 
@@ -270,120 +326,10 @@ func check_max_y_tolerance() -> float:
 		return platform_detection_distance
 	
 
-## Returns true if none of the hit results in the given row cast result is valid
-func is_none_valid(row_cast: Array[BasicRpgHitResult]) -> bool:
-	
-	var out: bool = true
-	
-	for result in row_cast:
-		if result.valid:
-			out = false
-
-	return out
-
-## Returns true if all the hit results have the same x- and z-coordinate
-func is_flat_surface(row_cast: Array[BasicRpgHitResult]) -> bool:
-	
-	var flat: bool = true
-	
-	for index in row_cast.size():
-		
-		if not index == row_cast.size() - 1:
-			if row_cast[index].valid and row_cast[index + 1].valid:
-				var position_x_equal = Math.equal_float(row_cast[index].position.x, row_cast[index + 1].position.x, 0.01)
-				var position_z_equal = Math.equal_float(row_cast[index].position.z, row_cast[index + 1].position.z, 0.01)
-				
-				if not (position_x_equal and position_z_equal):
-					flat = false
-			else:
-				flat = false
-	return flat
-	
-
-## General purpose function. Returns the breakpoint of a row cast, the latest place where a hit result is significantly shorter than its successor
-func get_breakpoint_from_row(row: Array[BasicRpgHitResult]) -> Array[BasicRpgHitResult]:
-	
-	
-	
-	var hit_result_that_is_longer: BasicRpgHitResult = make_invalid_hit_result()
-	
-	var hit_result_before: BasicRpgHitResult = make_invalid_hit_result()
-
-	if row.size() <= 1:
-		
-		var out: Array[BasicRpgHitResult]
-		out = [make_invalid_hit_result(), make_invalid_hit_result()]
-		
-		return out
-	
-	for index in row.size():
-		if not index == row.size() - 1:
-			
-			if row[index].valid:
-			
-				var length_difference: float
-				
-				# This works because invalid Hit Results get a length of 100
-				# Don't change that in the Ray Caster, or we're fucked.
-				
-				length_difference = (row[index].length - row[index + 1].length) 
-				
-				if length_difference < -0.1:
-					# THIS is the breakpoint
-					hit_result_that_is_longer = row[index + 1]
-					hit_result_before = row[index]
-					break
-	
-	
-	
-	# TODO: If we could add an additional row here which checks if 
-	# Any two results in this additional row in the breakpoint have a significantly higher length difference
-	# Than the EXPECTED AVERAGE length difference they should have, it's at least a... hm
-	# On a spherical surface the last should have a longer, the first have a shorter length - 
-	# we're searching for a significant, unexpected change. WAIT
-	
-	# IF we set the length difference of the two rays BEFORE the current one as reference, and check if 
-	# it's, let's say, more than 1,25 times longer, then it should be significant!
-	
-	# But how do we treat invalid ones with a length of 100.0? If the normal changes slowly 
-	# towards the dot product of zero between it's direction and the normal... well. What do we do with low resolution spheres?
-	
-	return [hit_result_before, hit_result_that_is_longer]
-
-func get_breakpoint_from_vertical_row(row: Array[BasicRpgHitResult], row_y_interval: float) -> BasicRpgLedge:
-	
-	
-	if row[0].valid and row[1].valid:
-		row_y_interval = abs( row[0].position.y - row[1].position.y)
-	
-	var out: BasicRpgLedge = BasicRpgLedge.new()
-	
-	# early return if the input row is invalid because it has only 1 or zero elements
-	if row.size() <= 1:
-		
-		out = BasicRpgLedge.new()
-		out.valid = false
-		
-		return out
-	
-	var two_results_that_represent_breakpoint: Array[BasicRpgHitResult] = get_breakpoint_from_row(row)
-	
-	out.under = two_results_that_represent_breakpoint[0]
-	out.above = two_results_that_represent_breakpoint[1]
-	out.y_tolerance = row_y_interval
-	
-	if out.under:
-		out.valid = true
-	else:
-		out.valid = false
-	
-	return out
-
-
 func approximate_ledge(ledge: BasicRpgLedge, number_of_rays: int) -> BasicRpgLedge:
 	
 	if ledge == null:
-		return make_invalid_ledge()
+		return RayCaster.make_invalid_ledge()
 		
 	if not ledge.valid:
 		return ledge
@@ -396,7 +342,7 @@ func approximate_ledge(ledge: BasicRpgLedge, number_of_rays: int) -> BasicRpgLed
 	
 	var hit_results : Array[BasicRpgHitResult] = RayCaster.cast_row(self, row_begin, row_end, row_direction, number_of_rays, ledge.under.original_ray_length * 2.0, true)
 	
-	return make_ledge(get_breakpoint_from_row(hit_results))
+	return make_ledge(RayCaster.get_breakpoint_from_row(hit_results))
 
 
 ## This function is to check if something is between the player and the point.

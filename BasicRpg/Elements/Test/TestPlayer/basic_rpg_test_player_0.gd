@@ -3,14 +3,14 @@ extends CharacterBody3D
 @onready var movement_component: BasicRpgMovementStateMachine = $BasicRpgMovementStateMachine
 @onready var hud: Control = $BasicRpgTestHud
 @onready var camera_component: BasicRpgCameraComponent = $BasicRpgCameraComponent
-@onready var grappling_hook_edge_detector: BasicRpgGrapplingHookEdgeDetector = $BasicRpgGrapplingHookEdgeDetector
+#@onready var grappling_hook_edge_detector: BasicRpgGrapplingHookEdgeDetector = $BasicRpgGrapplingHookEdgeDetector
 
 func _ready() -> void:
 	
 	hud.state_machine = movement_component
 	hud.input_component = input_component
 	hud.camera_component = camera_component
-	hud.edge_detector = grappling_hook_edge_detector
+	#hud.edge_detector = grappling_hook_edge_detector
 	
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 

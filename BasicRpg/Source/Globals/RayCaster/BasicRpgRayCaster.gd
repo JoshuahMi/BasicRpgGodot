@@ -104,3 +104,98 @@ func cast_row(node_this_was_called_from: Node3D, start_point: Vector3, end_point
 		
 
 	return out
+	
+	
+#region Interpreting Functions
+
+
+## Returns true if none of the hit results in the given row cast result is valid
+func row_cast_is_none_valid(row_cast: Array[BasicRpgHitResult]) -> bool:
+	
+	var out: bool = true
+	
+	for result in row_cast:
+		if result.valid:
+			out = false
+
+	return out
+
+## Returns true if all the hit results have the same x- and z-coordinate
+func row_cast_is_flat_surface(row_cast: Array[BasicRpgHitResult]) -> bool:
+	
+	var flat: bool = true
+	
+	for index in row_cast.size():
+		
+		if not index == row_cast.size() - 1:
+			if row_cast[index].valid and row_cast[index + 1].valid:
+				var position_x_equal = Math.equal_float(row_cast[index].position.x, row_cast[index + 1].position.x, 0.01)
+				var position_z_equal = Math.equal_float(row_cast[index].position.z, row_cast[index + 1].position.z, 0.01)
+				
+				if not (position_x_equal and position_z_equal):
+					flat = false
+			else:
+				flat = false
+	return flat
+
+## General purpose function. Returns the breakpoint of a row cast, the latest place where a hit result is significantly shorter than its successor
+func get_breakpoint_from_row(row: Array[BasicRpgHitResult]) -> Array[BasicRpgHitResult]:
+	
+	
+	
+	var hit_result_that_is_longer: BasicRpgHitResult = make_invalid_hit_result()
+	
+	var hit_result_before: BasicRpgHitResult = make_invalid_hit_result()
+
+	if row.size() <= 1:
+		
+		var out: Array[BasicRpgHitResult]
+		out = [make_invalid_hit_result(), make_invalid_hit_result()]
+		
+		return out
+	
+	for index in row.size():
+		if not index == row.size() - 1:
+			
+			if row[index].valid:
+			
+				var length_difference: float
+				
+				# This works because invalid Hit Results get a length of 100
+				# Don't change that in the Ray Caster, or we're fucked.
+				
+				length_difference = (row[index].length - row[index + 1].length) 
+				
+				if length_difference < -0.1:
+					# THIS is the breakpoint
+					
+					hit_result_that_is_longer = row[index + 1]
+					hit_result_before = row[index]
+					break
+	
+	return [hit_result_before, hit_result_that_is_longer]
+
+	
+
+
+#endregion Interpreting Functions
+
+#region Helper Functions
+
+func make_invalid_ledge() -> BasicRpgLedge:
+	var out: BasicRpgLedge = BasicRpgLedge.new()
+	out.valid = false
+	return out
+
+func make_invalid_hit_result() -> BasicRpgHitResult:
+	
+	var out: BasicRpgHitResult = BasicRpgHitResult.new()
+	out.valid = false
+	out.length = 100.0
+	
+	return out
+
+
+
+
+#endregion Helper Functions
