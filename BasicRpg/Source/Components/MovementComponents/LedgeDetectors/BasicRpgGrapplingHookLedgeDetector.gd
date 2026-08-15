@@ -79,13 +79,49 @@ func _physics_process(_delta: float) -> void:
 
 func detect_ledge_all() -> BasicRpgHitResult:
 	
+	var small: BasicRpgHitResult = detect_ledge_near_crosshair() 
+	
+	
+	if small.valid:
+		return small
+	
 	var first_attempt: BasicRpgHitResult = detect_ledge()
+	
+	
+	
 	
 	if first_attempt.valid:
 		return first_attempt
 	else:
 		return detect_ledge_big()
 
+
+func detect_ledge_near_crosshair() -> BasicRpgHitResult:
+	
+	var row: BasicRpgVerticalRowScanResult = cast_row_forward(3.0, vertical_row_number_of_rays)
+	
+	#DebugShapes.hide_all()
+	
+	#for result in row.results:
+		#if result.valid:
+			#DebugShapes.place_a_blue_sphere(result.position)
+			
+	#if row.breakpoint_as_ledge.valid:
+		#DebugShapes.place_the_purple_sphere(row.breakpoint_as_ledge.under.position)
+	if row.breakpoint_as_ledge.valid:	
+		if approximate:
+			var out: BasicRpgHitResult = approximate_ledge(row.breakpoint_as_ledge, approximation_row_resolution).under
+			return out
+	
+	if row.breakpoint_as_ledge.valid and row.breakpoint_as_ledge.under.valid:
+	
+		return row.breakpoint_as_ledge.under
+	
+	else:
+		return RayCaster.make_invalid_hit_result()
+	
+	
+	
 
 func detect_ledge_big():
 	
@@ -292,8 +328,8 @@ func cast_row_forward(y_tolerance: float, number_of_rays: int) -> BasicRpgVertic
 	var forward_direction: Vector3 = Math.get_forward_vector_of_node(camera)
 	
 	# Correct the y direction, so that all the rays are going upwards
-	if forward_direction.y < 0.1:
-		forward_direction = Vector3(forward_direction.x, 0.1, forward_direction.z).normalized()
+	if forward_direction.y < 0.01:
+		forward_direction = Vector3(forward_direction.x, 0.01, forward_direction.z).normalized()
 	
 	var forward_row_cast: Array[BasicRpgHitResult] = RayCaster.cast_row(self, camera.global_position, camera.global_position + Vector3.UP * y_tolerance, forward_direction, number_of_rays, platform_detection_distance, true)
 		
