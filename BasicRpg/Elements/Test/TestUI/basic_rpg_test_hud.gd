@@ -165,7 +165,10 @@ func update_state_label(state: BasicRpgMovementStateMachine.States):
 		BasicRpgMovementStateMachine.States.DIVE:
 			
 			%CurrentMovementStateLabel.text = "Dive"
-
+		
+		BasicRpgMovementStateMachine.States.GRAPPLING_HOOK:
+			
+			%CurrentMovementStateLabel.text = "Grappling Hook"
 	
 	
 	pass

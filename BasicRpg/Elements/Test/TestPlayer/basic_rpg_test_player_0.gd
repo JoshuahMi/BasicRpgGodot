@@ -19,9 +19,15 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	
 	if input_component.is_test_just_pressed:
-		movement_component.wants_to_dash = true
+		#print("From Test Player: Test pressed!")
+		if movement_component.grappling_hook.current_state == BasicRpgGrapplingHook.GrapplingHookState.AT_PLAYER_IDLE:
+			movement_component.wants_to_use_grappling_hook = true
+		elif movement_component.grappling_hook.current_state == BasicRpgGrapplingHook.GrapplingHookState.CONNECTED:
+			#print("From Test Player: Wants to return Grappling Hook!")
+			movement_component.wants_to_return_grappling_hook = true
 	else:
-		movement_component.wants_to_dash = false
+		movement_component.wants_to_use_grappling_hook = false
+		movement_component.wants_to_return_grappling_hook = false
 	
 	if input_component.jump_window:
 		movement_component.wants_to_jump = true

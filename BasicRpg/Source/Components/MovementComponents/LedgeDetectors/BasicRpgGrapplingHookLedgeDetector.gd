@@ -5,6 +5,9 @@ class_name BasicRpgGrapplingHookEdgeDetector extends Node3D
 @export var camera: Node3D
 
 
+
+
+## GREEN SPHERES: The big row.
 @export var debug: bool = false
 
 
@@ -31,7 +34,7 @@ var is_currently_searching: bool = true
 ## The resolution of the approximation row of ray casts, i.e. how many rays it will cast in the y position interval the ledge that is to be approximated will be.
 @export var approximation_row_resolution: int = 16
 
-## The representator that is telling the HUD if the point is currently on screen.
+## The representator that is telling the Grappling Hook where the ledge is and the HUD if the point is currently on screen.
 var detected_platform_point_representator: BasicRpgLedgeRepresentator = BasicRpgLedgeRepresentator.new()
 
 ## This is the point that is detected by this detector. The most important variable,
@@ -77,7 +80,11 @@ func _physics_process(_delta: float) -> void:
 	
 #region MAIN FUNCTIONS
 
+## THE STANDARD
 func detect_ledge_all() -> BasicRpgHitResult:
+	
+	if debug:
+		DebugShapes.hide_all()
 	
 	var small: BasicRpgHitResult = detect_ledge_near_crosshair() 
 	
@@ -101,7 +108,7 @@ func detect_ledge_near_crosshair() -> BasicRpgHitResult:
 	var row: BasicRpgVerticalRowScanResult = cast_row_forward(3.0, vertical_row_number_of_rays)
 	
 	#DebugShapes.hide_all()
-	
+	#
 	#for result in row.results:
 		#if result.valid:
 			#DebugShapes.place_a_blue_sphere(result.position)
@@ -125,8 +132,6 @@ func detect_ledge_near_crosshair() -> BasicRpgHitResult:
 
 func detect_ledge_big():
 	
-	
-	
 	var max_y_tolerance: float = check_max_y_tolerance()
 	
 	if max_y_tolerance > 30.0:
@@ -138,16 +143,9 @@ func detect_ledge_big():
 		for result in big_row.results:
 			if result.valid:
 				if result.original_ray_direction.y > 0.0:
-					DebugShapes.place_a_blue_sphere(result.position)
+					DebugShapes.place_a_purple_sphere(result.position)
 	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	#if big_row.breakpoint_as_ledge.under.valid:
 		#DebugShapes.place_the_red_sphere(big_row.breakpoint_as_ledge.under.position)
@@ -227,82 +225,6 @@ func detect_ledge() -> BasicRpgHitResult:
 			
 			return RayCaster.make_invalid_hit_result()
 			
-	return RayCaster.make_invalid_hit_result()
-
-## THE STANDARD - it uses the forward row cast approach
-func detect_ledge_exp() -> BasicRpgHitResult:
-	
-	# If the small row cast didn't find a ledge, do a bigger one.
-	
-	var max_y_tolerance: float = check_max_y_tolerance()
-	
-	var point: BasicRpgHitResult = RayCaster.make_invalid_hit_result()
-	
-	for i in 4:
-		
-		var index = i + 1
-		var yy_tolerance = 2.0 * index
-		
-		if yy_tolerance > max_y_tolerance:
-			yy_tolerance = max_y_tolerance
-		
-		var forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(yy_tolerance, vertical_row_number_of_rays)
-		
-		var ledge: BasicRpgLedge = forward_scan.breakpoint_as_ledge
-		
-		ledge.determine_validity()
-		
-		if debug:
-			if ledge.under.valid:
-				DebugShapes.place_the_purple_sphere(ledge.under.position)
-		
-			for result in forward_scan.results:
-				
-				if result.valid:
-					
-					DebugShapes.place_a_blue_sphere(result.position)
-		
-		
-		
-		
-		if ledge.validity == BasicRpgLedge.Validity.VALID:
-			
-			if approximate:
-				ledge = approximate_ledge(ledge, approximation_row_resolution)
-				
-				ledge.determine_validity()
-				
-				if ledge.validity == BasicRpgLedge.Validity.VALID:
-					
-					return ledge.under
-				else:
-					return RayCaster.make_invalid_hit_result()
-				
-				
-			point = ledge.under
-			
-			return point
-			
-	
-	var forward_scan: BasicRpgVerticalRowScanResult = cast_row_forward(max_y_tolerance, vertical_row_number_of_rays)
-		
-	var ledge: BasicRpgLedge = forward_scan.breakpoint_as_ledge
-	
-	ledge.determine_validity()
-	
-	if ledge.validity == BasicRpgLedge.Validity.VALID:
-		
-		ledge = approximate_ledge(ledge, vertical_row_number_of_rays)
-		
-		if approximate:
-			ledge = approximate_ledge(ledge, approximation_row_resolution)
-			
-		if ledge.valid:
-			return ledge.under
-		else:
-			return RayCaster.make_invalid_hit_result()
-	
-	
 	return RayCaster.make_invalid_hit_result()
 
 #endregion MAIN FUNCTIONS

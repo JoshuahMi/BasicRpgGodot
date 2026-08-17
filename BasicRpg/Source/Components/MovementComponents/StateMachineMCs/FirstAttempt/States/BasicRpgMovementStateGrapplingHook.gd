@@ -23,10 +23,24 @@ func update(delta: float):
 	
 func physics_update(delta: float):
 	
+	input_management()
+	
 	pass
 
-func input_handling():
+func happening_management():
+	
+	pass
+
+func input_management():
 	
 	# We can alter the distance to the point we hang on.
+	
+	
+	if state_machine.wants_to_return_grappling_hook:
+		print("From Grappling Hook state: Wants tu return grappling hook!")
+		state_machine.grappling_hook.return_to_player()
+		transitioned.emit(BasicRpgMovementStateMachine.States.GRAPPLING_HOOK, BasicRpgMovementStateMachine.States.GO)
+		pass
+	
 	
 	pass

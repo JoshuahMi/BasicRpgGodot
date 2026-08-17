@@ -78,7 +78,9 @@ func happening_management():
 
 	if body.is_on_wall_only() and Vector2(body.velocity.x, body.velocity.z).length_squared() * WALL_RUNNING_TOLERANCE > absf(body.velocity.y) :
 		transitioned.emit(BasicRpgMovementStateMachine.States.AIR, BasicRpgMovementStateMachine.States.WALL)
-
+	
+	if state_machine.grappling_hook.current_state == BasicRpgGrapplingHook.GrapplingHookState.CONNECTED:
+		transitioned.emit(BasicRpgMovementStateMachine.States.AIR, BasicRpgMovementStateMachine.States.GRAPPLING_HOOK)
 
 
 	pass
@@ -94,6 +96,11 @@ func input_management():
 	
 	if state_machine.wants_to_dash and state_machine.dash_charges > 0:
 		transitioned.emit(BasicRpgMovementStateMachine.States.AIR, BasicRpgMovementStateMachine.States.DASH)
+	
+	if state_machine.wants_to_use_grappling_hook:
+		state_machine.grappling_hook.initiate_use()
+	
+	
 	
 	
 	pass

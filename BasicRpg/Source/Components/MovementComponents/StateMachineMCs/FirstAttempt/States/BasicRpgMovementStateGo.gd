@@ -88,6 +88,8 @@ func happening_management():
 	if not state_machine.is_on_ground:
 		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.AIR)
 		
+	if state_machine.grappling_hook.current_state == BasicRpgGrapplingHook.GrapplingHookState.CONNECTED:
+		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.GRAPPLING_HOOK)
 	
 	pass
 
@@ -104,7 +106,10 @@ func input_management():
 		
 	if state_machine.movement_direction.length_squared() < 0.001:
 		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.IDLE)
-		
+	
+	if state_machine.wants_to_use_grappling_hook:
+		state_machine.grappling_hook.initiate_use()
+	
 	pass
 
 ## Meant for capsuling everything happening at entering the state

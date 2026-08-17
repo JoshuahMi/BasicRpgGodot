@@ -53,7 +53,9 @@ func happening_management():
 		
 		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.AIR)
 		
-	pass
+	if state_machine.grappling_hook.current_state == BasicRpgGrapplingHook.GrapplingHookState.CONNECTED:
+		transitioned.emit(BasicRpgMovementStateMachine.States.IDLE, BasicRpgMovementStateMachine.States.GRAPPLING_HOOK)
+	
 	
 func input_management():
 	
@@ -69,7 +71,10 @@ func input_management():
 	if state_machine.movement_direction.length_squared() > 0.001:
 		transitioned.emit(BasicRpgMovementStateMachine.States.IDLE, BasicRpgMovementStateMachine.States.GO)
 		
-
+	
+	if state_machine.wants_to_use_grappling_hook:
+		state_machine.grappling_hook.initiate_use()
+	
 func verifications():
 	
 	# Set the wall normal to zero, so the wall run is possible on the wall that was ran on before (see enter function in Wall state)

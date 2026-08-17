@@ -73,6 +73,9 @@ func happening_management():
 	if body.is_on_wall_only() and state_machine.is_jump_from_moving:
 		transitioned.emit(BasicRpgMovementStateMachine.States.JUMP, BasicRpgMovementStateMachine.States.WALL)
 	
+	if state_machine.grappling_hook.current_state == BasicRpgGrapplingHook.GrapplingHookState.CONNECTED:
+		transitioned.emit(BasicRpgMovementStateMachine.States.JUMP, BasicRpgMovementStateMachine.States.GRAPPLING_HOOK)
+	
 	pass
 
 func input_management():
@@ -83,8 +86,8 @@ func input_management():
 	if state_machine.wants_to_jump:
 		pass
 		
-	#if state_machine.movement_direction.length_squared() > 0.001:
-		#move(delta)
+	if state_machine.wants_to_use_grappling_hook:
+		state_machine.grappling_hook.initiate_use()
 		
 func move(delta: float):
 	

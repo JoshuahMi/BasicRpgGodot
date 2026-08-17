@@ -8,6 +8,7 @@
 [ext_resource type="ArrayMesh" uid="uid://si6examkdmgo" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/Test2.obj" id="6_cakl3"]
 [ext_resource type="ArrayMesh" uid="uid://dc1y2q07fpkym" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/Test3.obj" id="7_oxyr5"]
 [ext_resource type="ArrayMesh" uid="uid://5l8r5d81ygfh" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/Test5.obj" id="8_gkyuj"]
+[ext_resource type="ArrayMesh" uid="uid://5vq3pj1gaqtj" path="res://BasicRpg/Elements/Test/TestLevels/Buildings/TestKanten.obj" id="9_y2xc4"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_q1ege"]
 
@@ -421,4 +422,9 @@ material = SubResource("StandardMaterial3D_xi4co")
 [node name="CSGMesh3D5" type="CSGMesh3D" parent="CSGCombiner3D2" unique_id=672652144]
 transform = Transform3D(1.815, 0, 0, 0, 1.815, 0, 0, 0, 1.815, 0, 4.9273586, -81.22514)
 mesh = ExtResource("8_gkyuj")
+material = SubResource("StandardMaterial3D_xi4co")
+
+[node name="CSGMesh3D6" type="CSGMesh3D" parent="CSGCombiner3D2" unique_id=371151026]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.402901, 5.0953856, -125.01071)
+mesh = ExtResource("9_y2xc4")
 material = SubResource("StandardMaterial3D_xi4co")

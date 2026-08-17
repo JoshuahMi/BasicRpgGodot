@@ -151,6 +151,8 @@ var is_on_ground: bool = false:
 var has_just_left_ground: bool = false
 var has_just_landed: bool = false
 
+var has_grappling_hook_just_connected: bool = false
+
 #endregion HAPPENINGS
 
 #region INPUT
@@ -161,6 +163,9 @@ var wants_to_jump: bool = false
 var wants_to_sprint: bool = false
 var wants_to_dash: bool = false
 var wants_to_crouch: bool = false
+var wants_to_use_grappling_hook: bool = false
+var wants_to_return_grappling_hook: bool = false
+
 
 var mouse_sensitivity: float = 0.5
 
@@ -171,7 +176,7 @@ var mouse_sensitivity: float = 0.5
 
 var edge_detector: BasicRpgGrapplingHookEdgeDetector = BasicRpgGrapplingHookEdgeDetector.new()
 
-
+var grappling_hook: BasicRpgGrapplingHook = BasicRpgGrapplingHook.new()
 
 #endregion GRAPPLING HOOK
 
@@ -230,7 +235,9 @@ func _ready() -> void:
 	edge_detector.camera = camera
 	add_child(edge_detector)
 	
-	
+	grappling_hook.player = get_parent()
+	grappling_hook.target = edge_detector.detected_platform_point_representator
+	add_child(grappling_hook)
 	
 	
 	
@@ -393,3 +400,10 @@ func _determine_initial_state():
 		current_state = States.AIR
 		
 	state_changed.emit(current_state)
+
+func force_grappling_hook_state():
+	
+	_on_state_transitioned(current_state, BasicRpgMovementStateMachine.States.GRAPPLING_HOOK)
+	
+	
+	

@@ -56,47 +56,47 @@ func validate_by_distance_ratio() -> bool:
 
 ## Checks if the "under" point has a normal that points either upwards or has no y, so is horizontal
 ## Then checks if the above is either invalid or the distance between the two points is, relative to the two normals, valid.
-func validate():
-	
-	if not under.valid:
-		valid = false
-		return
-	
-	if not above.valid:
-		
-		#print("From Ledge: Above invalid, so under automatically valid!")
-		
-		valid = true
-		return
-	
-	# If the normal is horizontal
-	if Math.equal_float(under.normal.y, 0.0, 0.1):
-		#print("From Ledge: normal horizontal!")
-		if (under.position - above.position).length() > 0.1:
-			
-			
-			valid = true
-			return
-			
-	elif under.normal.y < 0.0:
-		#print("From Ledge: Normal pointing downwards! ")
-		valid = false
-		return
-	
-	# Now here is the dificult part. If the normal of the ledge is pointing upwards, then it should point extremely upwards and the *above* position should be relatively far away.
-	
-	else:
-		
-		if under.normal.y > 0.5 and validate_by_distance_ratio():
-			
-			valid = true
-			return
-		else:
-			valid = false
-			return
-		
-	
-
+#func validate():
+	#
+	#if not under.valid:
+		#valid = false
+		#return
+	#
+	#if not above.valid:
+		#
+		##print("From Ledge: Above invalid, so under automatically valid!")
+		#
+		#valid = true
+		#return
+	#
+	## If the normal is horizontal
+	#if Math.equal_float(under.normal.y, 0.0, 0.1):
+		##print("From Ledge: normal horizontal!")
+		#if (under.position - above.position).length() > 0.1:
+			#
+			#
+			#valid = true
+			#return
+			#
+	#elif under.normal.y < 0.0:
+		##print("From Ledge: Normal pointing downwards! ")
+		#valid = false
+		#return
+	#
+	## Now here is the dificult part. If the normal of the ledge is pointing upwards, then it should point extremely upwards and the *above* position should be relatively far away.
+	#
+	#else:
+		#
+		#if under.normal.y > 0.5 and validate_by_distance_ratio():
+			#
+			#valid = true
+			#return
+		#else:
+			#valid = false
+			#return
+		#
+	#
+#
 
 func determine_validity():
 	

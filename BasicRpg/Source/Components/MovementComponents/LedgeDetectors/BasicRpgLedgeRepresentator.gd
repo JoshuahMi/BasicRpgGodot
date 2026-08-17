@@ -1,10 +1,12 @@
 class_name BasicRpgLedgeRepresentator extends Node3D
 
-## A class for making sure the ledge indicator in the HUD hides properly when the detected point isn't on screen.
+## A class for representing the point that is detected by the ledge detector.
+
 
 var point: Vector3 = Vector3.ZERO
 
-## The actual representation that is moved around.
+
+## making sure the ledge indicator in the HUD hides properly when the detected point isn't on screen.
 var is_on_screen_notifier: VisibleOnScreenNotifier3D = VisibleOnScreenNotifier3D.new()
 
 var is_on_screen: bool = false
@@ -13,7 +15,10 @@ var is_on_screen: bool = false
 func _ready() -> void:
 	
 	add_child(is_on_screen_notifier)
-	is_on_screen_notifier.top_level = true
+	
+	top_level = true
+	
+	is_on_screen_notifier.top_level = false
 	
 	is_on_screen_notifier.global_scale(Vector3(0.1, 0.1, 0.1))
 	is_on_screen_notifier.screen_entered.connect(_on_screen_entered)
@@ -29,7 +34,10 @@ func _process(delta: float) -> void:
 func set_point(new_position: Vector3):
 	
 	point = new_position
-	is_on_screen_notifier.global_position = point
+	
+	global_position = point
+	
+	#is_on_screen_notifier.global_position = point
 	
 func _on_screen_entered():
 	#print("From Ledge Representator: Screen entered!")
