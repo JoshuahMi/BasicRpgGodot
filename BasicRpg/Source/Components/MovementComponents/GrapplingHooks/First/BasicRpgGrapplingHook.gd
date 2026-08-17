@@ -7,8 +7,6 @@ enum GrapplingHookState {
 	CONNECTED,
 	TRAVELING_TO_PLAYER
 	
-	
-	
 }
 
 @export var mesh: MeshInstance3D = MeshInstance3D.new()
@@ -19,11 +17,10 @@ enum GrapplingHookState {
 
 var debug: bool = true
 
-## The Ledge Representator this Grappling Hook will travel to.
+## The Ledge Representator. It's location will be stored when *initiate use* is called
 var target: Node3D
 
-
-## TODO: This point will be set when *initiate use* is called, and all functionality will refer to this point.
+## This point will be set when *initiate use* is called, and all functionality will refer to this point.
 var target_point: Vector3
 
 var player: Node3D

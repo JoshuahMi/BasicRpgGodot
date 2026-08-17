@@ -60,6 +60,16 @@ func apply_gravity(delta: float):
 	
 func apply_constraint():
 	
+	if state_machine.grappling_hook.global_position.distance_to(state_machine.camera.global_position) > distance_to_hook:
+		# TODO: Correct the distance by rotating the velocity vector, so that the distance to the hook stays the same.
+		pass
+		
+		
+		
+		
+		
+		
+	
 	# reduce the distance to the hook 
 	
 	
