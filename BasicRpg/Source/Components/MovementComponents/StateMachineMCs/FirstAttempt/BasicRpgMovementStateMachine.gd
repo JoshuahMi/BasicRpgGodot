@@ -239,8 +239,6 @@ func _ready() -> void:
 	grappling_hook.target = edge_detector.detected_platform_point_representator
 	add_child(grappling_hook)
 	
-	
-	
 	# Initializing the states
 	
 	states[States.IDLE] = BasicRpgMovementStateIdle.new()
@@ -333,8 +331,6 @@ func _ready() -> void:
 	
 
 func _physics_process(delta: float) -> void:
-	
-	#current_wall_run_cheese_cooldown -= delta
 	
 	if can_dash == false:
 		ground_dash_cooldown_status -= delta

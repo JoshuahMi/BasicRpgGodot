@@ -1,6 +1,8 @@
 class_name BasicRpgMovementStateGrapplingHook extends BasicRpgMovementState
 
 
+var distance_to_hook: float
+
 func enter():
 	
 	# We need this point as a basis, obviously.
@@ -23,7 +25,11 @@ func update(delta: float):
 	
 func physics_update(delta: float):
 	
+	apply_gravity(delta)
+	apply_constraint()
+	
 	input_management()
+	happening_management()
 	
 	pass
 
@@ -41,6 +47,21 @@ func input_management():
 		state_machine.grappling_hook.return_to_player()
 		transitioned.emit(BasicRpgMovementStateMachine.States.GRAPPLING_HOOK, BasicRpgMovementStateMachine.States.GO)
 		pass
+	
+	
+	pass
+	
+func apply_gravity(delta: float):
+	if body.velocity.y >= 0.0:
+		body.velocity += body.get_gravity() * delta * state_machine.jump_gravity_multiplier
+	else:
+		body.velocity += body.get_gravity() * delta * state_machine.fall_gravity_multiplier
+	
+	
+func apply_constraint():
+	
+	# reduce the distance to the hook 
+	
 	
 	
 	pass

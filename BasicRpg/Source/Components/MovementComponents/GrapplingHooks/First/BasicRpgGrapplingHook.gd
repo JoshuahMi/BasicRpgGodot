@@ -23,6 +23,8 @@ var debug: bool = true
 var target: Node3D
 
 
+## TODO: This point will be set when *initiate use* is called, and all functionality will refer to this point.
+var target_point: Vector3
 
 var player: Node3D
 
@@ -54,26 +56,24 @@ func update(delta: float):
 	match current_state:
 		
 		GrapplingHookState.AT_PLAYER_IDLE:
-			#print("From Grappling Hook: Idle State! ")
-			#mesh.visible = false
 			
 			pass
 		GrapplingHookState.TRAVELING_TO_TARGET:
 			if target == null:
 				return
-			#print("From Grappling Hook: Travelling State! ")
+			
 			
 			if debug:
 				DebugShapes.place_the_blue_sphere(global_position)
-			#print("From Grappling Hook: Distance to ledge: " + str(global_position.distance_to(target.global_position)))
-			velocity = global_position.direction_to(target.global_position).normalized() * travelling_speed
+			
+			velocity = global_position.direction_to(target_point).normalized() * travelling_speed
 			
 			
-			if global_position.distance_to(player.global_position) >= target.global_position.distance_to(player.global_position):
+			if global_position.distance_to(player.global_position) >= target_point.distance_to(player.global_position):
 				# Reached target
 				# change state to connected
 				
-				global_position = target.global_position
+				global_position = target_point
 				
 				
 				current_state = GrapplingHookState.CONNECTED
@@ -106,7 +106,7 @@ func update(delta: float):
 				
 			velocity = global_position.direction_to(player.global_position) * travelling_speed
 			
-			if global_position.distance_to(target.global_position) > target.global_position.distance_to(player.global_position):
+			if global_position.distance_to(target_point) > target_point.distance_to(player.global_position):
 				#reached player
 				# change state to at player idle
 				mesh.visible = false
@@ -136,6 +136,8 @@ func initiate_use():
 		return
 	
 	current_state = GrapplingHookState.TRAVELING_TO_TARGET
+	
+	target_point = target.global_position
 	
 	mesh.visible = true
 	
