@@ -37,7 +37,7 @@ func input_management():
 	
 	
 	if state_machine.wants_to_return_grappling_hook:
-		print("From Grappling Hook state: Wants tu return grappling hook!")
+		#print("From Grappling Hook state: Wants tu return grappling hook!")
 		state_machine.grappling_hook.return_to_player()
 		transitioned.emit(BasicRpgMovementStateMachine.States.GRAPPLING_HOOK, BasicRpgMovementStateMachine.States.GO)
 		pass

@@ -86,7 +86,7 @@ func input_management():
 	if state_machine.wants_to_jump:
 		pass
 		
-	if state_machine.wants_to_use_grappling_hook:
+	if state_machine.wants_to_use_grappling_hook and state_machine.edge_detector.is_detected_point_valid:
 		state_machine.grappling_hook.initiate_use()
 		
 func move(delta: float):

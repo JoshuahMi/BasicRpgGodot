@@ -400,10 +400,4 @@ func _determine_initial_state():
 		current_state = States.AIR
 		
 	state_changed.emit(current_state)
-
-func force_grappling_hook_state():
-	
-	_on_state_transitioned(current_state, BasicRpgMovementStateMachine.States.GRAPPLING_HOOK)
-	
-	
 	

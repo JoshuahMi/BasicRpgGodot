@@ -97,7 +97,7 @@ func input_management():
 	if state_machine.wants_to_dash and state_machine.dash_charges > 0:
 		transitioned.emit(BasicRpgMovementStateMachine.States.AIR, BasicRpgMovementStateMachine.States.DASH)
 	
-	if state_machine.wants_to_use_grappling_hook:
+	if state_machine.wants_to_use_grappling_hook and state_machine.edge_detector.is_detected_point_valid:
 		state_machine.grappling_hook.initiate_use()
 	
 	

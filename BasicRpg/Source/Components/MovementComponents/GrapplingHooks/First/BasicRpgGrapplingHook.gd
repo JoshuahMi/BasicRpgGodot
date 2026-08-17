@@ -22,6 +22,8 @@ var debug: bool = true
 ## The Ledge Representator this Grappling Hook will travel to.
 var target: Node3D
 
+
+
 var player: Node3D
 
 var current_state: GrapplingHookState = GrapplingHookState.AT_PLAYER_IDLE

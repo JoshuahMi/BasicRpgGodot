@@ -107,7 +107,7 @@ func input_management():
 	if state_machine.movement_direction.length_squared() < 0.001:
 		transitioned.emit(BasicRpgMovementStateMachine.States.GO, BasicRpgMovementStateMachine.States.IDLE)
 	
-	if state_machine.wants_to_use_grappling_hook:
+	if state_machine.wants_to_use_grappling_hook and state_machine.edge_detector.is_detected_point_valid:
 		state_machine.grappling_hook.initiate_use()
 	
 	pass
