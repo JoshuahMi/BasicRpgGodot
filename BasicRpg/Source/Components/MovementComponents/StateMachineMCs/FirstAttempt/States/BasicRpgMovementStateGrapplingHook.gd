@@ -5,6 +5,8 @@ var distance_to_hook: float
 
 func enter():
 	
+	distance_to_hook = state_machine.body.global_position.distance_to(state_machine.grappling_hook.global_position)
+	
 	# We need this point as a basis, obviously.
 	state_machine.edge_detector.detected_platform_point
 	state_machine.edge_detector.is_detected_point_valid
@@ -26,7 +28,7 @@ func update(delta: float):
 func physics_update(delta: float):
 	
 	apply_gravity(delta)
-	apply_constraint()
+	limit_distance_to_hook()
 	
 	input_management()
 	happening_management()
@@ -58,20 +60,16 @@ func apply_gravity(delta: float):
 		body.velocity += body.get_gravity() * delta * state_machine.fall_gravity_multiplier
 	
 	
-func apply_constraint():
+func limit_distance_to_hook():
 	
 	if state_machine.grappling_hook.global_position.distance_to(state_machine.camera.global_position) > distance_to_hook:
-		# TODO: Correct the distance by rotating the velocity vector, so that the distance to the hook stays the same.
-		pass
+		# Correct the distance by rotating the velocity vector, so that the distance to the hook stays the same.
 		
+		var direction: Vector3 = body.global_position - state_machine.grappling_hook.global_position
 		
+		direction =  direction.limit_length(distance_to_hook)
 		
-		
+		body.global_position = state_machine.grappling_hook.global_position + direction
 		
 		
 	
-	# reduce the distance to the hook 
-	
-	
-	
-	pass
